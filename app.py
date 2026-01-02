@@ -11,7 +11,7 @@ CORS(app)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 SITE_URL = os.getenv("SITE_URL", "https://your-shopify-store.com")
 APP_NAME = "Bazi Pro Calculator"
-MODEL_ID = "google/gemini-flash-1.5" # 逻辑强且上下文长的模型
+MODEL_ID = "google/gemini-3-pro-preview" # 逻辑强且上下文长的模型
 # ===========================================
 
 def format_bazi_context(data):
@@ -215,4 +215,5 @@ def generate_section():
         return jsonify({"error": "Failed to generate content", "details": ai_result}), 500
 
 if __name__ == '__main__':
+
     app.run(debug=True, port=5000)
