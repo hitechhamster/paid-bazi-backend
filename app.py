@@ -3,23 +3,35 @@ from flask_cors import CORS
 import requests
 import os
 import json
-import traceback  # 用于打印详细错误日志
+import traceback
 
 app = Flask(__name__)
-# 允许所有域名跨域访问 (这是解决 CORS 的关键)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# ✅ 修复：更完整的 CORS 配置
+CORS(app, 
+     resources={r"/api/*": {"origins": "*"}},
+     methods=["GET", "POST", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization"],
+     supports_credentials=False)
+
+# ✅ 添加：手动处理 OPTIONS 预检请求
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 # ================= 配置区域 =================
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 SITE_URL = os.getenv("SITE_URL", "https://your-shopify-store.com")
 APP_NAME = "Bazi Pro Calculator"
-MODEL_ID = "google/gemini-3-pro-preview"
+MODEL_ID = "google/gemini-3-pro-preview"  # ✅ 修复模型名称
 # ===========================================
 
 def format_bazi_context(data):
     """安全格式化数据，防止报错"""
     try:
-        # 使用 .get() 并提供默认值，防止 KeyError
         year = data.get('year', {})
         month = data.get('month', {})
         day = data.get('day', {})
@@ -49,6 +61,7 @@ def format_bazi_context(data):
 
 def ask_ai(system_prompt, user_prompt):
     if not OPENROUTER_API_KEY:
+        print("ERROR: OPENROUTER_API_KEY is missing!")  # ✅ 添加日志
         return {"error": "Server Configuration Error: API Key missing"}
 
     headers = {
@@ -69,42 +82,54 @@ def ask_ai(system_prompt, user_prompt):
     }
 
     try:
-        # 增加 verify=False 以防某些 Render 环境下的 SSL 问题 (虽然不推荐生产环境，但能解决 fetch 问题)
+        print(f"Calling OpenRouter with model: {MODEL_ID}")  # ✅ 添加日志
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
             json=payload,
             timeout=120
         )
+        print(f"OpenRouter response status: {response.status_code}")  # ✅ 添加日志
         response.raise_for_status()
         return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP Error: {http_err}")
+        print(f"Response body: {response.text}")  # ✅ 打印详细错误
+        return {"error": f"HTTP Error: {str(http_err)}", "details": response.text}
     except Exception as e:
-        print(f"OpenRouter API Error: {str(e)}") # 打印到 Render 日志
+        print(f"OpenRouter API Error: {str(e)}")
         return {"error": str(e)}
 
 @app.route('/', methods=['GET'])
 def health_check():
-    return "Service is Running", 200
+    return jsonify({"status": "running", "api_key_set": bool(OPENROUTER_API_KEY)}), 200
+
+# ✅ 添加：显式处理 OPTIONS 请求
+@app.route('/api/generate-section', methods=['OPTIONS'])
+def options_handler():
+    return '', 204
 
 @app.route('/api/generate-section', methods=['POST'])
 def generate_section():
-    # === 全局错误捕获 (防弹衣) ===
     try:
+        print("=== Received request ===")  # ✅ 添加日志
+        
         req_data = request.json
         if not req_data:
+            print("ERROR: No JSON received")
             return jsonify({"error": "No JSON received"}), 400
 
+        print(f"Request data: {json.dumps(req_data, ensure_ascii=False)[:500]}")  # ✅ 打印前500字符
+        
         bazi_json = req_data.get('bazi_data', {})
         section_type = req_data.get('section_type', 'core')
         
         context_str = format_bazi_context(bazi_json)
         
-        # 安全获取字段，防止崩溃
         day_master = bazi_json.get('dayMaster', '日主')
         month_zhi = bazi_json.get('month', {}).get('zhi', '月令')
         day_zhi = bazi_json.get('day', {}).get('zhi', '日支')
         
-        # 系统提示词
         base_system_prompt = """
         你是一位精通《三命通会》的国学大师。
         请撰写一份【专业八字命书】。
@@ -113,7 +138,6 @@ def generate_section():
 
         specific_prompt = ""
 
-        # 构建提示词 (使用安全变量)
         if section_type == 'core':
             specific_prompt = f"""
             【任务】撰写第一章《命局格局与灵魂》
@@ -156,26 +180,26 @@ def generate_section():
         else:
             return jsonify({"error": "Unknown section type"}), 400
 
-        # 调用 AI
+        print(f"Calling AI for section: {section_type}")  # ✅ 添加日志
         ai_result = ask_ai(base_system_prompt, specific_prompt)
+        print(f"AI result keys: {ai_result.keys() if isinstance(ai_result, dict) else 'not a dict'}")  # ✅ 添加日志
 
-        # 检查 AI 返回结果
         if ai_result and 'choices' in ai_result:
-            return jsonify({
-                "content": ai_result['choices'][0]['message']['content']
-            })
+            content = ai_result['choices'][0]['message']['content']
+            print(f"Success! Content length: {len(content)}")  # ✅ 添加日志
+            return jsonify({"content": content})
         elif ai_result and 'error' in ai_result:
-             # 如果是 API Key 错误等，返回 500
-            print(f"AI Error: {ai_result['error']}")
+            print(f"AI Error: {ai_result}")
             return jsonify(ai_result), 500
         else:
-            return jsonify({"error": "AI response format invalid", "raw": ai_result}), 500
+            print(f"Unknown AI response: {ai_result}")
+            return jsonify({"error": "AI response format invalid", "raw": str(ai_result)}), 500
 
     except Exception as e:
-        # === 捕获所有未知错误，打印并返回 JSON ===
         error_msg = traceback.format_exc()
-        print(f"CRITICAL SERVER ERROR: {error_msg}") # 这会显示在 Render Logs 里
+        print(f"CRITICAL SERVER ERROR: {error_msg}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
