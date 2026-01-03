@@ -27,32 +27,47 @@ APP_NAME = "Bazi Pro Calculator"
 MODEL_ID = "google/gemini-3-pro-preview"
 # ===========================================
 
-# ================= 多语言配置 =================
+# ================= 多语言配置 (完整版：含强制规则) =================
 LANGUAGE_PROMPTS = {
     "en": {
         "name": "English",
         "instruction": "Write your response in fluent, natural English.",
-        "style": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend."
+        "pronoun_rule": "Address the user as 'you'. Maintain a consistent professional yet warm tone.",
+        "style": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
+        "opening": "In this chapter, I will analyze for you...",
+        "closing": "End of this chapter."
     },
     "zh": {
         "name": "中文",
         "instruction": "请用流畅自然的中文撰写。",
-        "style": "用温暖睿智的语气，像一位通晓古今的智者在与朋友分享人生智慧。"
+        "pronoun_rule": "必须统一使用'您'（尊称）来称呼用户，切勿使用'你'。保持语气的一致性。",
+        "style": "用温暖睿智的语气，像一位通晓古今的智者在与朋友分享人生智慧。",
+        "opening": "本章为您分析...",
+        "closing": "此章节完"
     },
     "de": {
         "name": "Deutsch",
         "instruction": "Schreiben Sie Ihre Antwort in flüssigem, natürlichem Deutsch.",
-        "style": "Verwenden Sie einen warmen, einfühlsamen Ton wie ein weiser Mentor, der alte Weisheiten mit einem modernen Freund teilt."
+        "pronoun_rule": "Verwenden Sie KONSEQUENT die Höflichkeitsform 'Sie' und 'Ihre' (formal). Vermeiden Sie unbedingt das 'Du' (informal). Dies ist eine strikte Regel.",
+        "style": "Verwenden Sie einen warmen, einfühlsamen Ton wie ein weiser Mentor, der alte Weisheiten mit einem modernen Freund teilt.",
+        "opening": "In diesem Kapitel analysiere ich für Sie...",
+        "closing": "Ende dieses Kapitels."
     },
     "es": {
         "name": "Español",
         "instruction": "Escribe tu respuesta en español fluido y natural.",
-        "style": "Usa un tono cálido y perspicaz, como un mentor sabio compartiendo sabiduría ancestral con un amigo moderno."
+        "pronoun_rule": "Utiliza consistentemente la forma 'Usted' (formal) para dirigirte al usuario. No uses 'Tú'.",
+        "style": "Usa un tono cálido y perspicaz, como un mentor sabio compartiendo sabiduría ancestral con un amigo moderno.",
+        "opening": "En este capítulo, analizo para usted...",
+        "closing": "Fin de este capítulo."
     },
     "fr": {
         "name": "Français",
         "instruction": "Rédigez votre réponse dans un français fluide et naturel.",
-        "style": "Utilisez un ton chaleureux et perspicace, comme un sage mentor partageant une sagesse ancestrale avec un ami moderne."
+        "pronoun_rule": "Utilisez systématiquement le vouvoiement ('Vous'). Ne tutoyez jamais l'utilisateur.",
+        "style": "Utilisez un ton chaleureux et perspicace, comme un sage mentor partageant une sagesse ancestrale avec un ami moderne.",
+        "opening": "Dans ce chapitre, j'analyse pour vous...",
+        "closing": "Fin de ce chapitre."
     }
 }
 # ===========================================
@@ -93,7 +108,10 @@ def get_language_config(lang_code, custom_lang=None):
         return {
             "name": custom_lang,
             "instruction": f"Write your response in fluent, natural {custom_lang}.",
-            "style": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend."
+            "pronoun_rule": "Address the user in a formal and respectful manner consistent with this language.",
+            "style": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
+            "opening": f"Analysis for you in {custom_lang}...",
+            "closing": "End of chapter."
         }
     return LANGUAGE_PROMPTS.get(lang_code, LANGUAGE_PROMPTS["en"])
 
@@ -166,18 +184,33 @@ def generate_section():
         custom_lang = req_data.get('custom_language', None)
         lang_config = get_language_config(lang_code, custom_lang)
         
+        # 提取语言特定配置
+        default_config = LANGUAGE_PROMPTS["en"]
+        current_opening = lang_config.get('opening', default_config['opening'])
+        current_closing = lang_config.get('closing', default_config['closing'])
+        current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
+        
         context_str = format_bazi_context(bazi_json)
         
         day_master = bazi_json.get('dayMaster', 'Day Master')
         month_zhi = bazi_json.get('month', {}).get('zhi', 'Month Branch')
         day_zhi = bazi_json.get('day', {}).get('zhi', 'Day Branch')
         
-        # ================= 核心 Prompt =================
+        # ================= 核心 Prompt (保持新逻辑) =================
         base_system_prompt = f"""
 You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会) and "Yuan Hai Zi Ping" (渊海子平).
 
-【LANGUAGE REQUIREMENT】
-{lang_config['instruction']}
+【LANGUAGE & PRONOUNS】
+1. Language: {lang_config['instruction']}
+2. **Pronoun Rules (CRITICAL)**: {current_pronoun_rule}
+   - Do NOT switch between formal and informal addressing. Adhere strictly to this rule.
+
+【MANDATORY STRUCTURE】
+1. **START** your response exactly with this phrase: "{current_opening}"
+   - Do NOT add greetings like "Welcome back", "Hello again", or "As we discussed previously".
+   - Start immediately with the analysis phrase above.
+2. **END** your response exactly with this phrase: "{current_closing}"
+3. **INDEPENDENCE**: Treat this as a standalone chapter. Assume this is the first time the user is reading this. Do not reference previous conversations.
 
 【WRITING STYLE】
 {lang_config['style']}
@@ -204,6 +237,7 @@ You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge o
 
         specific_prompt = ""
 
+        # ================= 恢复了原始详细指令 =================
         if section_type == 'core':
             specific_prompt = f"""
 【TASK】Write Chapter 1: Soul Blueprint & Destiny Overview
