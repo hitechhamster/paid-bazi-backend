@@ -226,7 +226,7 @@ You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge o
 - Use Markdown formatting
 - Include clear section headers
 - Use bullet points for key insights
-- Aim for 2000+ words per chapter
+- Aim for 3000+ words per chapter
 - Add occasional Chinese terms (with translation) for authenticity
 
 【IMPORTANT】
@@ -415,3 +415,4 @@ Make this feel like a practical roadmap they can actually use.
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
