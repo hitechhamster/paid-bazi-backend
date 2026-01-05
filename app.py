@@ -7,7 +7,7 @@ import traceback
 
 app = Flask(__name__)
 
-CORS(app, 
+CORS(app,
      resources={r"/api/*": {"origins": "*"}},
      methods=["GET", "POST", "OPTIONS"],
      allow_headers=["Content-Type", "Authorization"],
@@ -27,7 +27,7 @@ APP_NAME = "Bazi Pro Calculator"
 MODEL_ID = "google/gemini-3-pro-preview"
 # ===========================================
 
-# ================= 多语言配置 (完整版：含强制规则) =================
+# ================= 多语言配置 =================
 LANGUAGE_PROMPTS = {
     "en": {
         "name": "English",
@@ -116,9 +116,9 @@ GENDER_INSTRUCTIONS = {
 }
 # ===========================================
 
+
 def get_gender_instruction(gender, lang_code):
     """获取性别相关的解读指令"""
-    # 确定使用英文还是中文规则
     rule_lang = "zh" if lang_code == "zh" else "en"
     
     if gender == "male":
@@ -126,19 +126,53 @@ def get_gender_instruction(gender, lang_code):
     elif gender == "female":
         return GENDER_INSTRUCTIONS["female"].get(rule_lang, GENDER_INSTRUCTIONS["female"]["en"])
     else:
-        # 默认返回男性规则，但标注性别未知
         default = GENDER_INSTRUCTIONS["male"].get(rule_lang, GENDER_INSTRUCTIONS["male"]["en"])
         return {
             "pronoun": "they/them/their",
             "bazi_rules": f"Gender not specified. Defaulting to general interpretation:\n{default['bazi_rules']}"
         }
 
+
 def format_bazi_context(data):
-    """安全格式化数据 - 包含性别和姓名"""
+    """格式化完整八字数据给 AI - v4.0"""
     try:
-        # ✅ 提取性别和姓名
+        # === 基础信息 ===
         gender = data.get('gender', 'unknown')
         name = data.get('name', 'Client')
+        birth_info = data.get('birthInfo', {})
+        
+        # === 日主信息 ===
+        day_master = data.get('dayMaster', 'N/A')
+        day_master_element = data.get('dayMasterElement', 'N/A')
+        day_master_yinyang = data.get('dayMasterYinYang', 'N/A')
+        day_master_full = data.get('dayMasterFull', 'N/A')
+        
+        # === 四柱数据 ===
+        pillars = data.get('pillars', {})
+        
+        # === 五行统计 ===
+        five_elements = data.get('fiveElements', {})
+        
+        # === 特殊宫位 ===
+        special_palaces = data.get('specialPalaces', {})
+        
+        # === 起运信息 ===
+        yun_info = data.get('yunInfo', {})
+        
+        # === 当前大运 ===
+        current_dayun = data.get('currentDayun', {})
+        
+        # === 当前流年 ===
+        current_liunian = data.get('currentLiuNian', {})
+        
+        # === 完整大运列表 ===
+        all_dayun = data.get('allDayun', [])
+        
+        # === 生肖 ===
+        zodiac = data.get('zodiac', {})
+        
+        # === 神煞 ===
+        shen_sha = data.get('shenSha', {})
         
         # 性别显示
         if gender == 'male':
@@ -148,42 +182,147 @@ def format_bazi_context(data):
         else:
             gender_display = "Unknown"
         
-        year = data.get('year', {})
-        month = data.get('month', {})
-        day = data.get('day', {})
-        hour = data.get('hour', {})
-        wuxing = data.get('wuxing', {})
-        strength = data.get('strength', {})
-        dayun = data.get('dayun', {})
-        birth_info = data.get('birthInfo', {})
+        # 格式化单柱信息
+        def format_pillar(name_cn, name_en, p):
+            if not p:
+                return f"{name_en} {name_cn}: N/A"
+            return f"""{name_en} {name_cn}: {p.get('ganZhi', 'N/A')}
+    - 天干 Stem: {p.get('gan', '')} | 地支 Branch: {p.get('zhi', '')}
+    - 五行 WuXing: {p.get('wuXing', '')}
+    - 纳音 NaYin: {p.get('naYin', '')}
+    - 十神 Ten Gods: 天干 {p.get('shiShenGan', '')} / 地支 {p.get('shiShenZhi', '')}
+    - 长生 Twelve Stage: {p.get('diShi', '')}
+    - 空亡 Void: {p.get('xunKong', '')}
+    - 藏干 Hidden Stems: {p.get('hideGan', '')}"""
+
+        year_str = format_pillar('年柱', 'Year Pillar', pillars.get('year', {}))
+        month_str = format_pillar('月柱', 'Month Pillar', pillars.get('month', {}))
+        day_str = format_pillar('日柱', 'Day Pillar', pillars.get('day', {}))
+        hour_str = format_pillar('时柱', 'Hour Pillar', pillars.get('hour', {}))
+        
+        # 格式化大运列表
+        dayun_list = []
+        for d in all_dayun:
+            marker = " ← 【当前 CURRENT】" if d.get('isCurrent', False) else ""
+            dayun_list.append(
+                f"  {d.get('index', '')}. {d.get('ganZhi', '')} "
+                f"(年龄 Age {d.get('startAge', '')}-{d.get('endAge', '')}岁, "
+                f"{d.get('startYear', '')}-{d.get('endYear', '')}年){marker}"
+            )
+        dayun_str = "\n".join(dayun_list) if dayun_list else "  无数据 No data"
+        
+        # 当前大运状态
+        if current_dayun:
+            if current_dayun.get('notStarted'):
+                current_dayun_status = f"尚未起运 (将于 {current_dayun.get('startYear', '')} 年起运)"
+            else:
+                current_dayun_status = (
+                    f"{current_dayun.get('ganZhi', 'N/A')} "
+                    f"(年龄 {current_dayun.get('startAge', '')}-{current_dayun.get('endAge', '')}岁, "
+                    f"{current_dayun.get('startYear', '')}-{current_dayun.get('endYear', '')}年)"
+                )
+        else:
+            current_dayun_status = "N/A"
+        
+        # 当前流年
+        if current_liunian:
+            current_liunian_str = f"{current_liunian.get('year', '')} 年 - {current_liunian.get('ganZhi', '')}"
+        else:
+            current_liunian_str = "N/A"
 
         context = f"""
-【Client Information / 客户信息】:
-- Name / 姓名: {name}
-- Gender / 性别: {gender_display}
-- Birthplace / 出生地: {birth_info.get('location', 'Unknown')}
+════════════════════════════════════════════════════════════════════════════════
+                    八字命盘完整数据 / COMPLETE BAZI CHART DATA
+════════════════════════════════════════════════════════════════════════════════
 
-【Four Pillars Structure / 四柱结构】:
-- Year Pillar 年柱 (Ancestry/祖上): {year.get('gan','')} {year.get('zhi','')} [NaYin/纳音: {year.get('nayin','')}] [Hidden Stems/藏干: {year.get('hidden','')}]
-- Month Pillar 月柱 (Parents/父母): {month.get('gan','')} {month.get('zhi','')} [NaYin/纳音: {month.get('nayin','')}] [Hidden Stems/藏干: {month.get('hidden','')}]
-- Day Pillar 日柱 (Self/自己): {day.get('gan','')} {day.get('zhi','')} [NaYin/纳音: {day.get('nayin','')}] [Day Master/日主: {data.get('dayMaster','')}] [Hidden Stems/藏干: {day.get('hidden','')}]
-- Hour Pillar 时柱 (Children/子女): {hour.get('gan','')} {hour.get('zhi','')} [NaYin/纳音: {hour.get('nayin','')}] [Hidden Stems/藏干: {hour.get('hidden','')}]
+【客户信息 / Client Information】
+  姓名 Name: {name}
+  性别 Gender: {gender_display}
+  出生地 Birthplace: {birth_info.get('location', 'Unknown')}
+  经度 Longitude: {birth_info.get('longitude', 'N/A')}°
+  时区 Timezone: UTC{'+' if birth_info.get('timezone', 0) >= 0 else ''}{birth_info.get('timezone', 'N/A')}
+  真太阳时 True Solar Time: {birth_info.get('solarTime', 'N/A')}
 
-【Five Elements Analysis / 五行分析】:
-- Metal/金: {wuxing.get('metal', wuxing.get('Metal', 0))}
-- Wood/木: {wuxing.get('wood', wuxing.get('Wood', 0))}
-- Water/水: {wuxing.get('water', wuxing.get('Water', 0))}
-- Fire/火: {wuxing.get('fire', wuxing.get('Fire', 0))}
-- Earth/土: {wuxing.get('earth', wuxing.get('Earth', 0))}
-- Day Master Strength: Supporting {strength.get('same',0)} vs Challenging {strength.get('diff',0)}
+────────────────────────────────────────────────────────────────────────────────
+【日主分析 / Day Master Analysis】
+  日主 Day Master: {day_master}
+  五行 Element: {day_master_element}
+  阴阳 Yin/Yang: {day_master_yinyang}
+  完整描述: {day_master_full}
 
-【Luck Cycles / 大运】:
-- Current Major Luck/当前大运: {dayun.get('ganZhi','')} (Starting year/起运年: {dayun.get('startYear','')})
-- Special Stars/神煞: {', '.join(data.get('shenSha', [])) if data.get('shenSha') else 'None specified'}
+────────────────────────────────────────────────────────────────────────────────
+【四柱八字 / Four Pillars - Complete Data】
+
+{year_str}
+
+{month_str}
+
+{day_str}
+
+{hour_str}
+
+────────────────────────────────────────────────────────────────────────────────
+【五行统计 / Five Elements Count】
+  金 Metal: {five_elements.get('metal', 0)}
+  木 Wood: {five_elements.get('wood', 0)}
+  水 Water: {five_elements.get('water', 0)}
+  火 Fire: {five_elements.get('fire', 0)}
+  土 Earth: {five_elements.get('earth', 0)}
+  
+  分析 Analysis:
+  - 最多 Strongest: {max(five_elements.items(), key=lambda x: x[1])[0] if five_elements else 'N/A'} ({max(five_elements.values()) if five_elements else 0})
+  - 最少/缺失 Weakest/Missing: {min(five_elements.items(), key=lambda x: x[1])[0] if five_elements else 'N/A'} ({min(five_elements.values()) if five_elements else 0})
+
+────────────────────────────────────────────────────────────────────────────────
+【特殊宫位 / Special Palaces】
+  胎元 Tai Yuan (Conception): {special_palaces.get('taiYuan', 'N/A')}
+    - 代表先天禀赋、母亲怀孕时的状态
+    - Represents prenatal foundation and mother's condition during pregnancy
+    
+  命宫 Ming Gong (Life Palace): {special_palaces.get('mingGong', 'N/A')}
+    - 代表命主的核心命运方向、人生主题
+    - Represents core destiny direction and life theme
+    
+  身宫 Shen Gong (Body Palace): {special_palaces.get('shenGong', 'N/A')}
+    - 代表身体状况、物质生活、后天努力方向
+    - Represents physical condition, material life, and self-cultivation direction
+
+────────────────────────────────────────────────────────────────────────────────
+【生肖信息 / Zodiac Animals】
+  年支生肖 Year: {zodiac.get('year', 'N/A')}
+  月支生肖 Month: {zodiac.get('month', 'N/A')}
+  日支生肖 Day: {zodiac.get('day', 'N/A')}
+  时支生肖 Hour: {zodiac.get('hour', 'N/A')}
+
+────────────────────────────────────────────────────────────────────────────────
+【大运信息 / Luck Cycles Information】
+
+  起运信息 Start of Luck Cycles:
+    - 起运年龄 Start Age: {yun_info.get('startAge', 'N/A')} 岁
+    - 起运年份 Start Year: {yun_info.get('startYear', 'N/A')} 年
+    - 运行方向 Direction: {yun_info.get('description', 'N/A')}
+
+  当前大运 Current Major Luck Cycle:
+    {current_dayun_status}
+
+  当前流年 Current Annual Luck:
+    {current_liunian_str}
+
+  完整大运列表 / All 10 Major Luck Cycles:
+{dayun_str}
+
+────────────────────────────────────────────────────────────────────────────────
+【神煞信息 / Special Stars (Shen Sha)】
+  吉神 Auspicious Stars: {shen_sha.get('jiShen', 'N/A')}
+  凶煞 Challenging Stars: {shen_sha.get('xiongSha', 'N/A')}
+
+════════════════════════════════════════════════════════════════════════════════
 """
         return context
+
     except Exception as e:
-        return f"Data parsing error: {str(e)}"
+        return f"Data parsing error: {str(e)}\n{traceback.format_exc()}"
+
 
 def get_language_config(lang_code, custom_lang=None):
     """获取语言配置"""
@@ -198,6 +337,7 @@ def get_language_config(lang_code, custom_lang=None):
         }
     return LANGUAGE_PROMPTS.get(lang_code, LANGUAGE_PROMPTS["en"])
 
+
 def ask_ai(system_prompt, user_prompt):
     if not OPENROUTER_API_KEY:
         print("ERROR: OPENROUTER_API_KEY is missing!")
@@ -209,14 +349,14 @@ def ask_ai(system_prompt, user_prompt):
         "HTTP-Referer": SITE_URL,
         "X-Title": APP_NAME,
     }
-    
+
     payload = {
         "model": MODEL_ID,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        "temperature": 0.75, 
+        "temperature": 0.75,
         "max_tokens": 8192
     }
 
@@ -239,325 +379,506 @@ def ask_ai(system_prompt, user_prompt):
         print(f"OpenRouter API Error: {str(e)}")
         return {"error": str(e)}
 
+
 @app.route('/', methods=['GET'])
 def health_check():
-    return jsonify({"status": "running", "api_key_set": bool(OPENROUTER_API_KEY)}), 200
+    return jsonify({"status": "running", "version": "4.0", "api_key_set": bool(OPENROUTER_API_KEY)}), 200
+
 
 @app.route('/api/generate-section', methods=['OPTIONS'])
 def options_handler():
     return '', 204
 
+
 @app.route('/api/generate-section', methods=['POST'])
 def generate_section():
     try:
         print("=== Received request ===")
-        
+
         req_data = request.json
         if not req_data:
             print("ERROR: No JSON received")
             return jsonify({"error": "No JSON received"}), 400
 
-        print(f"Request data: {json.dumps(req_data, ensure_ascii=False)[:500]}")
-        
+        print(f"Request data keys: {req_data.keys()}")
+
         bazi_json = req_data.get('bazi_data', {})
         section_type = req_data.get('section_type', 'core')
-        
+
         # 获取语言设置
         lang_code = req_data.get('language', 'en')
         custom_lang = req_data.get('custom_language', None)
         lang_config = get_language_config(lang_code, custom_lang)
-        
-        # ✅ 提取性别和姓名
+
+        # 提取性别和姓名
         gender = bazi_json.get('gender', 'unknown')
         client_name = bazi_json.get('name', 'Client')
-        print(f"Client: {client_name}, Gender: {gender}")
-        
-        # ✅ 获取性别相关的八字解读规则
+        print(f"Client: {client_name}, Gender: {gender}, Section: {section_type}")
+
+        # 获取性别相关的八字解读规则
         gender_info = get_gender_instruction(gender, lang_code)
-        
+
         # 提取语言特定配置
-        default_config = LANGUAGE_PROMPTS["en"]
-        current_opening = lang_config.get('opening', default_config['opening'])
-        current_closing = lang_config.get('closing', default_config['closing'])
+        current_opening = lang_config.get('opening', "In this chapter...")
+        current_closing = lang_config.get('closing', "End of chapter.")
         current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
-        
+
+        # 格式化完整八字数据
         context_str = format_bazi_context(bazi_json)
         
-        day_master = bazi_json.get('dayMaster', 'Day Master')
-        month_zhi = bazi_json.get('month', {}).get('zhi', 'Month Branch')
-        day_zhi = bazi_json.get('day', {}).get('zhi', 'Day Branch')
-        
-        # ================= 核心 Prompt (包含性别规则) =================
+        # 提取关键数据点供 prompt 使用
+        pillars = bazi_json.get('pillars', {})
+        day_master = bazi_json.get('dayMaster', '')
+        day_master_element = bazi_json.get('dayMasterElement', '')
+        current_dayun = bazi_json.get('currentDayun', {})
+        current_liunian = bazi_json.get('currentLiuNian', {})
+        special_palaces = bazi_json.get('specialPalaces', {})
+        five_elements = bazi_json.get('fiveElements', {})
+        yun_info = bazi_json.get('yunInfo', {})
+
+        # ================= 核心 System Prompt =================
         base_system_prompt = f"""
-You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会) and "Yuan Hai Zi Ping" (渊海子平).
+You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会), "Yuan Hai Zi Ping" (渊海子平), and "Di Tian Sui" (滴天髓).
 
-【CLIENT GENDER - CRITICAL / 客户性别 - 关键】
-The client is: {gender.upper() if gender != 'unknown' else 'UNKNOWN'}
-Client name: {client_name}
-Use pronouns: {gender_info['pronoun']}
+════════════════════════════════════════════════════════════════════════════════
+                        CLIENT INFORMATION - CRITICAL
+════════════════════════════════════════════════════════════════════════════════
 
+【Gender 性别】: {gender.upper() if gender != 'unknown' else 'UNKNOWN'}
+【Name 姓名】: {client_name}
+【Pronouns 代词】: {gender_info['pronoun']}
+
+【Gender-Specific BaZi Rules 性别专属解读规则】:
 {gender_info['bazi_rules']}
 
-⚠️ IMPORTANT: You MUST apply these gender-specific interpretation rules throughout your analysis, especially for:
-- Relationship/marriage analysis (love chapter)
-- Spouse palace (Day Branch) interpretation
-- Wealth and Officer star meanings
+⚠️ CRITICAL: You MUST apply these gender-specific interpretation rules throughout your analysis!
 
-【LANGUAGE & PRONOUNS / 语言与称谓】
-1. Language: {lang_config['instruction']}
-2. **Pronoun Rules (CRITICAL)**: {current_pronoun_rule}
-   - When referring to the client in third person, use: {gender_info['pronoun']}
-   - Do NOT switch between formal and informal addressing. Adhere strictly to this rule.
+════════════════════════════════════════════════════════════════════════════════
+                        LANGUAGE & STYLE REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
 
-【MANDATORY STRUCTURE / 强制结构】
-1. **START** your response exactly with this phrase: "{current_opening}"
-   - Do NOT add greetings like "Welcome back", "Hello again", or "As we discussed previously".
-   - Start immediately with the analysis phrase above.
-2. **END** your response exactly with this phrase: "{current_closing}"
-3. **INDEPENDENCE**: Treat this as a standalone chapter. Assume this is the first time the user is reading this. Do not reference previous conversations.
+【Language 语言】: {lang_config['instruction']}
+【Pronoun Rules 称谓规则】: {current_pronoun_rule}
+【Third Person Reference 第三人称】: Use {gender_info['pronoun']} when referring to the client
 
-【WRITING STYLE / 写作风格】
+【Writing Style 写作风格】:
 {lang_config['style']}
 
-【CONTENT GUIDELINES / 内容指南】
-1. Be ACCESSIBLE: Explain complex concepts in simple terms that anyone can understand, using everyday analogies and examples.
-2. Be PROFESSIONAL: Ground your analysis in authentic BaZi principles - mention specific concepts like Day Master strength, useful gods, elemental interactions.
-3. Be PERSONAL: Write as if speaking directly to this individual about THEIR unique chart - avoid generic statements.
-4. Be PRACTICAL: Provide actionable insights they can apply to their life.
-5. Be BALANCED: Acknowledge both strengths and challenges honestly, but frame challenges as growth opportunities.
+════════════════════════════════════════════════════════════════════════════════
+                        AVAILABLE DATA - USE ALL OF IT
+════════════════════════════════════════════════════════════════════════════════
 
-【FORMAT / 格式】
-- Use Markdown formatting
-- Include clear section headers
-- Use bullet points for key insights
-- Aim for 3000+ words per chapter
-- Add occasional Chinese terms (with translation) for authenticity
+You have access to COMPLETE chart data including:
 
-【IMPORTANT / 重要提示】
-- Never make absolute predictions about health, death, or guaranteed outcomes
-- Frame everything as "tendencies," "potentials," or "energetic patterns"
-- End sections with empowering, actionable advice
+1. **Four Pillars (四柱)** with FULL details for each pillar:
+   - GanZhi (干支) - Heavenly Stem and Earthly Branch
+   - WuXing (五行) - The element of each character
+   - NaYin (纳音) - Sound element (e.g., "海中金", "炉中火")
+   - Ten Gods (十神) - ShiShenGan/ShiShenZhi relationship to Day Master
+   - Twelve Stages (十二长生) - DiShi indicating element's life stage
+   - Void (空亡) - XunKong indicating which branches are "empty"
+   - Hidden Stems (藏干) - Internal elements within each branch
+
+2. **Day Master Analysis (日主分析)**:
+   - The Day Master element and Yin/Yang nature
+   - Use this as the reference point for all Ten Gods calculations
+
+3. **Special Palaces (特殊宫位)**:
+   - 胎元 Tai Yuan: Pre-birth foundation, inherited traits from parents
+   - 命宫 Ming Gong: Core destiny direction, life's central theme
+   - 身宫 Shen Gong: Physical body, material fortune, self-cultivation
+
+4. **Five Elements Count (五行统计)**:
+   - Exact count of each element in the chart
+   - Identify what is excessive, balanced, or missing
+
+5. **Complete Luck Cycles (完整大运)**:
+   - Start age and year of first luck cycle
+   - Direction (forward/backward)
+   - All 10 major luck periods with exact age/year ranges
+   - Current luck cycle clearly marked
+   - Current annual luck (流年)
+
+6. **Special Stars (神煞)**:
+   - Auspicious stars (吉神)
+   - Challenging stars (凶煞)
+
+════════════════════════════════════════════════════════════════════════════════
+                        ANALYSIS REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+【Be Specific 具体化】:
+- Reference ACTUAL data from the chart (e.g., "Your Day Branch 午 shows 帝旺 stage...")
+- Quote the exact GanZhi, Ten Gods, and Stages from the data
+- Connect observations to specific pillars and their relationships
+
+【Be Authentic 专业化】:
+- Use proper BaZi terminology with translations
+- Explain WHY certain combinations matter
+- Reference classical interpretations when relevant
+
+【Be Personal 个人化】:
+- This is THEIR unique chart - avoid generic statements
+- Connect analysis to real-life implications
+- Acknowledge both strengths and growth areas
+
+【Be Practical 实用化】:
+- Provide actionable insights
+- Suggest specific remedies or enhancements
+- Give timing guidance based on luck cycles
+
+════════════════════════════════════════════════════════════════════════════════
+                        MANDATORY STRUCTURE
+════════════════════════════════════════════════════════════════════════════════
+
+✅ START your response EXACTLY with: "{current_opening}"
+✅ END your response EXACTLY with: "{current_closing}"
+✅ Do NOT add greetings like "Welcome", "Hello", or "As we discussed"
+✅ Treat this as a STANDALONE chapter - do not reference other chapters
+✅ Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
+✅ Include Chinese terms with translations for authenticity
+
+════════════════════════════════════════════════════════════════════════════════
+                        ETHICAL GUIDELINES
+════════════════════════════════════════════════════════════════════════════════
+
+❌ Never make absolute predictions about health, death, or guaranteed outcomes
+❌ Never claim this is fortune-telling or can predict the future with certainty
+✅ Frame everything as "tendencies," "potentials," or "energetic patterns"
+✅ Empower the reader with choices and agency
+✅ End sections with constructive, actionable advice
 """
-
-        specific_prompt = ""
 
         # ================= 各章节详细指令 =================
+        specific_prompt = ""
+
         if section_type == 'core':
             specific_prompt = f"""
-【TASK】Write Chapter 1: Soul Blueprint & Destiny Overview
+【TASK 任务】: Write Chapter 1 - Soul Blueprint & Destiny Overview (命局灵魂)
 
-【CHART DATA】
+【COMPLETE CHART DATA 完整命盘数据】:
 {context_str}
 
-【MUST COVER】
-1. **Day Master Analysis**: Analyze [{day_master}] born in [{month_zhi}] month
-   - Is the Day Master strong or weak? Why?
-   - What element does this person embody?
-   
-2. **Hidden Stems Deep Dive**: 
-   - What do the hidden stems reveal about their inner nature?
-   - Any conflicts or harmony between surface and hidden elements?
-   
-3. **Destiny Structure (格局)**:
-   - What pattern/structure does this chart form?
-   - What is their "Useful God" (用神) - the element that brings balance?
-   
-4. **Core Personality Portrait**:
-   - Natural talents and gifts
-   - Thinking style and decision-making approach
-   - How others perceive them vs. who they really are
-   
-5. **Life Theme**:
-   - What is the central lesson or mission of this lifetime?
-   - What unique contribution can they make?
+【REQUIRED ANALYSIS - Reference Specific Data Points 必须分析的内容】:
 
-Make it feel like a profound self-discovery journey, not a cold analysis.
+## 1. Day Master Deep Analysis (日主深度分析)
+- Analyze Day Master [{day_master}] - is it {day_master_element}
+- What is the Yin/Yang nature? What personality traits does this indicate?
+- Check the Month Branch to determine seasonal strength (得令/失令)
+- Reference the 十二长生 stage of the Day Pillar: is Day Master in 长生, 帝旺, 墓, or other stage?
+- Overall assessment: Is Day Master strong (身强) or weak (身弱)? Cite evidence from the chart.
+
+## 2. Ten Gods Pattern Analysis (十神格局分析)
+- List ALL Ten Gods appearing in the four pillars (from shiShenGan and shiShenZhi data)
+- Create a summary: Which Ten Gods appear most? Which are missing?
+- What does this pattern reveal about personality and life themes?
+- Example: "比肩 appears in Year Pillar, suggesting..."
+
+## 3. Hidden Stems Secrets (藏干秘密)
+- Analyze the hidden stems (hideGan) in each of the four branches
+- Are there any conflicts between the visible stems and hidden stems?
+- What inner qualities or hidden potentials do they reveal?
+- Any special combinations (暗合) or clashes (暗冲)?
+
+## 4. Five Elements Balance (五行平衡)
+- Reference the exact five elements count from the data
+- What element is strongest? What is weakest or missing?
+- How does this imbalance manifest in personality and life?
+- What is the likely "Useful God" (用神) to bring balance?
+
+## 5. Special Palaces Interpretation (特殊宫位解读)
+- 胎元 [{special_palaces.get('taiYuan', 'N/A')}]: What does this reveal about prenatal foundation and inherited traits?
+- 命宫 [{special_palaces.get('mingGong', 'N/A')}]: What is their core life direction?
+- 身宫 [{special_palaces.get('shenGong', 'N/A')}]: What does this say about physical constitution and material life?
+
+## 6. Void Analysis (空亡分析)
+- Check which branches fall into void (xunKong) in each pillar
+- What life areas might feel "empty" or require extra effort?
+- How can they work with this energy?
+
+## 7. Core Destiny Theme (命运核心主题)
+- Synthesize all the above into a coherent life narrative
+- What is their unique gift or superpower based on this chart?
+- What is the central lesson or growth area of this lifetime?
+- What unique contribution can they make to the world?
+
+Make this feel like a profound self-discovery journey. The reader should feel truly SEEN and understood.
 """
-        
+
         elif section_type == 'wealth':
-            # ✅ 根据性别调整财运分析的说明
-            wealth_gender_note = ""
+            # 根据性别调整财运分析
             if gender == "female":
                 wealth_gender_note = """
-【GENDER-SPECIFIC NOTE FOR FEMALE CHART】
-For women, Wealth Stars primarily represent financial ability and relationship with father.
-Officer Stars (正官/七殺) represent husband and male relationships - this will be covered in the Love chapter.
-Focus this chapter on her career potential and money-making abilities.
+【GENDER-SPECIFIC NOTE FOR FEMALE CHART 女命特别说明】
+For women, Wealth Stars (财星) primarily represent:
+- Financial ability and money-making potential
+- Relationship with father
+- (NOT husband - that's Officer Stars for women)
+
+Focus this chapter on her CAREER and FINANCIAL potential.
+Officer Stars analysis for relationships belongs in the Love chapter.
 """
             else:
                 wealth_gender_note = """
-【GENDER-SPECIFIC NOTE FOR MALE CHART】
-For men, Wealth Stars represent both financial ability AND wife/female relationships.
-You may briefly mention how wealth stars affect his relationships, but detailed romance analysis belongs in the Love chapter.
+【GENDER-SPECIFIC NOTE FOR MALE CHART 男命特别说明】
+For men, Wealth Stars (财星) represent both:
+- Financial ability and money-making potential
+- Wife and female relationships
+
+You may briefly mention how wealth stars affect his relationships with women,
+but detailed romance analysis belongs in the Love chapter.
 """
-            
+
             specific_prompt = f"""
-【TASK】Write Chapter 2: Career Empire & Wealth Potential
+【TASK 任务】: Write Chapter 2 - Career Empire & Wealth Potential (事业财运)
 
 {wealth_gender_note}
 
-【CHART DATA】
+【COMPLETE CHART DATA 完整命盘数据】:
 {context_str}
 
-【MUST COVER】
-1. **Wealth Star Analysis (财星)**:
-   - Where is their wealth element? Strong or weak?
-   - Do they have "wealth storage" (财库)?
-   - Natural relationship with money - easy or challenging?
+【REQUIRED ANALYSIS 必须分析的内容】:
 
-2. **Career DNA**:
-   - What industries/fields align with their Useful God?
-   - Leadership style: boss, partner, or specialist?
-   - Best work environment: corporate, startup, freelance?
-   
-3. **Wealth-Building Strategy**:
-   - Their natural path to prosperity
-   - Should they focus on salary, business, or investments?
-   - Any warnings about financial pitfalls?
-   
-4. **Career Timeline**:
-   - Major luck cycles affecting career
-   - Best years for career moves/changes
-   - Periods requiring caution
+## 1. Wealth Star Analysis (财星分析)
+- Identify where 正财 and 偏财 appear in the chart (check shiShenGan/shiShenZhi for each pillar)
+- Are wealth stars strong or weak? In what stage (十二长生)?
+- Is there 财库 (wealth storage) in any branch?
+- Natural relationship with money - easy accumulation or challenging?
 
-5. **Practical Recommendations**:
-   - Specific industries to consider
-   - Skills to develop
-   - Networking and partnership advice
+## 2. Career DNA Based on Ten Gods (十神职业分析)
+- What Ten Gods dominate the chart? Map to career archetypes:
+  - 正官/七杀 dominant → Management, government, authority roles
+  - 财星 dominant → Business, finance, sales
+  - 食神/伤官 dominant → Creative fields, teaching, expression
+  - 印星 dominant → Academic, research, advisory roles
+  - 比劫 dominant → Competitive fields, sports, entrepreneurship
 
-Make them feel excited about their potential while being realistic.
+## 3. Useful God for Wealth (用神与财运)
+- Based on Day Master strength, what element helps wealth?
+- Which industries align with their Useful God element?
+- What environments support their success?
+
+## 4. Work Style Analysis (工作风格)
+- Leadership style: Boss, partner, or specialist?
+- Best work environment: Corporate, startup, freelance, government?
+- Team dynamics: Leader, collaborator, or independent contributor?
+
+## 5. Wealth-Building Strategy (财富策略)
+- Their natural path to prosperity
+- Should they focus on salary, business ownership, or investments?
+- Risk tolerance based on chart structure
+- Any warnings about financial pitfalls or 破财 patterns?
+
+## 6. Career Timeline from Luck Cycles (大运事业时机)
+- Analyze the complete luck cycles provided
+- Which luck cycles (大运) activate career and wealth?
+- Current luck cycle [{current_dayun.get('ganZhi', 'N/A')}] - how does it affect career?
+- Best years for career moves, promotions, or business launches
+- Periods requiring caution or consolidation
+
+## 7. Practical Recommendations (实用建议)
+- Top 3-5 specific industries to consider
+- Skills to develop based on chart strengths
+- Networking and partnership advice
+- Feng shui elements to enhance wealth luck
+
+Make them feel excited about their potential while being realistic about challenges.
 """
 
         elif section_type == 'love':
-            # ✅ 根据性别完全不同的婚恋分析
+            # 根据性别完全不同的婚恋分析
+            day_branch = pillars.get('day', {}).get('zhi', 'N/A')
+            
             if gender == "female":
                 love_specific_instruction = f"""
-【CRITICAL: FEMALE CHART RELATIONSHIP ANALYSIS / 女命婚恋分析】
+【CRITICAL: FEMALE CHART RELATIONSHIP ANALYSIS 女命婚恋分析 - 关键】
 
 For this FEMALE client, you MUST analyze relationships using these rules:
-- **Officer Star (正官)** = Represents her HUSBAND, the "right" man, legitimate relationship
-- **Seven Killings (七殺)** = Represents boyfriends, lovers, passionate but potentially unstable relationships
-- If both 正官 and 七殺 appear: Suggests complexity in love life, possibly multiple significant relationships
-- If 正官 is absent but 七殺 is strong: May attract intense but non-traditional relationships
-- **Hurting Officer (傷官) clashing with Officer**: Classic indicator of marriage challenges for women
-- **Day Branch (日支) [{day_zhi}]** = Her Spouse Palace, represents her husband's characteristics
 
-Analyze:
-1. Where are her Officer Stars? Strong or weak?
-2. Any 傷官見官 (Hurting Officer seeing Officer) patterns?
-3. What type of man is she attracted to based on her chart?
-4. What does her spouse palace [{day_zhi}] reveal about her ideal husband?
+**Officer Stars = Husband/Boyfriends for Women:**
+- 正官 (Direct Officer) = Represents her HUSBAND, the "right" man, legitimate relationship
+- 七殺 (Seven Killings) = Represents boyfriends, lovers, passionate but potentially unstable relationships
+
+**Key Patterns to Check:**
+- If both 正官 and 七殺 appear: 官杀混杂 - complexity in love life, possibly multiple significant relationships
+- If 正官 is absent but 七殺 is strong: May attract intense but non-traditional relationships
+- If 傷官 (Hurting Officer) clashes with 正官: Classic 傷官見官 - challenges in marriage for women
+
+**Day Branch (Spouse Palace) Analysis:**
+- The Day Branch [{day_branch}] represents her SPOUSE PALACE (配偶宫)
+- What is the Ten God of the Day Branch? (check shiShenZhi of day pillar)
+- What is the Twelve Stage (diShi) of the Day Branch?
+- Is the Day Branch in 空亡 (void)?
+
+**Questions to Answer:**
+1. Where are her Officer Stars in the chart? Which pillars? Strong or weak?
+2. Is there 傷官見官 pattern? What does this mean for her marriage?
+3. What type of man is she attracted to based on Officer Star characteristics?
+4. What does her spouse palace [{day_branch}] reveal about her ideal husband's personality?
+5. What luck cycles activate romance (Officer Star luck cycles)?
 """
             else:
                 love_specific_instruction = f"""
-【CRITICAL: MALE CHART RELATIONSHIP ANALYSIS / 男命婚恋分析】
+【CRITICAL: MALE CHART RELATIONSHIP ANALYSIS 男命婚恋分析 - 关键】
 
 For this MALE client, you MUST analyze relationships using these rules:
-- **Direct Wealth (正財)** = Represents his WIFE, stable and legitimate relationship
-- **Indirect Wealth (偏財)** = Represents girlfriends, lovers, romantic but potentially less stable
-- If both 正財 and 偏財 appear: Suggests he may have multiple romantic interests
-- If 偏財 is stronger than 正財: May prefer casual relationships or marry later
-- **Day Branch (日支) [{day_zhi}]** = His Spouse Palace, represents his wife's characteristics
-- **Rob Wealth (劫財) clashing with Wealth**: Can indicate competition for partners or financial drain through relationships
 
-Analyze:
-1. Where are his Wealth Stars? Strong or weak?
-2. Any 比劫奪財 (Rob Wealth taking Wealth) patterns?
-3. What type of woman is he attracted to based on his chart?
-4. What does his spouse palace [{day_zhi}] reveal about his ideal wife?
+**Wealth Stars = Wife/Girlfriends for Men:**
+- 正財 (Direct Wealth) = Represents his WIFE, stable and legitimate relationship
+- 偏財 (Indirect Wealth) = Represents girlfriends, lovers, romantic but potentially less stable
+
+**Key Patterns to Check:**
+- If both 正財 and 偏財 appear: He may have multiple romantic interests or marry more than once
+- If 偏財 is stronger than 正財: May prefer casual relationships or marry later
+- If 比劫 (Rob Wealth) is strong: 比劫奪財 - competition for partners or financial drain through relationships
+
+**Day Branch (Spouse Palace) Analysis:**
+- The Day Branch [{day_branch}] represents his SPOUSE PALACE (配偶宫)
+- What is the Ten God of the Day Branch? (check shiShenZhi of day pillar)
+- What is the Twelve Stage (diShi) of the Day Branch?
+- Is the Day Branch in 空亡 (void)?
+
+**Questions to Answer:**
+1. Where are his Wealth Stars in the chart? Which pillars? Strong or weak?
+2. Is there 比劫奪財 pattern? What does this mean for relationships?
+3. What type of woman is he attracted to based on Wealth Star characteristics?
+4. What does his spouse palace [{day_branch}] reveal about his ideal wife's personality?
+5. What luck cycles activate romance (Wealth Star luck cycles)?
 """
 
             specific_prompt = f"""
-【TASK】Write Chapter 3: Love, Relationships & Soulmate Profile
+【TASK 任务】: Write Chapter 3 - Love, Relationships & Soulmate Profile (婚恋情感)
 
 {love_specific_instruction}
 
-【CHART DATA】
+【COMPLETE CHART DATA 完整命盘数据】:
 {context_str}
 
-【MUST COVER】
-1. **Spouse Palace Analysis (夫妻宫)**:
-   - Analyze the Day Branch [{day_zhi}] as the marriage palace
-   - Any clashes, combinations, or special formations?
-   - What does this reveal about marriage destiny?
+【REQUIRED ANALYSIS 必须分析的内容】:
 
-2. **Ideal Partner Profile**:
-   - Personality traits that complement this chart
-   - Physical characteristics tendencies (based on elements)
-   - Career/background of ideal match
-   - Which direction (literally geographic) might they come from?
+## 1. Relationship Stars Analysis (婚恋星分析)
+- Apply the gender-specific rules above
+- Locate and analyze all relevant relationship stars
+- Assess their strength, stage, and position in the chart
 
-3. **Love Patterns**:
-   - How do they behave in relationships?
-   - Common relationship challenges they face
-   - Their attachment style based on the chart
-   
-4. **Marriage Timing**:
-   - Which luck cycles activate romance?
-   - Favorable years for meeting someone/marriage
-   - Years requiring relationship caution
+## 2. Spouse Palace Deep Dive (配偶宫深度分析)
+- Day Branch [{day_branch}] analysis:
+  - What element is this branch? What does it represent?
+  - What is the Ten God (shiShenZhi) of the day pillar?
+  - What is the Twelve Stage (diShi)? 帝旺 = strong spouse, 墓 = introverted spouse, etc.
+  - Is it in 空亡? What does this mean for marriage timing or spouse presence?
+- Any clashes (冲), combinations (合), or harms (害) with other branches?
 
-5. **Relationship Advice**:
-   - How to attract the right partner
-   - How to maintain a healthy relationship
-   - Red flags to watch for based on their chart
+## 3. Ideal Partner Profile (理想伴侣画像)
+- Personality traits that complement this chart
+- Physical characteristics tendencies (based on elements)
+- Career or background of ideal match
+- Which geographic direction might they come from? (based on elements)
 
-Be warm and hopeful while being honest about challenges. Remember to use correct pronouns ({gender_info['pronoun']}).
+## 4. Love Patterns & Attachment Style (恋爱模式)
+- How do they behave in relationships based on Ten Gods pattern?
+- Common relationship challenges they may face
+- Their attachment style (secure, anxious, avoidant) based on chart structure
+- What triggers them emotionally?
+
+## 5. Marriage Timing from Luck Cycles (婚姻时机)
+- Analyze the complete luck cycles for romance timing
+- Which luck cycles activate relationship stars?
+- Current luck cycle [{current_dayun.get('ganZhi', 'N/A')}] - impact on love life?
+- Favorable years for meeting someone significant or marriage
+- Years requiring relationship caution
+
+## 6. Relationship Advice (婚恋建议)
+- How to attract the right partner based on their chart
+- How to maintain a healthy long-term relationship
+- Red flags to watch for based on chart patterns
+- How to work with challenging aspects
+
+Be warm and hopeful while being honest about challenges.
+Use correct pronouns: {gender_info['pronoun']}
 """
 
         elif section_type == '2026_forecast':
             specific_prompt = f"""
-【TASK】Write Chapter 4: 2026 Year of the Fire Horse (丙午) - Complete Forecast
+【TASK 任务】: Write Chapter 4 - 2026 Year of the Fire Horse (丙午) Complete Forecast (2026流年预测)
 
-【CHART DATA】
+【COMPLETE CHART DATA 完整命盘数据】:
 {context_str}
 
-【GENDER REMINDER】
-Client is {gender.upper()}. When discussing relationship forecasts, apply correct gender-based star interpretations.
+【GENDER REMINDER 性别提醒】:
+Client is {gender.upper()}. Apply correct gender-based star interpretations for all predictions.
 
-【MUST COVER】
-1. **2026 Overview**:
-   - How does 丙午 (Fire Horse) interact with their chart?
-   - Check especially for 子午冲 (Rat-Horse clash) if applicable
-   - Overall theme and energy of 2026 for them
+【REQUIRED ANALYSIS 必须分析的内容】:
 
-2. **Key Opportunities**:
-   - Which areas of life get activated?
-   - Best timing for major decisions
-   - Lucky elements and colors for 2026
+## 1. 2026 Fire Horse (丙午) Overview (2026火马年总览)
+- 2026 is 丙午 year - Fire Horse (Yang Fire + Horse)
+- How does 丙午 interact with their Day Master [{day_master}]?
+- How does 午 (Horse) interact with their four branches?
+- CHECK SPECIFICALLY: Is there 子午冲 (Rat-Horse clash) with any branch? This is major!
+- Any combinations (合) or harms (害) with 午?
+- Overall energy theme of 2026 for this person
 
-3. **Challenges to Navigate**:
-   - Potential obstacles or difficult periods
-   - Health areas to watch
-   - Relationship or career cautions
+## 2. Impact on Current Luck Cycle (与当前大运的交互)
+- Current luck cycle: [{current_dayun.get('ganZhi', 'N/A')}]
+- How does 2026 丙午 interact with their current 大运?
+- Is this a supportive or challenging combination?
+- What themes are amplified by this interaction?
 
-4. **Month-by-Month Breakdown**:
-   Provide guidance for each month (Chinese lunar months):
-   - Month 1 (寅月 Feb): ...
-   - Month 2 (卯月 Mar): ...
-   - Month 3 (辰月 Apr): ...
-   - Month 4 (巳月 May): ...
-   - Month 5 (午月 Jun): ...
-   - Month 6 (未月 Jul): ...
-   - Month 7 (申月 Aug): ...
-   - Month 8 (酉月 Sep): ...
-   - Month 9 (戌月 Oct): ...
-   - Month 10 (亥月 Nov): ...
-   - Month 11 (子月 Dec): ...
-   - Month 12 (丑月 Jan 2027): ...
+## 3. Key Opportunities in 2026 (2026机遇)
+- Which life areas get activated positively?
+- Career opportunities based on element interactions
+- Relationship opportunities (apply gender-specific rules)
+- Wealth opportunities
+- Best timing for major decisions
 
-5. **2026 Action Plan**:
-   - Top 3 things to focus on
-   - Things to avoid
-   - Feng shui or element remedies if relevant
+## 4. Challenges to Navigate in 2026 (2026挑战)
+- Potential obstacles or difficult periods
+- Health areas to watch (which organs relate to stressed elements?)
+- Relationship cautions
+- Career or financial cautions
+- How to mitigate challenges
 
-Make this feel like a practical roadmap they can actually use.
+## 5. Month-by-Month Breakdown (逐月分析)
+Provide specific guidance for each Chinese lunar month:
+
+- **Month 1 (寅月 - Feb 4 to Mar 5)**: Tiger month...
+- **Month 2 (卯月 - Mar 6 to Apr 4)**: Rabbit month...
+- **Month 3 (辰月 - Apr 5 to May 5)**: Dragon month...
+- **Month 4 (巳月 - May 6 to Jun 5)**: Snake month...
+- **Month 5 (午月 - Jun 6 to Jul 6)**: Horse month (double 午!)...
+- **Month 6 (未月 - Jul 7 to Aug 7)**: Goat month...
+- **Month 7 (申月 - Aug 8 to Sep 7)**: Monkey month...
+- **Month 8 (酉月 - Sep 8 to Oct 7)**: Rooster month...
+- **Month 9 (戌月 - Oct 8 to Nov 7)**: Dog month...
+- **Month 10 (亥月 - Nov 8 to Dec 6)**: Pig month...
+- **Month 11 (子月 - Dec 7 to Jan 5)**: Rat month (子午冲 if applicable!)...
+- **Month 12 (丑月 - Jan 6 to Feb 3 2027)**: Ox month...
+
+For each month, briefly note:
+- Key theme or energy
+- Opportunities
+- Cautions
+- Lucky days or activities
+
+## 6. 2026 Action Plan (2026行动计划)
+- Top 3 things to focus on in 2026
+- Top 3 things to avoid or be cautious about
+- Lucky elements, colors, and directions for 2026
+- Feng shui recommendations
+- Any specific remedies if challenges are significant
+
+## 7. Looking Ahead (展望未来)
+- How does 2026 set up 2027?
+- Any long-term themes emerging?
+- Final empowering message for the year ahead
+
+Make this feel like a practical roadmap they can actually use throughout 2026.
 """
-        
+
         else:
             return jsonify({"error": f"Unknown section type: {section_type}"}), 400
 
-        print(f"Calling AI for section: {section_type} in language: {lang_config['name']} for {gender} client")
+        print(f"Calling AI for section: {section_type} in language: {lang_config['name']}")
         ai_result = ask_ai(base_system_prompt, specific_prompt)
         print(f"AI result keys: {ai_result.keys() if isinstance(ai_result, dict) else 'not a dict'}")
 
@@ -577,7 +898,7 @@ Make this feel like a practical roadmap they can actually use.
         print(f"CRITICAL SERVER ERROR: {error_msg}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
