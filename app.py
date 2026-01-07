@@ -33,7 +33,8 @@ LANGUAGE_PROMPTS = {
         "name": "English",
         "instruction": "Write your response in fluent, natural English.",
         "pronoun_rule": "Address the user as 'you'. Maintain a consistent professional yet warm tone.",
-        "style": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
+        "style_gentle": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
+        "style_authentic": "Use a direct, authoritative tone like a traditional Chinese fortune-telling master who tells it like it is - no sugarcoating.",
         "opening": "In this chapter, I will analyze for you...",
         "closing": "End of this chapter."
     },
@@ -41,7 +42,8 @@ LANGUAGE_PROMPTS = {
         "name": "中文",
         "instruction": "请用流畅自然的中文撰写。",
         "pronoun_rule": "必须统一使用'您'（尊称）来称呼用户，切勿使用'你'。保持语气的一致性。",
-        "style": "用温暖睿智的语气，像一位通晓古今的智者在与朋友分享人生智慧。",
+        "style_gentle": "用温暖睿智的语气，像一位通晓古今的智者在与朋友分享人生智慧。",
+        "style_authentic": "用传统命理师的直接语气，像老师傅算命一样直言不讳，好就是好，不好就直说，不绕弯子。",
         "opening": "本章为您分析...",
         "closing": "此章节完"
     },
@@ -49,7 +51,8 @@ LANGUAGE_PROMPTS = {
         "name": "Deutsch",
         "instruction": "Schreiben Sie Ihre Antwort in flüssigem, natürlichem Deutsch.",
         "pronoun_rule": "Verwenden Sie KONSEQUENT die Höflichkeitsform 'Sie' und 'Ihre' (formal). Vermeiden Sie unbedingt das 'Du' (informal). Dies ist eine strikte Regel.",
-        "style": "Verwenden Sie einen warmen, einfühlsamen Ton wie ein weiser Mentor, der alte Weisheiten mit einem modernen Freund teilt.",
+        "style_gentle": "Verwenden Sie einen warmen, einfühlsamen Ton wie ein weiser Mentor, der alte Weisheiten mit einem modernen Freund teilt.",
+        "style_authentic": "Verwenden Sie einen direkten, autoritativen Ton wie ein traditioneller chinesischer Wahrsagemeister, der die Dinge beim Namen nennt.",
         "opening": "In diesem Kapitel analysiere ich für Sie...",
         "closing": "Ende dieses Kapitels."
     },
@@ -57,7 +60,8 @@ LANGUAGE_PROMPTS = {
         "name": "Español",
         "instruction": "Escribe tu respuesta en español fluido y natural.",
         "pronoun_rule": "Utiliza consistentemente la forma 'Usted' (formal) para dirigirte al usuario. No uses 'Tú'.",
-        "style": "Usa un tono cálido y perspicaz, como un mentor sabio compartiendo sabiduría ancestral con un amigo moderno.",
+        "style_gentle": "Usa un tono cálido y perspicaz, como un mentor sabio compartiendo sabiduría ancestral con un amigo moderno.",
+        "style_authentic": "Usa un tono directo y autoritario, como un maestro tradicional chino de adivinación que dice las cosas como son.",
         "opening": "En este capítulo, analizo para usted...",
         "closing": "Fin de este capítulo."
     },
@@ -65,7 +69,8 @@ LANGUAGE_PROMPTS = {
         "name": "Français",
         "instruction": "Rédigez votre réponse dans un français fluide et naturel.",
         "pronoun_rule": "Utilisez systématiquement le vouvoiement ('Vous'). Ne tutoyez jamais l'utilisateur.",
-        "style": "Utilisez un ton chaleureux et perspicace, comme un sage mentor partageant une sagesse ancestrale avec un ami moderne.",
+        "style_gentle": "Utilisez un ton chaleureux et perspicace, comme un sage mentor partageant une sagesse ancestrale avec un ami moderne.",
+        "style_authentic": "Utilisez un ton direct et autoritaire, comme un maître traditionnel chinois de divination qui dit les choses telles qu'elles sont.",
         "opening": "Dans ce chapitre, j'analyse pour vous...",
         "closing": "Fin de ce chapitre."
     }
@@ -114,6 +119,104 @@ GENDER_INSTRUCTIONS = {
         }
     }
 }
+
+# ================= 模式配置 =================
+MODE_CONFIGS = {
+    "gentle": {
+        "name": "Gentle Mode",
+        "name_zh": "温和版",
+        "ethics": """
+════════════════════════════════════════════════════════════════════════════════
+                        ETHICAL GUIDELINES
+════════════════════════════════════════════════════════════════════════════════
+
+❌ Never make absolute predictions about health, death, or guaranteed outcomes
+❌ Never claim this is fortune-telling or can predict the future with certainty
+✅ Frame everything as "tendencies," "potentials," or "energetic patterns"
+✅ Empower the reader with choices and agency
+✅ End sections with constructive, actionable advice
+""",
+        "interpretation_style": """
+════════════════════════════════════════════════════════════════════════════════
+                        INTERPRETATION STYLE - GENTLE MODE
+════════════════════════════════════════════════════════════════════════════════
+
+【Be Encouraging 鼓励性】:
+- Focus on strengths and positive potentials
+- Frame challenges as "growth opportunities"
+- Use softer language for difficult aspects
+
+【Be Balanced 平衡性】:
+- Present both positive and challenging aspects
+- Always provide hope and solutions
+- Emphasize free will and personal agency
+
+【Word Choice 用词选择】:
+- Use: "tendency," "potential," "may experience," "opportunity for growth"
+- Avoid: "definitely will," "doomed to," "cannot escape," "destined to fail"
+"""
+    },
+    "authentic": {
+        "name": "Authentic Mode",
+        "name_zh": "真实版",
+        "ethics": """
+════════════════════════════════════════════════════════════════════════════════
+                        AUTHENTICITY DISCLAIMER
+════════════════════════════════════════════════════════════════════════════════
+
+⚠️ This reading uses TRADITIONAL interpretation methods without modern softening.
+⚠️ The language is direct, as traditional masters would speak.
+⚠️ Challenging aspects are stated clearly - not to discourage, but to prepare.
+⚠️ Every challenge mentioned comes with traditional remedies or timing guidance.
+""",
+        "interpretation_style": """
+════════════════════════════════════════════════════════════════════════════════
+                        INTERPRETATION STYLE - AUTHENTIC MODE (传统直言版)
+════════════════════════════════════════════════════════════════════════════════
+
+【Be Direct 直言不讳】:
+- 像传统命理师一样说话，不要绕弯子
+- 该说"破财"就说"破财"，该说"婚姻有波折"就直说
+- 用传统术语：犯太岁、刑冲破害、比劫夺财、伤官见官、财库被冲
+- 不要用"可能有挑战"，要说"今年子午相冲，6月财运受阻，不宜大额投资"
+
+【Be Specific 具体明确】:
+- 给出具体时间："2026年午月（6月）"
+- 给出具体事项："不宜签合同"、"防小人"、"注意肠胃"
+- 给出具体建议："佩戴属虎的生肖吉祥物可化解"
+
+【Use Traditional Terms 使用传统术语】:
+✅ 正确用法:
+- "命中比劫重，合伙做生意容易被拖累，建议独资或控股"
+- "日支空亡，晚婚对你更有利，30岁后遇到的对象更稳定"
+- "今年犯太岁，诸事不顺，宜守不宜攻"
+- "七杀无制，性格刚烈，事业上易与上司冲突"
+- "财星入墓，中年后财运才能真正起来"
+- "伤官见官，婚姻宫有刑，第一段感情难以长久"
+
+❌ 避免用法:
+- "You might experience some challenges..." 
+- "There could potentially be..."
+- "This suggests a tendency toward..."
+- "能量比较复杂" (这是废话)
+
+【Provide Remedies 给出化解方案】:
+- 每个问题都要给出传统的化解方法
+- 可以是：风水摆设、佩戴饰品、择日行事、方位选择、贵人方向
+- 不是空泛的"保持积极心态"，而是具体的操作建议
+
+【Timing is Key 时机很重要】:
+- 明确说出哪些年份/月份有利、哪些需要避开
+- "2026年上半年适合谈恋爱，下半年不宜做重大决定"
+- "35-45岁这步大运是事业上升期，抓紧这十年"
+
+【Balance Yin-Yang 阴阳平衡】:
+- 好的直接说好，不好的也直接指出
+- 但每个挑战都必须配一个化解方法或最佳应对时机
+- 这不是恐吓，是让人提前知道如何趋吉避凶
+"""
+    }
+}
 # ===========================================
 
 
@@ -131,6 +234,11 @@ def get_gender_instruction(gender, lang_code):
             "pronoun": "they/them/their",
             "bazi_rules": f"Gender not specified. Defaulting to general interpretation:\n{default['bazi_rules']}"
         }
+
+
+def get_mode_config(mode):
+    """获取模式配置"""
+    return MODE_CONFIGS.get(mode, MODE_CONFIGS["gentle"])
 
 
 def format_bazi_context(data):
@@ -331,7 +439,8 @@ def get_language_config(lang_code, custom_lang=None):
             "name": custom_lang,
             "instruction": f"Write your response in fluent, natural {custom_lang}.",
             "pronoun_rule": "Address the user in a formal and respectful manner consistent with this language.",
-            "style": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
+            "style_gentle": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
+            "style_authentic": "Use a direct, authoritative tone like a traditional fortune-telling master.",
             "opening": f"Analysis for you in {custom_lang}...",
             "closing": "End of chapter."
         }
@@ -382,7 +491,7 @@ def ask_ai(system_prompt, user_prompt):
 
 @app.route('/', methods=['GET'])
 def health_check():
-    return jsonify({"status": "running", "version": "4.0", "api_key_set": bool(OPENROUTER_API_KEY)}), 200
+    return jsonify({"status": "running", "version": "4.1", "api_key_set": bool(OPENROUTER_API_KEY)}), 200
 
 
 @app.route('/api/generate-section', methods=['OPTIONS'])
@@ -410,10 +519,15 @@ def generate_section():
         custom_lang = req_data.get('custom_language', None)
         lang_config = get_language_config(lang_code, custom_lang)
 
+        # ================= 新增：获取模式设置 =================
+        reading_mode = req_data.get('mode', 'gentle')  # 默认温和版
+        mode_config = get_mode_config(reading_mode)
+        print(f"Reading Mode: {reading_mode} ({mode_config['name']})")
+
         # 提取性别和姓名
         gender = bazi_json.get('gender', 'unknown')
         client_name = bazi_json.get('name', 'Client')
-        print(f"Client: {client_name}, Gender: {gender}, Section: {section_type}")
+        print(f"Client: {client_name}, Gender: {gender}, Section: {section_type}, Mode: {reading_mode}")
 
         # 获取性别相关的八字解读规则
         gender_info = get_gender_instruction(gender, lang_code)
@@ -422,6 +536,12 @@ def generate_section():
         current_opening = lang_config.get('opening', "In this chapter...")
         current_closing = lang_config.get('closing', "End of chapter.")
         current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
+        
+        # ================= 根据模式选择风格 =================
+        if reading_mode == "authentic":
+            current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
+        else:
+            current_style = lang_config.get('style_gentle')
 
         # 格式化完整八字数据
         context_str = format_bazi_context(bazi_json)
@@ -439,6 +559,14 @@ def generate_section():
         # ================= 核心 System Prompt =================
         base_system_prompt = f"""
 You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会), "Yuan Hai Zi Ping" (渊海子平), and "Di Tian Sui" (滴天髓).
+
+════════════════════════════════════════════════════════════════════════════════
+                        READING MODE: {mode_config['name'].upper()} / {mode_config['name_zh']}
+════════════════════════════════════════════════════════════════════════════════
+
+{mode_config['interpretation_style']}
+
+{mode_config['ethics']}
 
 ════════════════════════════════════════════════════════════════════════════════
                         CLIENT INFORMATION - CRITICAL
@@ -462,7 +590,7 @@ You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge o
 【Third Person Reference 第三人称】: Use {gender_info['pronoun']} when referring to the client
 
 【Writing Style 写作风格】:
-{lang_config['style']}
+{current_style}
 
 ════════════════════════════════════════════════════════════════════════════════
                         AVAILABLE DATA - USE ALL OF IT
@@ -537,19 +665,11 @@ You have access to COMPLETE chart data including:
 ✅ Treat this as a STANDALONE chapter - do not reference other chapters
 ✅ Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
 ✅ Include Chinese terms with translations for authenticity
-
-════════════════════════════════════════════════════════════════════════════════
-                        ETHICAL GUIDELINES
-════════════════════════════════════════════════════════════════════════════════
-
-❌ Never make absolute predictions about health, death, or guaranteed outcomes
-❌ Never claim this is fortune-telling or can predict the future with certainty
-✅ Frame everything as "tendencies," "potentials," or "energetic patterns"
-✅ Empower the reader with choices and agency
-✅ End sections with constructive, actionable advice
 """
 
         # ================= 各章节详细指令 =================
+        # (保持原有的 section 逻辑不变，这里省略重复代码)
+        
         specific_prompt = ""
 
         if section_type == 'core':
@@ -602,7 +722,7 @@ You have access to COMPLETE chart data including:
 - What is the central lesson or growth area of this lifetime?
 - What unique contribution can they make to the world?
 
-Make this feel like a profound self-discovery journey. The reader should feel truly SEEN and understood.
+{"Make this feel like a profound self-discovery journey. The reader should feel truly SEEN and understood." if reading_mode == "gentle" else "直言命局优劣，好的明说，问题也要指出，但每个问题都给出具体的化解方向。让读者真正了解自己的命局特点。"}
 """
 
         elif section_type == 'wealth':
@@ -627,6 +747,21 @@ For men, Wealth Stars (财星) represent both:
 
 You may briefly mention how wealth stars affect his relationships with women,
 but detailed romance analysis belongs in the Love chapter.
+"""
+
+            # 根据模式调整结尾指导
+            if reading_mode == "authentic":
+                wealth_closing_guidance = """
+【AUTHENTIC MODE 真实版要求】:
+- 如果财星弱，直接说"命中财运平平，需要格外努力"
+- 如果有比劫夺财，直接说"不适合合伙，容易被人分走利益"
+- 如果财库被冲，直接说"存不住钱，要特别注意理财"
+- 每个问题都给出具体建议：什么行业适合、什么年份发财、要避开什么
+- 不要用"可能"、"或许"、"有机会"这类模糊词汇
+"""
+            else:
+                wealth_closing_guidance = """
+Make them feel excited about their potential while being realistic about challenges.
 """
 
             specific_prompt = f"""
@@ -682,7 +817,7 @@ but detailed romance analysis belongs in the Love chapter.
 - Networking and partnership advice
 - Feng shui elements to enhance wealth luck
 
-Make them feel excited about their potential while being realistic about challenges.
+{wealth_closing_guidance}
 """
 
         elif section_type == 'love':
@@ -746,6 +881,25 @@ For this MALE client, you MUST analyze relationships using these rules:
 5. What luck cycles activate romance (Wealth Star luck cycles)?
 """
 
+            # 根据模式调整婚恋分析的结尾指导
+            if reading_mode == "authentic":
+                love_closing_guidance = f"""
+【AUTHENTIC MODE 真实版婚恋分析要求】:
+- 如果婚姻宫有刑冲，直接说"第一段感情不稳定，容易有波折"
+- 如果伤官见官（女命），直接说"对婚姻有挑战，可能经历分手或离婚"
+- 如果比劫夺财（男命），直接说"容易遇到竞争者，或因女人破财"
+- 如果日支空亡，直接说"配偶宫空亡，晚婚更稳定，或婚后聚少离多"
+- 给出具体的结婚年龄建议："28-32岁结婚最合适"
+- 给出配偶的具体画像："对方可能从事金融/教育行业，性格偏内向/外向"
+
+Use correct pronouns: {gender_info['pronoun']}
+"""
+            else:
+                love_closing_guidance = f"""
+Be warm and hopeful while being honest about challenges.
+Use correct pronouns: {gender_info['pronoun']}
+"""
+
             specific_prompt = f"""
 【TASK 任务】: Write Chapter 3 - Love, Relationships & Soulmate Profile (婚恋情感)
 
@@ -794,11 +948,25 @@ For this MALE client, you MUST analyze relationships using these rules:
 - Red flags to watch for based on chart patterns
 - How to work with challenging aspects
 
-Be warm and hopeful while being honest about challenges.
-Use correct pronouns: {gender_info['pronoun']}
+{love_closing_guidance}
 """
 
         elif section_type == '2026_forecast':
+            # 根据模式调整流年预测
+            if reading_mode == "authentic":
+                forecast_mode_instruction = """
+【AUTHENTIC MODE 真实版流年预测要求】:
+- 直接说哪几个月好、哪几个月差
+- 如果有冲克，直接说"这个月犯太岁/逢冲，不宜做重大决定"
+- 具体到事项："6月不宜投资"、"9月防小人"、"12月注意身体"
+- 如果整年运势不好，直接说"2026年宜守不宜攻，稳扎稳打为主"
+- 每个问题都要给出化解方法：佩戴什么、摆放什么、去什么方位
+"""
+            else:
+                forecast_mode_instruction = """
+Make this feel like a practical roadmap they can actually use throughout 2026.
+"""
+
             specific_prompt = f"""
 【TASK 任务】: Write Chapter 4 - 2026 Year of the Fire Horse (丙午) Complete Forecast (2026流年预测)
 
@@ -807,6 +975,8 @@ Use correct pronouns: {gender_info['pronoun']}
 
 【GENDER REMINDER 性别提醒】:
 Client is {gender.upper()}. Apply correct gender-based star interpretations for all predictions.
+
+{forecast_mode_instruction}
 
 【REQUIRED ANALYSIS 必须分析的内容】:
 
@@ -871,14 +1041,12 @@ For each month, briefly note:
 - How does 2026 set up 2027?
 - Any long-term themes emerging?
 - Final empowering message for the year ahead
-
-Make this feel like a practical roadmap they can actually use throughout 2026.
 """
 
         else:
             return jsonify({"error": f"Unknown section type: {section_type}"}), 400
 
-        print(f"Calling AI for section: {section_type} in language: {lang_config['name']}")
+        print(f"Calling AI for section: {section_type} in language: {lang_config['name']} with mode: {reading_mode}")
         ai_result = ask_ai(base_system_prompt, specific_prompt)
         print(f"AI result keys: {ai_result.keys() if isinstance(ai_result, dict) else 'not a dict'}")
 
