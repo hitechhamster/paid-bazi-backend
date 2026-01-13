@@ -126,32 +126,28 @@ MODE_CONFIGS = {
         "name": "Gentle Mode",
         "name_zh": "温和版",
         "ethics": """
-════════════════════════════════════════════════════════════════════════════════
-                        ETHICAL GUIDELINES
-════════════════════════════════════════════════════════════════════════════════
+## ETHICAL GUIDELINES
 
-❌ Never make absolute predictions about health, death, or guaranteed outcomes
-❌ Never claim this is fortune-telling or can predict the future with certainty
-✅ Frame everything as "tendencies," "potentials," or "energetic patterns"
-✅ Empower the reader with choices and agency
-✅ End sections with constructive, actionable advice
+- Never make absolute predictions about health, death, or guaranteed outcomes
+- Never claim this is fortune-telling or can predict the future with certainty
+- Frame everything as "tendencies," "potentials," or "energetic patterns"
+- Empower the reader with choices and agency
+- End sections with constructive, actionable advice
 """,
         "interpretation_style": """
-════════════════════════════════════════════════════════════════════════════════
-                        INTERPRETATION STYLE - GENTLE MODE
-════════════════════════════════════════════════════════════════════════════════
+## INTERPRETATION STYLE - GENTLE MODE
 
-【Be Encouraging 鼓励性】:
+**Be Encouraging 鼓励性**:
 - Focus on strengths and positive potentials
 - Frame challenges as "growth opportunities"
 - Use softer language for difficult aspects
 
-【Be Balanced 平衡性】:
+**Be Balanced 平衡性**:
 - Present both positive and challenging aspects
 - Always provide hope and solutions
 - Emphasize free will and personal agency
 
-【Word Choice 用词选择】:
+**Word Choice 用词选择**:
 - Use: "tendency," "potential," "may experience," "opportunity for growth"
 - Avoid: "definitely will," "doomed to," "cannot escape," "destined to fail"
 """
@@ -160,33 +156,29 @@ MODE_CONFIGS = {
         "name": "Authentic Mode",
         "name_zh": "真实版",
         "ethics": """
-════════════════════════════════════════════════════════════════════════════════
-                        AUTHENTICITY DISCLAIMER
-════════════════════════════════════════════════════════════════════════════════
+## AUTHENTICITY DISCLAIMER
 
-⚠️ This reading uses TRADITIONAL interpretation methods without modern softening.
-⚠️ The language is direct, as traditional masters would speak.
-⚠️ Challenging aspects are stated clearly - not to discourage, but to prepare.
-⚠️ Every challenge mentioned comes with traditional remedies or timing guidance.
+- This reading uses TRADITIONAL interpretation methods without modern softening.
+- The language is direct, as traditional masters would speak.
+- Challenging aspects are stated clearly - not to discourage, but to prepare.
+- Every challenge mentioned comes with traditional remedies or timing guidance.
 """,
         "interpretation_style": """
-════════════════════════════════════════════════════════════════════════════════
-                        INTERPRETATION STYLE - AUTHENTIC MODE (传统直言版)
-════════════════════════════════════════════════════════════════════════════════
+## INTERPRETATION STYLE - AUTHENTIC MODE (传统直言版)
 
-【Be Direct 直言不讳】:
+**Be Direct 直言不讳**:
 - 像传统命理师一样说话，不要绕弯子
 - 该说"破财"就说"破财"，该说"婚姻有波折"就直说
 - 用传统术语：犯太岁、刑冲破害、比劫夺财、伤官见官、财库被冲
 - 不要用"可能有挑战"，要说"今年子午相冲，6月财运受阻，不宜大额投资"
 
-【Be Specific 具体明确】:
+**Be Specific 具体明确**:
 - 给出具体时间："2026年午月（6月）"
 - 给出具体事项："不宜签合同"、"防小人"、"注意肠胃"
 - 给出具体建议："佩戴属虎的生肖吉祥物可化解"
 
-【Use Traditional Terms 使用传统术语】:
-✅ 正确用法:
+**Use Traditional Terms 使用传统术语**:
+正确用法:
 - "命中比劫重，合伙做生意容易被拖累，建议独资或控股"
 - "日支空亡，晚婚对你更有利，30岁后遇到的对象更稳定"
 - "今年犯太岁，诸事不顺，宜守不宜攻"
@@ -194,23 +186,23 @@ MODE_CONFIGS = {
 - "财星入墓，中年后财运才能真正起来"
 - "伤官见官，婚姻宫有刑，第一段感情难以长久"
 
-❌ 避免用法:
+避免用法:
 - "You might experience some challenges..." 
 - "There could potentially be..."
 - "This suggests a tendency toward..."
 - "能量比较复杂" (这是废话)
 
-【Provide Remedies 给出化解方案】:
+**Provide Remedies 给出化解方案**:
 - 每个问题都要给出传统的化解方法
 - 可以是：风水摆设、佩戴饰品、择日行事、方位选择、贵人方向
 - 不是空泛的"保持积极心态"，而是具体的操作建议
 
-【Timing is Key 时机很重要】:
+**Timing is Key 时机很重要**:
 - 明确说出哪些年份/月份有利、哪些需要避开
 - "2026年上半年适合谈恋爱，下半年不宜做重大决定"
 - "35-45岁这步大运是事业上升期，抓紧这十年"
 
-【Balance Yin-Yang 阴阳平衡】:
+**Balance Yin-Yang 阴阳平衡**:
 - 好的直接说好，不好的也直接指出
 - 但每个挑战都必须配一个化解方法或最佳应对时机
 - 这不是恐吓，是让人提前知道如何趋吉避凶
@@ -311,55 +303,51 @@ def format_bazi_context(data):
         # 格式化大运列表
         dayun_list = []
         for d in all_dayun:
-            marker = " ← 【当前 CURRENT】" if d.get('isCurrent', False) else ""
+            marker = " <- CURRENT" if d.get('isCurrent', False) else ""
             dayun_list.append(
                 f"  {d.get('index', '')}. {d.get('ganZhi', '')} "
-                f"(年龄 Age {d.get('startAge', '')}-{d.get('endAge', '')}岁, "
-                f"{d.get('startYear', '')}-{d.get('endYear', '')}年){marker}"
+                f"(Age {d.get('startAge', '')}-{d.get('endAge', '')}, "
+                f"{d.get('startYear', '')}-{d.get('endYear', '')}){marker}"
             )
-        dayun_str = "\n".join(dayun_list) if dayun_list else "  无数据 No data"
+        dayun_str = "\n".join(dayun_list) if dayun_list else "  No data"
         
         # 当前大运状态
         if current_dayun:
             if current_dayun.get('notStarted'):
-                current_dayun_status = f"尚未起运 (将于 {current_dayun.get('startYear', '')} 年起运)"
+                current_dayun_status = f"Not started yet (will start in {current_dayun.get('startYear', '')})"
             else:
                 current_dayun_status = (
                     f"{current_dayun.get('ganZhi', 'N/A')} "
-                    f"(年龄 {current_dayun.get('startAge', '')}-{current_dayun.get('endAge', '')}岁, "
-                    f"{current_dayun.get('startYear', '')}-{current_dayun.get('endYear', '')}年)"
+                    f"(Age {current_dayun.get('startAge', '')}-{current_dayun.get('endAge', '')}, "
+                    f"{current_dayun.get('startYear', '')}-{current_dayun.get('endYear', '')})"
                 )
         else:
             current_dayun_status = "N/A"
         
         # 当前流年
         if current_liunian:
-            current_liunian_str = f"{current_liunian.get('year', '')} 年 - {current_liunian.get('ganZhi', '')}"
+            current_liunian_str = f"{current_liunian.get('year', '')} - {current_liunian.get('ganZhi', '')}"
         else:
             current_liunian_str = "N/A"
 
         context = f"""
-════════════════════════════════════════════════════════════════════════════════
-                    八字命盘完整数据 / COMPLETE BAZI CHART DATA
-════════════════════════════════════════════════════════════════════════════════
+## COMPLETE BAZI CHART DATA
 
-【客户信息 / Client Information】
-  姓名 Name: {name}
-  性别 Gender: {gender_display}
-  出生地 Birthplace: {birth_info.get('location', 'Unknown')}
-  经度 Longitude: {birth_info.get('longitude', 'N/A')}°
-  时区 Timezone: UTC{'+' if birth_info.get('timezone', 0) >= 0 else ''}{birth_info.get('timezone', 'N/A')}
-  真太阳时 True Solar Time: {birth_info.get('solarTime', 'N/A')}
+### Client Information
+- Name: {name}
+- Gender: {gender_display}
+- Birthplace: {birth_info.get('location', 'Unknown')}
+- Longitude: {birth_info.get('longitude', 'N/A')}
+- Timezone: UTC{'+' if birth_info.get('timezone', 0) >= 0 else ''}{birth_info.get('timezone', 'N/A')}
+- True Solar Time: {birth_info.get('solarTime', 'N/A')}
 
-────────────────────────────────────────────────────────────────────────────────
-【日主分析 / Day Master Analysis】
-  日主 Day Master: {day_master}
-  五行 Element: {day_master_element}
-  阴阳 Yin/Yang: {day_master_yinyang}
-  完整描述: {day_master_full}
+### Day Master Analysis
+- Day Master: {day_master}
+- Element: {day_master_element}
+- Yin/Yang: {day_master_yinyang}
+- Full Description: {day_master_full}
 
-────────────────────────────────────────────────────────────────────────────────
-【四柱八字 / Four Pillars - Complete Data】
+### Four Pillars Complete Data
 
 {year_str}
 
@@ -369,62 +357,45 @@ def format_bazi_context(data):
 
 {hour_str}
 
-────────────────────────────────────────────────────────────────────────────────
-【五行统计 / Five Elements Count】
-  金 Metal: {five_elements.get('metal', 0)}
-  木 Wood: {five_elements.get('wood', 0)}
-  水 Water: {five_elements.get('water', 0)}
-  火 Fire: {five_elements.get('fire', 0)}
-  土 Earth: {five_elements.get('earth', 0)}
-  
-  分析 Analysis:
-  - 最多 Strongest: {max(five_elements.items(), key=lambda x: x[1])[0] if five_elements else 'N/A'} ({max(five_elements.values()) if five_elements else 0})
-  - 最少/缺失 Weakest/Missing: {min(five_elements.items(), key=lambda x: x[1])[0] if five_elements else 'N/A'} ({min(five_elements.values()) if five_elements else 0})
+### Five Elements Count
+- Metal 金: {five_elements.get('metal', 0)}
+- Wood 木: {five_elements.get('wood', 0)}
+- Water 水: {five_elements.get('water', 0)}
+- Fire 火: {five_elements.get('fire', 0)}
+- Earth 土: {five_elements.get('earth', 0)}
 
-────────────────────────────────────────────────────────────────────────────────
-【特殊宫位 / Special Palaces】
-  胎元 Tai Yuan (Conception): {special_palaces.get('taiYuan', 'N/A')}
-    - 代表先天禀赋、母亲怀孕时的状态
-    - Represents prenatal foundation and mother's condition during pregnancy
-    
-  命宫 Ming Gong (Life Palace): {special_palaces.get('mingGong', 'N/A')}
-    - 代表命主的核心命运方向、人生主题
-    - Represents core destiny direction and life theme
-    
-  身宫 Shen Gong (Body Palace): {special_palaces.get('shenGong', 'N/A')}
-    - 代表身体状况、物质生活、后天努力方向
-    - Represents physical condition, material life, and self-cultivation direction
+Analysis:
+- Strongest: {max(five_elements.items(), key=lambda x: x[1])[0] if five_elements else 'N/A'} ({max(five_elements.values()) if five_elements else 0})
+- Weakest/Missing: {min(five_elements.items(), key=lambda x: x[1])[0] if five_elements else 'N/A'} ({min(five_elements.values()) if five_elements else 0})
 
-────────────────────────────────────────────────────────────────────────────────
-【生肖信息 / Zodiac Animals】
-  年支生肖 Year: {zodiac.get('year', 'N/A')}
-  月支生肖 Month: {zodiac.get('month', 'N/A')}
-  日支生肖 Day: {zodiac.get('day', 'N/A')}
-  时支生肖 Hour: {zodiac.get('hour', 'N/A')}
+### Special Palaces
+- Tai Yuan 胎元 (Conception): {special_palaces.get('taiYuan', 'N/A')}
+- Ming Gong 命宫 (Life Palace): {special_palaces.get('mingGong', 'N/A')}
+- Shen Gong 身宫 (Body Palace): {special_palaces.get('shenGong', 'N/A')}
 
-────────────────────────────────────────────────────────────────────────────────
-【大运信息 / Luck Cycles Information】
+### Zodiac Animals
+- Year: {zodiac.get('year', 'N/A')}
+- Month: {zodiac.get('month', 'N/A')}
+- Day: {zodiac.get('day', 'N/A')}
+- Hour: {zodiac.get('hour', 'N/A')}
 
-  起运信息 Start of Luck Cycles:
-    - 起运年龄 Start Age: {yun_info.get('startAge', 'N/A')} 岁
-    - 起运年份 Start Year: {yun_info.get('startYear', 'N/A')} 年
-    - 运行方向 Direction: {yun_info.get('description', 'N/A')}
+### Luck Cycles Information
 
-  当前大运 Current Major Luck Cycle:
-    {current_dayun_status}
+Start of Luck Cycles:
+- Start Age: {yun_info.get('startAge', 'N/A')}
+- Start Year: {yun_info.get('startYear', 'N/A')}
+- Direction: {yun_info.get('description', 'N/A')}
 
-  当前流年 Current Annual Luck:
-    {current_liunian_str}
+Current Major Luck Cycle: {current_dayun_status}
 
-  完整大运列表 / All 10 Major Luck Cycles:
+Current Annual Luck: {current_liunian_str}
+
+All 10 Major Luck Cycles:
 {dayun_str}
 
-────────────────────────────────────────────────────────────────────────────────
-【神煞信息 / Special Stars (Shen Sha)】
-  吉神 Auspicious Stars: {shen_sha.get('jiShen', 'N/A')}
-  凶煞 Challenging Stars: {shen_sha.get('xiongSha', 'N/A')}
-
-════════════════════════════════════════════════════════════════════════════════
+### Special Stars (Shen Sha)
+- Auspicious Stars 吉神: {shen_sha.get('jiShen', 'N/A')}
+- Challenging Stars 凶煞: {shen_sha.get('xiongSha', 'N/A')}
 """
         return context
 
@@ -491,7 +462,7 @@ def ask_ai(system_prompt, user_prompt):
 
 @app.route('/', methods=['GET'])
 def health_check():
-    return jsonify({"status": "running", "version": "4.1", "api_key_set": bool(OPENROUTER_API_KEY)}), 200
+    return jsonify({"status": "running", "version": "4.2", "api_key_set": bool(OPENROUTER_API_KEY)}), 200
 
 
 @app.route('/api/generate-section', methods=['OPTIONS'])
@@ -519,8 +490,8 @@ def generate_section():
         custom_lang = req_data.get('custom_language', None)
         lang_config = get_language_config(lang_code, custom_lang)
 
-        # ================= 新增：获取模式设置 =================
-        reading_mode = req_data.get('mode', 'gentle')  # 默认温和版
+        # 获取模式设置
+        reading_mode = req_data.get('mode', 'gentle')
         mode_config = get_mode_config(reading_mode)
         print(f"Reading Mode: {reading_mode} ({mode_config['name']})")
 
@@ -537,7 +508,7 @@ def generate_section():
         current_closing = lang_config.get('closing', "End of chapter.")
         current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
         
-        # ================= 根据模式选择风格 =================
+        # 根据模式选择风格
         if reading_mode == "authentic":
             current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
         else:
@@ -557,66 +528,52 @@ def generate_section():
         yun_info = bazi_json.get('yunInfo', {})
 
         # ================= 核心 System Prompt =================
-        # ================= 核心 System Prompt =================
-base_system_prompt = f"""
+        base_system_prompt = f"""
 You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会), "Yuan Hai Zi Ping" (渊海子平), and "Di Tian Sui" (滴天髓).
 
-════════════════════════════════════════════════════════════════════════════════
-                        ⚠️ CRITICAL FORMATTING RULES ⚠️
-════════════════════════════════════════════════════════════════════════════════
+## CRITICAL FORMATTING RULES - MUST FOLLOW
 
-【OUTPUT FORMAT 输出格式 - STRICTLY ENFORCED 必须严格遵守】:
+**ABSOLUTELY FORBIDDEN in your response 绝对禁止使用:**
+- Horizontal divider lines: --- or ___ or *** or ===
+- Setext-style headers (text with === or --- underneath)
+- Triple or more consecutive blank lines
+- Any decorative separators or dividers
 
-❌ ABSOLUTELY FORBIDDEN in your response 绝对禁止使用:
-   - Horizontal divider lines 水平分隔线: --- or ___ or *** or ===
-   - Setext-style headers 下划线式标题 (text with === or --- underneath)
-   - Triple or more consecutive blank lines 三个或更多连续空行
-   - Any decorative separators or dividers 任何装饰性分隔符
+**MANDATORY formatting 必须使用的格式:**
+- Use ATX-style headers ONLY: # H1, ## H2, ### H3, #### H4
+- Use single blank lines between sections
+- Use **bold** for emphasis
+- Use bullet lists: - or * or 1. 2. 3.
 
-✅ MANDATORY formatting 必须使用的格式:
-   - Use ATX-style headers ONLY 只用井号标题: # H1, ## H2, ### H3, #### H4
-   - Use single blank lines between sections 段落之间只用一个空行
-   - Use **bold** for emphasis 用粗体强调
-   - Use bullet lists 用列表: - or * or 1. 2. 3.
+This rule is NON-NEGOTIABLE. Violations will break the PDF rendering.
 
-⚠️ This rule is NON-NEGOTIABLE. Violations will break the PDF rendering.
-⚠️ 此规则不可违反，否则会导致PDF渲染错误。
-
-════════════════════════════════════════════════════════════════════════════════
-                        READING MODE: {mode_config['name'].upper()} / {mode_config['name_zh']}
-════════════════════════════════════════════════════════════════════════════════
+## READING MODE: {mode_config['name'].upper()} / {mode_config['name_zh']}
 
 {mode_config['interpretation_style']}
 
 {mode_config['ethics']}
 
-════════════════════════════════════════════════════════════════════════════════
-                        CLIENT INFORMATION - CRITICAL
-════════════════════════════════════════════════════════════════════════════════
+## CLIENT INFORMATION - CRITICAL
 
-【Gender 性别】: {gender.upper() if gender != 'unknown' else 'UNKNOWN'}
-【Name 姓名】: {client_name}
-【Pronouns 代词】: {gender_info['pronoun']}
+**Gender 性别**: {gender.upper() if gender != 'unknown' else 'UNKNOWN'}
+**Name 姓名**: {client_name}
+**Pronouns 代词**: {gender_info['pronoun']}
 
-【Gender-Specific BaZi Rules 性别专属解读规则】:
+**Gender-Specific BaZi Rules 性别专属解读规则**:
 {gender_info['bazi_rules']}
 
-⚠️ CRITICAL: You MUST apply these gender-specific interpretation rules throughout your analysis!
+CRITICAL: You MUST apply these gender-specific interpretation rules throughout your analysis!
 
-════════════════════════════════════════════════════════════════════════════════
-                        LANGUAGE & STYLE REQUIREMENTS
-════════════════════════════════════════════════════════════════════════════════
+## LANGUAGE & STYLE REQUIREMENTS
 
-【Language 语言】: {lang_config['instruction']}
-【Pronoun Rules 称谓规则】: {current_pronoun_rule}
-【Third Person Reference 第三人称】: Use {gender_info['pronoun']} when referring to the client
+**Language 语言**: {lang_config['instruction']}
+**Pronoun Rules 称谓规则**: {current_pronoun_rule}
+**Third Person Reference 第三人称**: Use {gender_info['pronoun']} when referring to the client
 
-【Writing Style 写作风格】:
+**Writing Style 写作风格**:
 {current_style}
 
-════════════════════════════════════════════════════════════════════════════════
-                        AVAILABLE DATA - USE ALL OF IT
-════════════════════════════════════════════════════════════════════════════════
+## AVAILABLE DATA - USE ALL OF IT
 
 You have access to COMPLETE chart data including:
 
@@ -653,56 +610,50 @@ You have access to COMPLETE chart data including:
    - Auspicious stars (吉神)
    - Challenging stars (凶煞)
 
-════════════════════════════════════════════════════════════════════════════════
-                        ANALYSIS REQUIREMENTS
-════════════════════════════════════════════════════════════════════════════════
+## ANALYSIS REQUIREMENTS
 
-【Be Specific 具体化】:
+**Be Specific 具体化**:
 - Reference ACTUAL data from the chart (e.g., "Your Day Branch 午 shows 帝旺 stage...")
 - Quote the exact GanZhi, Ten Gods, and Stages from the data
 - Connect observations to specific pillars and their relationships
 
-【Be Authentic 专业化】:
+**Be Authentic 专业化**:
 - Use proper BaZi terminology with translations
 - Explain WHY certain combinations matter
 - Reference classical interpretations when relevant
 
-【Be Personal 个人化】:
+**Be Personal 个人化**:
 - This is THEIR unique chart - avoid generic statements
 - Connect analysis to real-life implications
 - Acknowledge both strengths and growth areas
 
-【Be Practical 实用化】:
+**Be Practical 实用化**:
 - Provide actionable insights
 - Suggest specific remedies or enhancements
 - Give timing guidance based on luck cycles
 
-════════════════════════════════════════════════════════════════════════════════
-                        MANDATORY STRUCTURE
-════════════════════════════════════════════════════════════════════════════════
+## MANDATORY STRUCTURE
 
-✅ START your response EXACTLY with: "{current_opening}"
-✅ END your response EXACTLY with: "{current_closing}"
-✅ Do NOT add greetings like "Welcome", "Hello", or "As we discussed"
-✅ Treat this as a STANDALONE chapter - do not reference other chapters
-✅ Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
-✅ Include Chinese terms with translations for authenticity
-✅ Do NOT use any horizontal lines (---, ***, ===, ___) anywhere in your response
+- START your response EXACTLY with: "{current_opening}"
+- END your response EXACTLY with: "{current_closing}"
+- Do NOT add greetings like "Welcome", "Hello", or "As we discussed"
+- Treat this as a STANDALONE chapter - do not reference other chapters
+- Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
+- Include Chinese terms with translations for authenticity
+- Do NOT use any horizontal lines (---, ***, ===, ___) anywhere in your response
 """
 
         # ================= 各章节详细指令 =================
-        # (保持原有的 section 逻辑不变，这里省略重复代码)
-        
         specific_prompt = ""
 
         if section_type == 'core':
             specific_prompt = f"""
-【TASK 任务】: Write Chapter 1 - Soul Blueprint & Destiny Overview (命局灵魂)
+## TASK: Write Chapter 1 - Soul Blueprint & Destiny Overview (命局灵魂)
 
-【COMPLETE CHART DATA 完整命盘数据】:
+### COMPLETE CHART DATA:
 {context_str}
 
-【REQUIRED ANALYSIS - Reference Specific Data Points 必须分析的内容】:
+### REQUIRED ANALYSIS - Reference Specific Data Points:
 
 ## 1. Day Master Deep Analysis (日主深度分析)
 - Analyze Day Master [{day_master}] - is it {day_master_element}
@@ -749,10 +700,9 @@ You have access to COMPLETE chart data including:
 """
 
         elif section_type == 'wealth':
-            # 根据性别调整财运分析
             if gender == "female":
                 wealth_gender_note = """
-【GENDER-SPECIFIC NOTE FOR FEMALE CHART 女命特别说明】
+### GENDER-SPECIFIC NOTE FOR FEMALE CHART 女命特别说明
 For women, Wealth Stars (财星) primarily represent:
 - Financial ability and money-making potential
 - Relationship with father
@@ -763,7 +713,7 @@ Officer Stars analysis for relationships belongs in the Love chapter.
 """
             else:
                 wealth_gender_note = """
-【GENDER-SPECIFIC NOTE FOR MALE CHART 男命特别说明】
+### GENDER-SPECIFIC NOTE FOR MALE CHART 男命特别说明
 For men, Wealth Stars (财星) represent both:
 - Financial ability and money-making potential
 - Wife and female relationships
@@ -772,10 +722,9 @@ You may briefly mention how wealth stars affect his relationships with women,
 but detailed romance analysis belongs in the Love chapter.
 """
 
-            # 根据模式调整结尾指导
             if reading_mode == "authentic":
                 wealth_closing_guidance = """
-【AUTHENTIC MODE 真实版要求】:
+### AUTHENTIC MODE 真实版要求:
 - 如果财星弱，直接说"命中财运平平，需要格外努力"
 - 如果有比劫夺财，直接说"不适合合伙，容易被人分走利益"
 - 如果财库被冲，直接说"存不住钱，要特别注意理财"
@@ -788,14 +737,14 @@ Make them feel excited about their potential while being realistic about challen
 """
 
             specific_prompt = f"""
-【TASK 任务】: Write Chapter 2 - Career Empire & Wealth Potential (事业财运)
+## TASK: Write Chapter 2 - Career Empire & Wealth Potential (事业财运)
 
 {wealth_gender_note}
 
-【COMPLETE CHART DATA 完整命盘数据】:
+### COMPLETE CHART DATA:
 {context_str}
 
-【REQUIRED ANALYSIS 必须分析的内容】:
+### REQUIRED ANALYSIS:
 
 ## 1. Wealth Star Analysis (财星分析)
 - Identify where 正财 and 偏财 appear in the chart (check shiShenGan/shiShenZhi for each pillar)
@@ -805,11 +754,11 @@ Make them feel excited about their potential while being realistic about challen
 
 ## 2. Career DNA Based on Ten Gods (十神职业分析)
 - What Ten Gods dominate the chart? Map to career archetypes:
-  - 正官/七杀 dominant → Management, government, authority roles
-  - 财星 dominant → Business, finance, sales
-  - 食神/伤官 dominant → Creative fields, teaching, expression
-  - 印星 dominant → Academic, research, advisory roles
-  - 比劫 dominant → Competitive fields, sports, entrepreneurship
+  - 正官/七杀 dominant: Management, government, authority roles
+  - 财星 dominant: Business, finance, sales
+  - 食神/伤官 dominant: Creative fields, teaching, expression
+  - 印星 dominant: Academic, research, advisory roles
+  - 比劫 dominant: Competitive fields, sports, entrepreneurship
 
 ## 3. Useful God for Wealth (用神与财运)
 - Based on Day Master strength, what element helps wealth?
@@ -844,12 +793,11 @@ Make them feel excited about their potential while being realistic about challen
 """
 
         elif section_type == 'love':
-            # 根据性别完全不同的婚恋分析
             day_branch = pillars.get('day', {}).get('zhi', 'N/A')
             
             if gender == "female":
                 love_specific_instruction = f"""
-【CRITICAL: FEMALE CHART RELATIONSHIP ANALYSIS 女命婚恋分析 - 关键】
+### CRITICAL: FEMALE CHART RELATIONSHIP ANALYSIS 女命婚恋分析 - 关键
 
 For this FEMALE client, you MUST analyze relationships using these rules:
 
@@ -877,7 +825,7 @@ For this FEMALE client, you MUST analyze relationships using these rules:
 """
             else:
                 love_specific_instruction = f"""
-【CRITICAL: MALE CHART RELATIONSHIP ANALYSIS 男命婚恋分析 - 关键】
+### CRITICAL: MALE CHART RELATIONSHIP ANALYSIS 男命婚恋分析 - 关键
 
 For this MALE client, you MUST analyze relationships using these rules:
 
@@ -904,10 +852,9 @@ For this MALE client, you MUST analyze relationships using these rules:
 5. What luck cycles activate romance (Wealth Star luck cycles)?
 """
 
-            # 根据模式调整婚恋分析的结尾指导
             if reading_mode == "authentic":
                 love_closing_guidance = f"""
-【AUTHENTIC MODE 真实版婚恋分析要求】:
+### AUTHENTIC MODE 真实版婚恋分析要求:
 - 如果婚姻宫有刑冲，直接说"第一段感情不稳定，容易有波折"
 - 如果伤官见官（女命），直接说"对婚姻有挑战，可能经历分手或离婚"
 - 如果比劫夺财（男命），直接说"容易遇到竞争者，或因女人破财"
@@ -924,14 +871,14 @@ Use correct pronouns: {gender_info['pronoun']}
 """
 
             specific_prompt = f"""
-【TASK 任务】: Write Chapter 3 - Love, Relationships & Soulmate Profile (婚恋情感)
+## TASK: Write Chapter 3 - Love, Relationships & Soulmate Profile (婚恋情感)
 
 {love_specific_instruction}
 
-【COMPLETE CHART DATA 完整命盘数据】:
+### COMPLETE CHART DATA:
 {context_str}
 
-【REQUIRED ANALYSIS 必须分析的内容】:
+### REQUIRED ANALYSIS:
 
 ## 1. Relationship Stars Analysis (婚恋星分析)
 - Apply the gender-specific rules above
@@ -975,10 +922,9 @@ Use correct pronouns: {gender_info['pronoun']}
 """
 
         elif section_type == '2026_forecast':
-            # 根据模式调整流年预测
             if reading_mode == "authentic":
                 forecast_mode_instruction = """
-【AUTHENTIC MODE 真实版流年预测要求】:
+### AUTHENTIC MODE 真实版流年预测要求:
 - 直接说哪几个月好、哪几个月差
 - 如果有冲克，直接说"这个月犯太岁/逢冲，不宜做重大决定"
 - 具体到事项："6月不宜投资"、"9月防小人"、"12月注意身体"
@@ -991,17 +937,17 @@ Make this feel like a practical roadmap they can actually use throughout 2026.
 """
 
             specific_prompt = f"""
-【TASK 任务】: Write Chapter 4 - 2026 Year of the Fire Horse (丙午) Complete Forecast (2026流年预测)
+## TASK: Write Chapter 4 - 2026 Year of the Fire Horse (丙午) Complete Forecast (2026流年预测)
 
-【COMPLETE CHART DATA 完整命盘数据】:
+### COMPLETE CHART DATA:
 {context_str}
 
-【GENDER REMINDER 性别提醒】:
+### GENDER REMINDER:
 Client is {gender.upper()}. Apply correct gender-based star interpretations for all predictions.
 
 {forecast_mode_instruction}
 
-【REQUIRED ANALYSIS 必须分析的内容】:
+### REQUIRED ANALYSIS:
 
 ## 1. 2026 Fire Horse (丙午) Overview (2026火马年总览)
 - 2026 is 丙午 year - Fire Horse (Yang Fire + Horse)
@@ -1093,4 +1039,3 @@ For each month, briefly note:
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
