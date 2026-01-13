@@ -246,41 +246,48 @@ def get_google_services():
 
 
 def create_google_doc(client_name, full_report_content, bazi_summary):
-    """创建 Google Doc 并设置公开只读权限"""
+    """创建 Google Doc 并设置公开只读权限 - 使用 Drive API 方法"""
     docs_service, drive_service = get_google_services()
     
     if not docs_service or not drive_service:
         return {"error": "Google API not configured", "doc_url": None}
     
     try:
-        # 1. 创建文档
         doc_title = f"The Bazi of {client_name}"
-        document = docs_service.documents().create(body={
-            'title': doc_title
-        }).execute()
         
-        doc_id = document.get('documentId')
-        print(f"Created Google Doc: {doc_id}")
+        # 方法：使用 Drive API 创建 Google Doc（而不是 Docs API）
+        file_metadata = {
+            'name': doc_title,
+            'mimeType': 'application/vnd.google-apps.document'
+        }
         
-        # 2. 插入内容
+        # 如果指定了文件夹，放入该文件夹
+        if GOOGLE_DRIVE_FOLDER_ID:
+            file_metadata['parents'] = [GOOGLE_DRIVE_FOLDER_ID]
+        
+        # 使用 Drive API 创建空文档
+        file = drive_service.files().create(
+            body=file_metadata,
+            fields='id'
+        ).execute()
+        
+        doc_id = file.get('id')
+        print(f"Created Google Doc via Drive API: {doc_id}")
+        
         # 准备文档内容
-        header_text = f"""═══════════════════════════════════════════════════════════════
-THE BAZI OF {client_name.upper()}
+        header_text = f"""THE BAZI OF {client_name.upper()}
 Personal Destiny Blueprint
 Generated: {datetime.now().strftime('%B %d, %Y')}
-═══════════════════════════════════════════════════════════════
 
 {bazi_summary}
 
-═══════════════════════════════════════════════════════════════
 FULL REPORT
-═══════════════════════════════════════════════════════════════
 
 """
         
         full_content = header_text + full_report_content
         
-        # 插入文本
+        # 使用 Docs API 插入内容
         requests_body = [
             {
                 'insertText': {
@@ -295,28 +302,9 @@ FULL REPORT
             body={'requests': requests_body}
         ).execute()
         
-        # 3. 如果指定了文件夹，移动文档到该文件夹
-        if GOOGLE_DRIVE_FOLDER_ID:
-            try:
-                # 获取当前父文件夹
-                file = drive_service.files().get(
-                    fileId=doc_id,
-                    fields='parents'
-                ).execute()
-                previous_parents = ",".join(file.get('parents', []))
-                
-                # 移动到指定文件夹
-                drive_service.files().update(
-                    fileId=doc_id,
-                    addParents=GOOGLE_DRIVE_FOLDER_ID,
-                    removeParents=previous_parents,
-                    fields='id, parents'
-                ).execute()
-                print(f"Moved doc to folder: {GOOGLE_DRIVE_FOLDER_ID}")
-            except Exception as e:
-                print(f"Warning: Could not move to folder: {e}")
+        print(f"Inserted content into doc: {doc_id}")
         
-        # 4. 设置公开只读权限
+        # 设置公开只读权限
         drive_service.permissions().create(
             fileId=doc_id,
             body={
@@ -326,7 +314,7 @@ FULL REPORT
         ).execute()
         print(f"Set public read-only permission for doc: {doc_id}")
         
-        # 5. 生成公开链接
+        # 生成公开链接
         doc_url = f"https://docs.google.com/document/d/{doc_id}/view"
         
         return {
@@ -1407,3 +1395,4 @@ def finalize_report():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
