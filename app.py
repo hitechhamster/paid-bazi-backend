@@ -246,7 +246,7 @@ def get_google_services():
 
 
 def create_google_doc(client_name, full_report_content, bazi_summary):
-    """创建 Google Doc 并设置公开只读权限 - 使用 Drive API 方法"""
+    """创建 Google Doc 并设置公开只读权限"""
     docs_service, drive_service = get_google_services()
     
     if not docs_service or not drive_service:
@@ -255,27 +255,32 @@ def create_google_doc(client_name, full_report_content, bazi_summary):
     try:
         doc_title = f"The Bazi of {client_name}"
         
-        # ========== 关键修改：使用 Drive API 创建文档 ==========
+        # ========== 方法1：先创建文件（不指定父文件夹） ==========
         file_metadata = {
             'name': doc_title,
             'mimeType': 'application/vnd.google-apps.document'
         }
         
-        # 必须指定父文件夹，否则服务账号没有权限
-        if GOOGLE_DRIVE_FOLDER_ID:
-            file_metadata['parents'] = [GOOGLE_DRIVE_FOLDER_ID]
-        else:
-            return {"error": "GOOGLE_DRIVE_FOLDER_ID not set", "doc_url": None}
-        
-        # 使用 Drive API 创建空文档（不是 Docs API）
-        print(f"Creating doc in folder: {GOOGLE_DRIVE_FOLDER_ID}")
+        print(f"Creating doc without parent folder first...")
         file = drive_service.files().create(
             body=file_metadata,
             fields='id'
         ).execute()
         
         doc_id = file.get('id')
-        print(f"Created Google Doc via Drive API: {doc_id}")
+        print(f"Created Google Doc: {doc_id}")
+        
+        # ========== 移动到共享文件夹 ==========
+        if GOOGLE_DRIVE_FOLDER_ID:
+            try:
+                drive_service.files().update(
+                    fileId=doc_id,
+                    addParents=GOOGLE_DRIVE_FOLDER_ID,
+                    fields='id, parents'
+                ).execute()
+                print(f"Moved doc to folder: {GOOGLE_DRIVE_FOLDER_ID}")
+            except Exception as e:
+                print(f"Warning: Could not move to folder: {e}")
         
         # ========== 准备文档内容 ==========
         header_text = f"""THE BAZI OF {client_name.upper()}
@@ -292,7 +297,7 @@ FULL REPORT
         
         full_content = header_text + full_report_content
         
-        # ========== 使用 Docs API 插入内容 ==========
+        # ========== 插入内容 ==========
         requests_body = [
             {
                 'insertText': {
@@ -306,7 +311,6 @@ FULL REPORT
             documentId=doc_id,
             body={'requests': requests_body}
         ).execute()
-        
         print(f"Inserted content into doc: {doc_id}")
         
         # ========== 设置公开只读权限 ==========
@@ -317,7 +321,7 @@ FULL REPORT
                 'role': 'reader'
             }
         ).execute()
-        print(f"Set public read-only permission for doc: {doc_id}")
+        print(f"Set public read-only permission")
         
         # ========== 生成公开链接 ==========
         doc_url = f"https://docs.google.com/document/d/{doc_id}/view"
@@ -1400,5 +1404,6 @@ def finalize_report():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
 
 
