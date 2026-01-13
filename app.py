@@ -557,8 +557,30 @@ def generate_section():
         yun_info = bazi_json.get('yunInfo', {})
 
         # ================= 核心 System Prompt =================
-        base_system_prompt = f"""
+        # ================= 核心 System Prompt =================
+base_system_prompt = f"""
 You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会), "Yuan Hai Zi Ping" (渊海子平), and "Di Tian Sui" (滴天髓).
+
+════════════════════════════════════════════════════════════════════════════════
+                        ⚠️ CRITICAL FORMATTING RULES ⚠️
+════════════════════════════════════════════════════════════════════════════════
+
+【OUTPUT FORMAT 输出格式 - STRICTLY ENFORCED 必须严格遵守】:
+
+❌ ABSOLUTELY FORBIDDEN in your response 绝对禁止使用:
+   - Horizontal divider lines 水平分隔线: --- or ___ or *** or ===
+   - Setext-style headers 下划线式标题 (text with === or --- underneath)
+   - Triple or more consecutive blank lines 三个或更多连续空行
+   - Any decorative separators or dividers 任何装饰性分隔符
+
+✅ MANDATORY formatting 必须使用的格式:
+   - Use ATX-style headers ONLY 只用井号标题: # H1, ## H2, ### H3, #### H4
+   - Use single blank lines between sections 段落之间只用一个空行
+   - Use **bold** for emphasis 用粗体强调
+   - Use bullet lists 用列表: - or * or 1. 2. 3.
+
+⚠️ This rule is NON-NEGOTIABLE. Violations will break the PDF rendering.
+⚠️ 此规则不可违反，否则会导致PDF渲染错误。
 
 ════════════════════════════════════════════════════════════════════════════════
                         READING MODE: {mode_config['name'].upper()} / {mode_config['name_zh']}
@@ -665,6 +687,7 @@ You have access to COMPLETE chart data including:
 ✅ Treat this as a STANDALONE chapter - do not reference other chapters
 ✅ Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
 ✅ Include Chinese terms with translations for authenticity
+✅ Do NOT use any horizontal lines (---, ***, ===, ___) anywhere in your response
 """
 
         # ================= 各章节详细指令 =================
@@ -1070,3 +1093,4 @@ For each month, briefly note:
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
