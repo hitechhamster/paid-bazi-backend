@@ -4,8 +4,6 @@ import requests
 import os
 import json
 import traceback
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
 from datetime import datetime
 
 app = Flask(__name__)
@@ -28,10 +26,6 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 SITE_URL = os.getenv("SITE_URL", "https://theqiflow.com")
 APP_NAME = "Bazi Pro Calculator"
 MODEL_ID = "google/gemini-3-pro-preview"
-
-# Google Docs API 配置
-GOOGLE_SERVICE_ACCOUNT_JSON = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
-GOOGLE_DRIVE_FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "")  # 可选：指定文件夹
 # ===========================================
 
 # ================= 多语言配置 =================
@@ -219,276 +213,6 @@ MODE_CONFIGS = {
 # ===========================================
 
 
-# ================= Google Docs API 集成 =================
-def get_google_services():
-    """初始化 Google API 服务"""
-    if not GOOGLE_SERVICE_ACCOUNT_JSON:
-        print("WARNING: GOOGLE_SERVICE_ACCOUNT_JSON not set")
-        return None, None
-    
-    try:
-        credentials_info = json.loads(GOOGLE_SERVICE_ACCOUNT_JSON)
-        credentials = service_account.Credentials.from_service_account_info(
-            credentials_info,
-            scopes=[
-                'https://www.googleapis.com/auth/documents',
-                'https://www.googleapis.com/auth/drive'
-            ]
-        )
-        
-        docs_service = build('docs', 'v1', credentials=credentials)
-        drive_service = build('drive', 'v3', credentials=credentials)
-        
-        return docs_service, drive_service
-    except Exception as e:
-        print(f"Error initializing Google services: {e}")
-        return None, None
-
-
-def create_google_doc(client_name, full_report_content, bazi_summary):
-    """创建 Google Doc 并设置公开只读权限"""
-    docs_service, drive_service = get_google_services()
-    
-    if not docs_service or not drive_service:
-        return {"error": "Google API not configured", "doc_url": None}
-    
-    try:
-        doc_title = f"The Bazi of {client_name}"
-        
-        # ========== 方法1：先创建文件（不指定父文件夹） ==========
-        file_metadata = {
-            'name': doc_title,
-            'mimeType': 'application/vnd.google-apps.document'
-        }
-        
-        print(f"Creating doc without parent folder first...")
-        file = drive_service.files().create(
-            body=file_metadata,
-            fields='id'
-        ).execute()
-        
-        doc_id = file.get('id')
-        print(f"Created Google Doc: {doc_id}")
-        
-        # ========== 移动到共享文件夹 ==========
-        if GOOGLE_DRIVE_FOLDER_ID:
-            try:
-                drive_service.files().update(
-                    fileId=doc_id,
-                    addParents=GOOGLE_DRIVE_FOLDER_ID,
-                    fields='id, parents'
-                ).execute()
-                print(f"Moved doc to folder: {GOOGLE_DRIVE_FOLDER_ID}")
-            except Exception as e:
-                print(f"Warning: Could not move to folder: {e}")
-        
-        # ========== 准备文档内容 ==========
-        header_text = f"""THE BAZI OF {client_name.upper()}
-Personal Destiny Blueprint
-Generated: {datetime.now().strftime('%B %d, %Y')}
-
-{bazi_summary}
-
-========================================
-FULL REPORT
-========================================
-
-"""
-        
-        full_content = header_text + full_report_content
-        
-        # ========== 插入内容 ==========
-        requests_body = [
-            {
-                'insertText': {
-                    'location': {'index': 1},
-                    'text': full_content
-                }
-            }
-        ]
-        
-        docs_service.documents().batchUpdate(
-            documentId=doc_id,
-            body={'requests': requests_body}
-        ).execute()
-        print(f"Inserted content into doc: {doc_id}")
-        
-        # ========== 设置公开只读权限 ==========
-        drive_service.permissions().create(
-            fileId=doc_id,
-            body={
-                'type': 'anyone',
-                'role': 'reader'
-            }
-        ).execute()
-        print(f"Set public read-only permission")
-        
-        # ========== 生成公开链接 ==========
-        doc_url = f"https://docs.google.com/document/d/{doc_id}/view"
-        
-        return {
-            "success": True,
-            "doc_id": doc_id,
-            "doc_url": doc_url,
-            "doc_title": doc_title
-        }
-        
-    except Exception as e:
-        print(f"Error creating Google Doc: {e}")
-        traceback.print_exc()
-        return {"error": str(e), "doc_url": None}
-
-
-# ================= AI 自检功能 =================
-def validate_report(full_report, bazi_data, language):
-    """让 AI 检查报告是否有错误"""
-    
-    validation_prompt = f"""
-You are a senior BaZi (Chinese Four Pillars of Destiny) expert reviewer. 
-Your task is to review a generated BaZi report for accuracy and quality.
-
-## BAZI DATA PROVIDED TO THE REPORT GENERATOR:
-- Client Name: {bazi_data.get('name', 'Unknown')}
-- Gender: {bazi_data.get('gender', 'Unknown')}
-- Day Master: {bazi_data.get('dayMaster', 'Unknown')} ({bazi_data.get('dayMasterElement', '')})
-- Four Pillars: 
-  - Year: {bazi_data.get('pillars', {}).get('year', {}).get('ganZhi', 'N/A')}
-  - Month: {bazi_data.get('pillars', {}).get('month', {}).get('ganZhi', 'N/A')}
-  - Day: {bazi_data.get('pillars', {}).get('day', {}).get('ganZhi', 'N/A')}
-  - Hour: {bazi_data.get('pillars', {}).get('hour', {}).get('ganZhi', 'N/A')}
-- Five Elements Count: {json.dumps(bazi_data.get('fiveElements', {}), ensure_ascii=False)}
-
-## GENERATED REPORT TO REVIEW:
-{full_report[:8000]}  
-(Report truncated for review - first 8000 characters shown)
-
-## YOUR TASK:
-1. Check if the Day Master analysis is consistent with the provided data
-2. Check if Ten Gods interpretations are correct for the given gender
-3. Check if element analysis matches the five elements count
-4. Check if there are any obvious factual errors or contradictions
-5. Check if the language and tone are appropriate
-
-## RESPONSE FORMAT:
-Respond in JSON format ONLY:
-{{
-    "status": "PASS" or "NEEDS_REVIEW",
-    "confidence_score": 0-100,
-    "summary": "Brief summary of review findings",
-    "issues_found": [
-        {{"severity": "high/medium/low", "description": "Issue description"}}
-    ],
-    "recommendation": "Your recommendation"
-}}
-
-If everything looks good, return status "PASS" with an empty issues_found array.
-"""
-
-    result = ask_ai(
-        "You are a BaZi expert reviewer. Respond ONLY in valid JSON format.",
-        validation_prompt
-    )
-    
-    if result and 'choices' in result:
-        try:
-            content = result['choices'][0]['message']['content']
-            # 尝试解析 JSON
-            # 清理可能的 markdown 代码块
-            content = content.strip()
-            if content.startswith('```json'):
-                content = content[7:]
-            if content.startswith('```'):
-                content = content[3:]
-            if content.endswith('```'):
-                content = content[:-3]
-            
-            validation_result = json.loads(content.strip())
-            return validation_result
-        except json.JSONDecodeError as e:
-            print(f"Failed to parse validation JSON: {e}")
-            return {
-                "status": "PASS",
-                "confidence_score": 85,
-                "summary": "Validation completed (JSON parse fallback)",
-                "issues_found": [],
-                "recommendation": "Report appears acceptable based on structure review."
-            }
-    
-    return {
-        "status": "UNKNOWN",
-        "confidence_score": 0,
-        "summary": "Validation failed to complete",
-        "issues_found": [{"severity": "high", "description": "Could not complete validation"}],
-        "recommendation": "Manual review recommended"
-    }
-
-
-# ================= 生成客户消息 =================
-def generate_customer_message(client_name, doc_url, bazi_summary, language):
-    """生成发送给客户的消息"""
-    
-    if language == "zh":
-        message_prompt = f"""
-请为客户 {client_name} 生成一段专业、温暖的消息，告知他们的八字命理报告已完成。
-
-八字摘要：{bazi_summary}
-
-报告链接：{doc_url}
-
-要求：
-1. 用中文撰写
-2. 语气专业但温暖
-3. 简短介绍报告的内容
-4. 包含报告链接
-5. 提供后续联系方式或说明
-6. 整体长度适中，不要太长
-
-直接输出消息内容，不要加任何说明。
-"""
-    else:
-        message_prompt = f"""
-Generate a professional, warm message to send to the client {client_name} informing them that their BaZi destiny reading report is ready.
-
-BaZi Summary: {bazi_summary}
-
-Report Link: {doc_url}
-
-Requirements:
-1. Write in {LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS['en'])['name']}
-2. Professional but warm tone
-3. Brief introduction of what the report contains
-4. Include the report link
-5. Provide follow-up contact info or instructions
-6. Keep it medium length, not too long
-
-Output the message content directly without any additional explanation.
-"""
-
-    result = ask_ai(
-        "You are a professional customer service representative for a feng shui and destiny reading service.",
-        message_prompt
-    )
-    
-    if result and 'choices' in result:
-        return result['choices'][0]['message']['content']
-    
-    # Fallback message
-    return f"""Dear {client_name},
-
-Your personal BaZi Destiny Blueprint report is now ready!
-
-You can access your complete report here:
-{doc_url}
-
-This comprehensive analysis includes insights into your personality, career potential, relationships, and forecast for the year ahead.
-
-If you have any questions about your reading, please don't hesitate to reach out.
-
-Warm regards,
-The Qi Flow Team
-"""
-
-
 def get_gender_instruction(gender, lang_code):
     """获取性别相关的解读指令"""
     rule_lang = "zh" if lang_code == "zh" else "en"
@@ -511,7 +235,7 @@ def get_mode_config(mode):
 
 
 def format_bazi_context(data):
-    """格式化完整八字数据给 AI - v4.0"""
+    """格式化完整八字数据给 AI"""
     try:
         gender = data.get('gender', 'unknown')
         name = data.get('name', 'Client')
@@ -655,7 +379,7 @@ All 10 Major Luck Cycles:
 
 
 def format_bazi_summary(data):
-    """生成八字摘要用于文档头部"""
+    """生成八字摘要"""
     pillars = data.get('pillars', {})
     
     bazi_str = f"{pillars.get('year', {}).get('ganZhi', '?')} {pillars.get('month', {}).get('ganZhi', '?')} {pillars.get('day', {}).get('ganZhi', '?')} {pillars.get('hour', {}).get('ganZhi', '?')}"
@@ -727,14 +451,181 @@ def ask_ai(system_prompt, user_prompt):
         return {"error": str(e)}
 
 
+# ================= AI 自检功能 =================
+def validate_report(full_report, bazi_data, language):
+    """让 AI 检查报告是否有错误"""
+    
+    validation_prompt = f"""
+You are a senior BaZi (Chinese Four Pillars of Destiny) expert reviewer. 
+Your task is to review a generated BaZi report for accuracy and quality.
+
+## BAZI DATA PROVIDED TO THE REPORT GENERATOR:
+- Client Name: {bazi_data.get('name', 'Unknown')}
+- Gender: {bazi_data.get('gender', 'Unknown')}
+- Day Master: {bazi_data.get('dayMaster', 'Unknown')} ({bazi_data.get('dayMasterElement', '')})
+- Four Pillars: 
+  - Year: {bazi_data.get('pillars', {}).get('year', {}).get('ganZhi', 'N/A')}
+  - Month: {bazi_data.get('pillars', {}).get('month', {}).get('ganZhi', 'N/A')}
+  - Day: {bazi_data.get('pillars', {}).get('day', {}).get('ganZhi', 'N/A')}
+  - Hour: {bazi_data.get('pillars', {}).get('hour', {}).get('ganZhi', 'N/A')}
+- Five Elements Count: {json.dumps(bazi_data.get('fiveElements', {}), ensure_ascii=False)}
+
+## GENERATED REPORT TO REVIEW:
+{full_report[:8000]}  
+(Report truncated for review - first 8000 characters shown)
+
+## YOUR TASK:
+1. Check if the Day Master analysis is consistent with the provided data
+2. Check if Ten Gods interpretations are correct for the given gender
+3. Check if element analysis matches the five elements count
+4. Check if there are any obvious factual errors or contradictions
+5. Check if the language and tone are appropriate
+
+## RESPONSE FORMAT:
+Respond in JSON format ONLY:
+{{
+    "status": "PASS" or "NEEDS_REVIEW",
+    "confidence_score": 0-100,
+    "summary": "Brief summary of review findings",
+    "issues_found": [
+        {{"severity": "high/medium/low", "description": "Issue description"}}
+    ],
+    "recommendation": "Your recommendation"
+}}
+
+If everything looks good, return status "PASS" with an empty issues_found array.
+"""
+
+    result = ask_ai(
+        "You are a BaZi expert reviewer. Respond ONLY in valid JSON format.",
+        validation_prompt
+    )
+    
+    if result and 'choices' in result:
+        try:
+            content = result['choices'][0]['message']['content']
+            content = content.strip()
+            if content.startswith('```json'):
+                content = content[7:]
+            if content.startswith('```'):
+                content = content[3:]
+            if content.endswith('```'):
+                content = content[:-3]
+            
+            validation_result = json.loads(content.strip())
+            return validation_result
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse validation JSON: {e}")
+            return {
+                "status": "PASS",
+                "confidence_score": 85,
+                "summary": "Validation completed (JSON parse fallback)",
+                "issues_found": [],
+                "recommendation": "Report appears acceptable based on structure review."
+            }
+    
+    return {
+        "status": "UNKNOWN",
+        "confidence_score": 0,
+        "summary": "Validation failed to complete",
+        "issues_found": [{"severity": "high", "description": "Could not complete validation"}],
+        "recommendation": "Manual review recommended"
+    }
+
+
+# ================= 生成客户消息（简化版，无 Google Doc） =================
+def generate_customer_message_simple(client_name, bazi_summary, full_report, language):
+    """生成客户消息（不包含 Google Doc 链接）"""
+    
+    report_preview = full_report[:3000] if len(full_report) > 3000 else full_report
+    
+    if language == "zh":
+        message_prompt = f"""
+请为客户 {client_name} 生成一段专业、温暖的消息，告知他们的八字命理报告已完成。
+
+八字摘要：
+{bazi_summary}
+
+报告内容预览：
+{report_preview}
+
+要求：
+1. 用中文撰写
+2. 语气专业但温暖，像一位资深命理师在与客户交流
+3. 简要概括报告中的3-5个关键发现或亮点（从报告内容中提取）
+4. 给出一些积极的建议或祝福
+5. 告知客户如有问题可以随时咨询
+6. 整体长度适中（200-400字）
+7. 不要提及任何链接或文档
+
+直接输出消息内容，不要加任何说明或标题。
+"""
+    else:
+        lang_name = LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS['en'])['name']
+        message_prompt = f"""
+Generate a professional, warm message for client {client_name} informing them that their BaZi destiny reading is complete.
+
+BaZi Summary:
+{bazi_summary}
+
+Report Preview:
+{report_preview}
+
+Requirements:
+1. Write in {lang_name}
+2. Professional but warm tone, like an experienced destiny reader communicating with a client
+3. Briefly summarize 3-5 key findings or highlights from the report (extract from report content)
+4. Provide some positive advice or blessings
+5. Let them know they can reach out with questions
+6. Medium length (150-300 words)
+7. Do NOT mention any links or documents
+
+Output the message content directly without any additional explanation or title.
+"""
+
+    result = ask_ai(
+        "You are a professional feng shui and destiny reading consultant communicating with a valued client.",
+        message_prompt
+    )
+    
+    if result and 'choices' in result:
+        return result['choices'][0]['message']['content']
+    
+    # Fallback message
+    if language == "zh":
+        return f"""亲爱的 {client_name}，
+
+您的八字命理分析报告已经完成！
+
+{bazi_summary}
+
+感谢您的耐心等待。如果您对报告内容有任何疑问，欢迎随时与我们联系。
+
+祝您一切顺利！
+
+The Qi Flow 团队
+"""
+    else:
+        return f"""Dear {client_name},
+
+Your personal BaZi Destiny Blueprint report is now ready!
+
+{bazi_summary}
+
+Thank you for your patience. If you have any questions about your reading, please don't hesitate to reach out.
+
+Warm regards,
+The Qi Flow Team
+"""
+
+
 @app.route('/', methods=['GET'])
 def health_check():
-    google_configured = bool(GOOGLE_SERVICE_ACCOUNT_JSON)
     return jsonify({
         "status": "running", 
-        "version": "5.0", 
+        "version": "5.1-simplified", 
         "api_key_set": bool(OPENROUTER_API_KEY),
-        "google_docs_enabled": google_configured
+        "google_docs_enabled": False
     }), 200
 
 
@@ -1301,7 +1192,6 @@ For each month, briefly note:
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
-# ================= 新增：完成报告后的处理接口 =================
 @app.route('/api/finalize-report', methods=['OPTIONS'])
 def finalize_options_handler():
     return '', 204
@@ -1310,20 +1200,15 @@ def finalize_options_handler():
 @app.route('/api/finalize-report', methods=['POST'])
 def finalize_report():
     """
-    完成报告后的处理：
-    1. AI 自检报告
-    2. 创建 Google Doc
-    3. 设置公开只读权限
-    4. 生成客户消息
+    简化版：只做 AI 自检 + 生成客户消息（不创建 Google Doc）
     """
     try:
-        print("=== Finalize Report Request ===")
+        print("=== Finalize Report Request (No Google Doc) ===")
         
         req_data = request.json
         if not req_data:
             return jsonify({"error": "No JSON received"}), 400
         
-        # 获取必要数据
         full_report = req_data.get('full_report', '')
         bazi_data = req_data.get('bazi_data', {})
         language = req_data.get('language', 'en')
@@ -1342,7 +1227,6 @@ def finalize_report():
         result = {
             "client_name": client_name,
             "validation": None,
-            "google_doc": None,
             "customer_message": None
         }
         
@@ -1355,42 +1239,25 @@ def finalize_report():
         except Exception as e:
             print(f"Validation error: {e}")
             result["validation"] = {
-                "status": "ERROR",
-                "summary": f"Validation failed: {str(e)}",
+                "status": "SKIPPED",
+                "summary": "Validation skipped due to error",
                 "issues_found": []
             }
         
-        # 2. 创建 Google Doc
-        print("Step 2: Creating Google Doc...")
+        # 2. 生成客户消息
+        print("Step 2: Generating customer message...")
         try:
-            doc_result = create_google_doc(client_name, full_report, bazi_summary)
-            result["google_doc"] = doc_result
-            print(f"Google Doc result: {doc_result}")
+            customer_message = generate_customer_message_simple(
+                client_name, 
+                bazi_summary,
+                full_report,
+                language
+            )
+            result["customer_message"] = customer_message
+            print("Customer message generated successfully")
         except Exception as e:
-            print(f"Google Doc error: {e}")
-            result["google_doc"] = {
-                "error": str(e),
-                "doc_url": None
-            }
-        
-        # 3. 生成客户消息（仅当 Google Doc 成功创建时）
-        print("Step 3: Generating customer message...")
-        doc_url = result.get("google_doc", {}).get("doc_url")
-        if doc_url:
-            try:
-                customer_message = generate_customer_message(
-                    client_name, 
-                    doc_url, 
-                    bazi_summary,
-                    language
-                )
-                result["customer_message"] = customer_message
-                print("Customer message generated successfully")
-            except Exception as e:
-                print(f"Customer message error: {e}")
-                result["customer_message"] = f"[Error generating message: {str(e)}]\n\nReport link: {doc_url}"
-        else:
-            result["customer_message"] = "[Google Doc creation failed - no link available]"
+            print(f"Customer message error: {e}")
+            result["customer_message"] = f"[Error generating message: {str(e)}]"
         
         print("=== Finalize Report Complete ===")
         return jsonify(result)
@@ -1404,7 +1271,3 @@ def finalize_report():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
-
-
-
