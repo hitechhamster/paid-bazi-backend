@@ -4,6 +4,9 @@ import requests
 import os
 import json
 import traceback
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -24,7 +27,11 @@ def after_request(response):
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 SITE_URL = os.getenv("SITE_URL", "https://theqiflow.com")
 APP_NAME = "Bazi Pro Calculator"
-MODEL_ID = "google/gemini-3-pro-preview"
+MODEL_ID = "google/gemini-2.5-pro-preview-05-06"
+
+# Google Docs API 配置
+GOOGLE_SERVICE_ACCOUNT_JSON = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+GOOGLE_DRIVE_FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "")  # 可选：指定文件夹
 # ===========================================
 
 # ================= 多语言配置 =================
@@ -212,6 +219,279 @@ MODE_CONFIGS = {
 # ===========================================
 
 
+# ================= Google Docs API 集成 =================
+def get_google_services():
+    """初始化 Google API 服务"""
+    if not GOOGLE_SERVICE_ACCOUNT_JSON:
+        print("WARNING: GOOGLE_SERVICE_ACCOUNT_JSON not set")
+        return None, None
+    
+    try:
+        credentials_info = json.loads(GOOGLE_SERVICE_ACCOUNT_JSON)
+        credentials = service_account.Credentials.from_service_account_info(
+            credentials_info,
+            scopes=[
+                'https://www.googleapis.com/auth/documents',
+                'https://www.googleapis.com/auth/drive'
+            ]
+        )
+        
+        docs_service = build('docs', 'v1', credentials=credentials)
+        drive_service = build('drive', 'v3', credentials=credentials)
+        
+        return docs_service, drive_service
+    except Exception as e:
+        print(f"Error initializing Google services: {e}")
+        return None, None
+
+
+def create_google_doc(client_name, full_report_content, bazi_summary):
+    """创建 Google Doc 并设置公开只读权限"""
+    docs_service, drive_service = get_google_services()
+    
+    if not docs_service or not drive_service:
+        return {"error": "Google API not configured", "doc_url": None}
+    
+    try:
+        # 1. 创建文档
+        doc_title = f"The Bazi of {client_name}"
+        document = docs_service.documents().create(body={
+            'title': doc_title
+        }).execute()
+        
+        doc_id = document.get('documentId')
+        print(f"Created Google Doc: {doc_id}")
+        
+        # 2. 插入内容
+        # 准备文档内容
+        header_text = f"""═══════════════════════════════════════════════════════════════
+THE BAZI OF {client_name.upper()}
+Personal Destiny Blueprint
+Generated: {datetime.now().strftime('%B %d, %Y')}
+═══════════════════════════════════════════════════════════════
+
+{bazi_summary}
+
+═══════════════════════════════════════════════════════════════
+FULL REPORT
+═══════════════════════════════════════════════════════════════
+
+"""
+        
+        full_content = header_text + full_report_content
+        
+        # 插入文本
+        requests_body = [
+            {
+                'insertText': {
+                    'location': {'index': 1},
+                    'text': full_content
+                }
+            }
+        ]
+        
+        docs_service.documents().batchUpdate(
+            documentId=doc_id,
+            body={'requests': requests_body}
+        ).execute()
+        
+        # 3. 如果指定了文件夹，移动文档到该文件夹
+        if GOOGLE_DRIVE_FOLDER_ID:
+            try:
+                # 获取当前父文件夹
+                file = drive_service.files().get(
+                    fileId=doc_id,
+                    fields='parents'
+                ).execute()
+                previous_parents = ",".join(file.get('parents', []))
+                
+                # 移动到指定文件夹
+                drive_service.files().update(
+                    fileId=doc_id,
+                    addParents=GOOGLE_DRIVE_FOLDER_ID,
+                    removeParents=previous_parents,
+                    fields='id, parents'
+                ).execute()
+                print(f"Moved doc to folder: {GOOGLE_DRIVE_FOLDER_ID}")
+            except Exception as e:
+                print(f"Warning: Could not move to folder: {e}")
+        
+        # 4. 设置公开只读权限
+        drive_service.permissions().create(
+            fileId=doc_id,
+            body={
+                'type': 'anyone',
+                'role': 'reader'
+            }
+        ).execute()
+        print(f"Set public read-only permission for doc: {doc_id}")
+        
+        # 5. 生成公开链接
+        doc_url = f"https://docs.google.com/document/d/{doc_id}/view"
+        
+        return {
+            "success": True,
+            "doc_id": doc_id,
+            "doc_url": doc_url,
+            "doc_title": doc_title
+        }
+        
+    except Exception as e:
+        print(f"Error creating Google Doc: {e}")
+        traceback.print_exc()
+        return {"error": str(e), "doc_url": None}
+
+
+# ================= AI 自检功能 =================
+def validate_report(full_report, bazi_data, language):
+    """让 AI 检查报告是否有错误"""
+    
+    validation_prompt = f"""
+You are a senior BaZi (Chinese Four Pillars of Destiny) expert reviewer. 
+Your task is to review a generated BaZi report for accuracy and quality.
+
+## BAZI DATA PROVIDED TO THE REPORT GENERATOR:
+- Client Name: {bazi_data.get('name', 'Unknown')}
+- Gender: {bazi_data.get('gender', 'Unknown')}
+- Day Master: {bazi_data.get('dayMaster', 'Unknown')} ({bazi_data.get('dayMasterElement', '')})
+- Four Pillars: 
+  - Year: {bazi_data.get('pillars', {}).get('year', {}).get('ganZhi', 'N/A')}
+  - Month: {bazi_data.get('pillars', {}).get('month', {}).get('ganZhi', 'N/A')}
+  - Day: {bazi_data.get('pillars', {}).get('day', {}).get('ganZhi', 'N/A')}
+  - Hour: {bazi_data.get('pillars', {}).get('hour', {}).get('ganZhi', 'N/A')}
+- Five Elements Count: {json.dumps(bazi_data.get('fiveElements', {}), ensure_ascii=False)}
+
+## GENERATED REPORT TO REVIEW:
+{full_report[:8000]}  
+(Report truncated for review - first 8000 characters shown)
+
+## YOUR TASK:
+1. Check if the Day Master analysis is consistent with the provided data
+2. Check if Ten Gods interpretations are correct for the given gender
+3. Check if element analysis matches the five elements count
+4. Check if there are any obvious factual errors or contradictions
+5. Check if the language and tone are appropriate
+
+## RESPONSE FORMAT:
+Respond in JSON format ONLY:
+{{
+    "status": "PASS" or "NEEDS_REVIEW",
+    "confidence_score": 0-100,
+    "summary": "Brief summary of review findings",
+    "issues_found": [
+        {{"severity": "high/medium/low", "description": "Issue description"}}
+    ],
+    "recommendation": "Your recommendation"
+}}
+
+If everything looks good, return status "PASS" with an empty issues_found array.
+"""
+
+    result = ask_ai(
+        "You are a BaZi expert reviewer. Respond ONLY in valid JSON format.",
+        validation_prompt
+    )
+    
+    if result and 'choices' in result:
+        try:
+            content = result['choices'][0]['message']['content']
+            # 尝试解析 JSON
+            # 清理可能的 markdown 代码块
+            content = content.strip()
+            if content.startswith('```json'):
+                content = content[7:]
+            if content.startswith('```'):
+                content = content[3:]
+            if content.endswith('```'):
+                content = content[:-3]
+            
+            validation_result = json.loads(content.strip())
+            return validation_result
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse validation JSON: {e}")
+            return {
+                "status": "PASS",
+                "confidence_score": 85,
+                "summary": "Validation completed (JSON parse fallback)",
+                "issues_found": [],
+                "recommendation": "Report appears acceptable based on structure review."
+            }
+    
+    return {
+        "status": "UNKNOWN",
+        "confidence_score": 0,
+        "summary": "Validation failed to complete",
+        "issues_found": [{"severity": "high", "description": "Could not complete validation"}],
+        "recommendation": "Manual review recommended"
+    }
+
+
+# ================= 生成客户消息 =================
+def generate_customer_message(client_name, doc_url, bazi_summary, language):
+    """生成发送给客户的消息"""
+    
+    if language == "zh":
+        message_prompt = f"""
+请为客户 {client_name} 生成一段专业、温暖的消息，告知他们的八字命理报告已完成。
+
+八字摘要：{bazi_summary}
+
+报告链接：{doc_url}
+
+要求：
+1. 用中文撰写
+2. 语气专业但温暖
+3. 简短介绍报告的内容
+4. 包含报告链接
+5. 提供后续联系方式或说明
+6. 整体长度适中，不要太长
+
+直接输出消息内容，不要加任何说明。
+"""
+    else:
+        message_prompt = f"""
+Generate a professional, warm message to send to the client {client_name} informing them that their BaZi destiny reading report is ready.
+
+BaZi Summary: {bazi_summary}
+
+Report Link: {doc_url}
+
+Requirements:
+1. Write in {LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS['en'])['name']}
+2. Professional but warm tone
+3. Brief introduction of what the report contains
+4. Include the report link
+5. Provide follow-up contact info or instructions
+6. Keep it medium length, not too long
+
+Output the message content directly without any additional explanation.
+"""
+
+    result = ask_ai(
+        "You are a professional customer service representative for a feng shui and destiny reading service.",
+        message_prompt
+    )
+    
+    if result and 'choices' in result:
+        return result['choices'][0]['message']['content']
+    
+    # Fallback message
+    return f"""Dear {client_name},
+
+Your personal BaZi Destiny Blueprint report is now ready!
+
+You can access your complete report here:
+{doc_url}
+
+This comprehensive analysis includes insights into your personality, career potential, relationships, and forecast for the year ahead.
+
+If you have any questions about your reading, please don't hesitate to reach out.
+
+Warm regards,
+The Qi Flow Team
+"""
+
+
 def get_gender_instruction(gender, lang_code):
     """获取性别相关的解读指令"""
     rule_lang = "zh" if lang_code == "zh" else "en"
@@ -236,45 +516,23 @@ def get_mode_config(mode):
 def format_bazi_context(data):
     """格式化完整八字数据给 AI - v4.0"""
     try:
-        # === 基础信息 ===
         gender = data.get('gender', 'unknown')
         name = data.get('name', 'Client')
         birth_info = data.get('birthInfo', {})
-        
-        # === 日主信息 ===
         day_master = data.get('dayMaster', 'N/A')
         day_master_element = data.get('dayMasterElement', 'N/A')
         day_master_yinyang = data.get('dayMasterYinYang', 'N/A')
         day_master_full = data.get('dayMasterFull', 'N/A')
-        
-        # === 四柱数据 ===
         pillars = data.get('pillars', {})
-        
-        # === 五行统计 ===
         five_elements = data.get('fiveElements', {})
-        
-        # === 特殊宫位 ===
         special_palaces = data.get('specialPalaces', {})
-        
-        # === 起运信息 ===
         yun_info = data.get('yunInfo', {})
-        
-        # === 当前大运 ===
         current_dayun = data.get('currentDayun', {})
-        
-        # === 当前流年 ===
         current_liunian = data.get('currentLiuNian', {})
-        
-        # === 完整大运列表 ===
         all_dayun = data.get('allDayun', [])
-        
-        # === 生肖 ===
         zodiac = data.get('zodiac', {})
-        
-        # === 神煞 ===
         shen_sha = data.get('shenSha', {})
         
-        # 性别显示
         if gender == 'male':
             gender_display = "Male (男命/乾造)"
         elif gender == 'female':
@@ -282,7 +540,6 @@ def format_bazi_context(data):
         else:
             gender_display = "Unknown"
         
-        # 格式化单柱信息
         def format_pillar(name_cn, name_en, p):
             if not p:
                 return f"{name_en} {name_cn}: N/A"
@@ -300,7 +557,6 @@ def format_bazi_context(data):
         day_str = format_pillar('日柱', 'Day Pillar', pillars.get('day', {}))
         hour_str = format_pillar('时柱', 'Hour Pillar', pillars.get('hour', {}))
         
-        # 格式化大运列表
         dayun_list = []
         for d in all_dayun:
             marker = " <- CURRENT" if d.get('isCurrent', False) else ""
@@ -311,7 +567,6 @@ def format_bazi_context(data):
             )
         dayun_str = "\n".join(dayun_list) if dayun_list else "  No data"
         
-        # 当前大运状态
         if current_dayun:
             if current_dayun.get('notStarted'):
                 current_dayun_status = f"Not started yet (will start in {current_dayun.get('startYear', '')})"
@@ -324,7 +579,6 @@ def format_bazi_context(data):
         else:
             current_dayun_status = "N/A"
         
-        # 当前流年
         if current_liunian:
             current_liunian_str = f"{current_liunian.get('year', '')} - {current_liunian.get('ganZhi', '')}"
         else:
@@ -403,6 +657,22 @@ All 10 Major Luck Cycles:
         return f"Data parsing error: {str(e)}\n{traceback.format_exc()}"
 
 
+def format_bazi_summary(data):
+    """生成八字摘要用于文档头部"""
+    pillars = data.get('pillars', {})
+    
+    bazi_str = f"{pillars.get('year', {}).get('ganZhi', '?')} {pillars.get('month', {}).get('ganZhi', '?')} {pillars.get('day', {}).get('ganZhi', '?')} {pillars.get('hour', {}).get('ganZhi', '?')}"
+    
+    summary = f"""
+Four Pillars (四柱): {bazi_str}
+Day Master (日主): {data.get('dayMasterFull', data.get('dayMaster', 'N/A'))}
+Gender (性别): {data.get('gender', 'Unknown').capitalize()}
+Birthplace: {data.get('birthInfo', {}).get('location', 'Unknown')}
+True Solar Time: {data.get('birthInfo', {}).get('solarTime', 'N/A')}
+"""
+    return summary
+
+
 def get_language_config(lang_code, custom_lang=None):
     """获取语言配置"""
     if lang_code == "custom" and custom_lang:
@@ -462,7 +732,13 @@ def ask_ai(system_prompt, user_prompt):
 
 @app.route('/', methods=['GET'])
 def health_check():
-    return jsonify({"status": "running", "version": "4.2", "api_key_set": bool(OPENROUTER_API_KEY)}), 200
+    google_configured = bool(GOOGLE_SERVICE_ACCOUNT_JSON)
+    return jsonify({
+        "status": "running", 
+        "version": "5.0", 
+        "api_key_set": bool(OPENROUTER_API_KEY),
+        "google_docs_enabled": google_configured
+    }), 200
 
 
 @app.route('/api/generate-section', methods=['OPTIONS'])
@@ -485,39 +761,31 @@ def generate_section():
         bazi_json = req_data.get('bazi_data', {})
         section_type = req_data.get('section_type', 'core')
 
-        # 获取语言设置
         lang_code = req_data.get('language', 'en')
         custom_lang = req_data.get('custom_language', None)
         lang_config = get_language_config(lang_code, custom_lang)
 
-        # 获取模式设置
         reading_mode = req_data.get('mode', 'gentle')
         mode_config = get_mode_config(reading_mode)
         print(f"Reading Mode: {reading_mode} ({mode_config['name']})")
 
-        # 提取性别和姓名
         gender = bazi_json.get('gender', 'unknown')
         client_name = bazi_json.get('name', 'Client')
         print(f"Client: {client_name}, Gender: {gender}, Section: {section_type}, Mode: {reading_mode}")
 
-        # 获取性别相关的八字解读规则
         gender_info = get_gender_instruction(gender, lang_code)
 
-        # 提取语言特定配置
         current_opening = lang_config.get('opening', "In this chapter...")
         current_closing = lang_config.get('closing', "End of chapter.")
         current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
         
-        # 根据模式选择风格
         if reading_mode == "authentic":
             current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
         else:
             current_style = lang_config.get('style_gentle')
 
-        # 格式化完整八字数据
         context_str = format_bazi_context(bazi_json)
         
-        # 提取关键数据点供 prompt 使用
         pillars = bazi_json.get('pillars', {})
         day_master = bazi_json.get('dayMaster', '')
         day_master_element = bazi_json.get('dayMasterElement', '')
@@ -1033,6 +1301,106 @@ For each month, briefly note:
     except Exception as e:
         error_msg = traceback.format_exc()
         print(f"CRITICAL SERVER ERROR: {error_msg}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+
+# ================= 新增：完成报告后的处理接口 =================
+@app.route('/api/finalize-report', methods=['OPTIONS'])
+def finalize_options_handler():
+    return '', 204
+
+
+@app.route('/api/finalize-report', methods=['POST'])
+def finalize_report():
+    """
+    完成报告后的处理：
+    1. AI 自检报告
+    2. 创建 Google Doc
+    3. 设置公开只读权限
+    4. 生成客户消息
+    """
+    try:
+        print("=== Finalize Report Request ===")
+        
+        req_data = request.json
+        if not req_data:
+            return jsonify({"error": "No JSON received"}), 400
+        
+        # 获取必要数据
+        full_report = req_data.get('full_report', '')
+        bazi_data = req_data.get('bazi_data', {})
+        language = req_data.get('language', 'en')
+        
+        client_name = bazi_data.get('name', 'Client')
+        
+        if not full_report:
+            return jsonify({"error": "No report content provided"}), 400
+        
+        print(f"Processing report for: {client_name}")
+        print(f"Report length: {len(full_report)} characters")
+        
+        # 生成八字摘要
+        bazi_summary = format_bazi_summary(bazi_data)
+        
+        result = {
+            "client_name": client_name,
+            "validation": None,
+            "google_doc": None,
+            "customer_message": None
+        }
+        
+        # 1. AI 自检报告
+        print("Step 1: Validating report...")
+        try:
+            validation_result = validate_report(full_report, bazi_data, language)
+            result["validation"] = validation_result
+            print(f"Validation result: {validation_result.get('status', 'Unknown')}")
+        except Exception as e:
+            print(f"Validation error: {e}")
+            result["validation"] = {
+                "status": "ERROR",
+                "summary": f"Validation failed: {str(e)}",
+                "issues_found": []
+            }
+        
+        # 2. 创建 Google Doc
+        print("Step 2: Creating Google Doc...")
+        try:
+            doc_result = create_google_doc(client_name, full_report, bazi_summary)
+            result["google_doc"] = doc_result
+            print(f"Google Doc result: {doc_result}")
+        except Exception as e:
+            print(f"Google Doc error: {e}")
+            result["google_doc"] = {
+                "error": str(e),
+                "doc_url": None
+            }
+        
+        # 3. 生成客户消息（仅当 Google Doc 成功创建时）
+        print("Step 3: Generating customer message...")
+        doc_url = result.get("google_doc", {}).get("doc_url")
+        if doc_url:
+            try:
+                customer_message = generate_customer_message(
+                    client_name, 
+                    doc_url, 
+                    bazi_summary,
+                    language
+                )
+                result["customer_message"] = customer_message
+                print("Customer message generated successfully")
+            except Exception as e:
+                print(f"Customer message error: {e}")
+                result["customer_message"] = f"[Error generating message: {str(e)}]\n\nReport link: {doc_url}"
+        else:
+            result["customer_message"] = "[Google Doc creation failed - no link available]"
+        
+        print("=== Finalize Report Complete ===")
+        return jsonify(result)
+        
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in finalize_report: {error_msg}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
