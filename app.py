@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
@@ -25,7 +26,7 @@ def after_request(response):
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 SITE_URL = os.getenv("SITE_URL", "https://theqiflow.com")
 APP_NAME = "Bazi Pro Calculator"
-MODEL_ID = "google/gemini-3-pro-preview"
+MODEL_ID = "google/gemini-2.5-pro-preview-06-05"
 # ===========================================
 
 # ================= 多语言配置 =================
@@ -428,7 +429,7 @@ def ask_ai(system_prompt, user_prompt):
             {"role": "user", "content": user_prompt}
         ],
         "temperature": 0.75,
-        "max_tokens": 8192
+        "max_tokens": 16000
     }
 
     try:
@@ -623,9 +624,12 @@ The Qi Flow Team
 def health_check():
     return jsonify({
         "status": "running", 
-        "version": "5.1-simplified", 
+        "version": "5.2-with-marriage", 
         "api_key_set": bool(OPENROUTER_API_KEY),
-        "google_docs_enabled": False
+        "endpoints": {
+            "personal_report": "/api/generate-section",
+            "marriage_report": "/api/generate-marriage-section"
+        }
     }), 200
 
 
@@ -1265,6 +1269,945 @@ def finalize_report():
     except Exception as e:
         error_msg = traceback.format_exc()
         print(f"CRITICAL ERROR in finalize_report: {error_msg}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+
+# =====================================================================
+# ================= 合婚报告功能 - MARRIAGE COMPATIBILITY =================
+# =====================================================================
+
+MARRIAGE_SECTIONS = [
+    {'type': 'overview', 'title': 'Chapter 1: Both Partners Overview', 'zh': '第一章：双方命局概览'},
+    {'type': 'compatibility', 'title': 'Chapter 2: Core Compatibility Analysis', 'zh': '第二章：核心配对分析'},
+    {'type': 'communication', 'title': 'Chapter 3: Communication & Conflict Patterns', 'zh': '第三章：相处与沟通模式'},
+    {'type': 'wealth_career', 'title': 'Chapter 4: Wealth & Career Together', 'zh': '第四章：财运与事业配合'},
+    {'type': 'love_marriage', 'title': 'Chapter 5: Love & Marriage Stability', 'zh': '第五章：感情与婚姻稳定性'},
+    {'type': 'forecast_2026', 'title': 'Chapter 6: 2026 Forecast & Harmony Tips', 'zh': '第六章：2026流年预测与和谐建议'},
+]
+
+
+def format_marriage_bazi_context(bazi_a, bazi_b):
+    """格式化双人八字数据给 AI"""
+    
+    def format_single_person(data, label):
+        name = data.get('name', label)
+        gender = data.get('gender', 'unknown')
+        birth_info = data.get('birthInfo', {})
+        pillars = data.get('pillars', {})
+        five_elements = data.get('fiveElements', {})
+        
+        gender_display = "Male (男命)" if gender == 'male' else "Female (女命)" if gender == 'female' else "Unknown"
+        
+        bazi_str = f"{pillars.get('year', {}).get('ganZhi', '?')} {pillars.get('month', {}).get('ganZhi', '?')} {pillars.get('day', {}).get('ganZhi', '?')} {pillars.get('hour', {}).get('ganZhi', '?')}"
+        
+        return f"""
+### {name} ({label})
+- Gender: {gender_display}
+- Birthplace: {birth_info.get('location', 'Unknown')}
+- True Solar Time: {birth_info.get('solarTime', 'N/A')}
+- Four Pillars: {bazi_str}
+- Day Master: {data.get('dayMaster', 'N/A')} ({data.get('dayMasterElement', '')})
+- Day Master Strength: {data.get('dayMasterStrength', 'N/A')}
+- Zodiac: {data.get('zodiac', 'N/A')}
+- Na Yin: {data.get('naYin', 'N/A')}
+
+**Year Pillar 年柱**: {pillars.get('year', {}).get('ganZhi', 'N/A')}
+  - Hidden Stems: {pillars.get('year', {}).get('hideGan', 'N/A')}
+  - Ten Gods: {pillars.get('year', {}).get('shiShenGan', '')} / {pillars.get('year', {}).get('shiShenZhi', '')}
+
+**Month Pillar 月柱**: {pillars.get('month', {}).get('ganZhi', 'N/A')}
+  - Hidden Stems: {pillars.get('month', {}).get('hideGan', 'N/A')}
+  - Ten Gods: {pillars.get('month', {}).get('shiShenGan', '')} / {pillars.get('month', {}).get('shiShenZhi', '')}
+
+**Day Pillar 日柱**: {pillars.get('day', {}).get('ganZhi', 'N/A')}
+  - Hidden Stems: {pillars.get('day', {}).get('hideGan', 'N/A')}
+  - Spouse Palace (配偶宫): {pillars.get('day', {}).get('zhi', 'N/A')}
+
+**Hour Pillar 时柱**: {pillars.get('hour', {}).get('ganZhi', 'N/A')}
+  - Hidden Stems: {pillars.get('hour', {}).get('hideGan', 'N/A')}
+  - Ten Gods: {pillars.get('hour', {}).get('shiShenGan', '')} / {pillars.get('hour', {}).get('shiShenZhi', '')}
+
+**Five Elements Count 五行统计**:
+  - Metal 金: {five_elements.get('metal', 0)}
+  - Wood 木: {five_elements.get('wood', 0)}
+  - Water 水: {five_elements.get('water', 0)}
+  - Fire 火: {five_elements.get('fire', 0)}
+  - Earth 土: {five_elements.get('earth', 0)}
+
+**Favorable Elements 喜用神**: {', '.join(data.get('favorableElements', [])) or 'N/A'}
+**Unfavorable Elements 忌神**: {', '.join(data.get('unfavorableElements', [])) or 'N/A'}
+
+**Current Luck Cycle 当前大运**: {data.get('currentDayun', {}).get('ganZhi', 'N/A')} ({data.get('currentDayun', {}).get('startYear', '')}-{data.get('currentDayun', {}).get('endYear', '')})
+"""
+    
+    context_a = format_single_person(bazi_a, "Partner A")
+    context_b = format_single_person(bazi_b, "Partner B")
+    
+    return f"""
+## COMPLETE MARRIAGE COMPATIBILITY DATA
+
+{context_a}
+
+{context_b}
+"""
+
+
+def format_compatibility_scores(scores):
+    """格式化合婚评分数据"""
+    breakdown = scores.get('breakdown', {})
+    
+    return f"""
+## COMPATIBILITY SCORES (已计算)
+
+**Total Score 总分**: {scores.get('total', 0)} / 100
+**Level 等级**: {scores.get('level', {}).get('name', 'N/A')}
+
+### Score Breakdown 评分详解:
+
+1. **Day Master Match 日主相合**: {breakdown.get('dayMaster', {}).get('score', 0)}/{breakdown.get('dayMaster', {}).get('maxScore', 25)}
+   - {breakdown.get('dayMaster', {}).get('description', '')}
+
+2. **Zodiac Connection 生肖配对**: {breakdown.get('zodiac', {}).get('score', 0)}/{breakdown.get('zodiac', {}).get('maxScore', 20)}
+   - {breakdown.get('zodiac', {}).get('description', '')}
+
+3. **Elements Balance 五行互补**: {breakdown.get('elements', {}).get('score', 0)}/{breakdown.get('elements', {}).get('maxScore', 20)}
+   - {breakdown.get('elements', {}).get('description', '')}
+
+4. **Na Yin Harmony 纳音合婚**: {breakdown.get('naYin', {}).get('score', 0)}/{breakdown.get('naYin', {}).get('maxScore', 15)}
+   - {breakdown.get('naYin', {}).get('description', '')}
+
+5. **Gan Zhi Synergy 干支配合**: {breakdown.get('ganZhi', {}).get('score', 0)}/{breakdown.get('ganZhi', {}).get('maxScore', 10)}
+   - {breakdown.get('ganZhi', {}).get('description', '')}
+
+6. **Spouse Palace 婚姻宫位**: {breakdown.get('spousePalace', {}).get('score', 0)}/{breakdown.get('spousePalace', {}).get('maxScore', 10)}
+   - {breakdown.get('spousePalace', {}).get('description', '')}
+"""
+
+
+@app.route('/api/generate-marriage-section', methods=['OPTIONS'])
+def marriage_options_handler():
+    return '', 204
+
+
+@app.route('/api/generate-marriage-section', methods=['POST'])
+def generate_marriage_section():
+    """生成合婚报告的单个章节"""
+    try:
+        print("=== Marriage Section Request ===")
+        
+        req_data = request.json
+        if not req_data:
+            return jsonify({"error": "No JSON received"}), 400
+        
+        bazi_a = req_data.get('bazi_a', {})
+        bazi_b = req_data.get('bazi_b', {})
+        scores = req_data.get('scores', {})
+        section_type = req_data.get('section_type', 'overview')
+        
+        lang_code = req_data.get('language', 'en')
+        custom_lang = req_data.get('custom_language', None)
+        lang_config = get_language_config(lang_code, custom_lang)
+        
+        reading_mode = req_data.get('mode', 'gentle')
+        mode_config = get_mode_config(reading_mode)
+        
+        name_a = bazi_a.get('name', 'Partner A')
+        name_b = bazi_b.get('name', 'Partner B')
+        gender_a = bazi_a.get('gender', 'unknown')
+        gender_b = bazi_b.get('gender', 'unknown')
+        
+        print(f"Marriage Section: {section_type}, Mode: {reading_mode}, Lang: {lang_code}")
+        print(f"Partner A: {name_a} ({gender_a}), Partner B: {name_b} ({gender_b})")
+        
+        # 获取语言配置
+        current_opening = lang_config.get('opening', "In this chapter...")
+        current_closing = lang_config.get('closing', "End of chapter.")
+        
+        if reading_mode == "authentic":
+            current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
+        else:
+            current_style = lang_config.get('style_gentle')
+        
+        # 格式化双人数据
+        context_str = format_marriage_bazi_context(bazi_a, bazi_b)
+        scores_str = format_compatibility_scores(scores)
+        
+        # ================= 合婚专用 System Prompt =================
+        base_system_prompt = f"""
+You are a master of BaZi (Chinese Four Pillars of Destiny) marriage compatibility analysis, with deep knowledge of classical texts and traditional 合婚 (marriage matching) techniques.
+
+## CRITICAL FORMATTING RULES - MUST FOLLOW
+
+**ABSOLUTELY FORBIDDEN 绝对禁止:**
+- Horizontal divider lines: --- or ___ or *** or ===
+- Setext-style headers
+- Triple or more consecutive blank lines
+
+**MANDATORY formatting 必须使用:**
+- Use ATX-style headers: # H1, ## H2, ### H3, #### H4
+- Use **bold** for emphasis
+- Use bullet lists: - or * or 1. 2. 3.
+
+## READING MODE: {mode_config['name'].upper()} / {mode_config['name_zh']}
+
+{mode_config['interpretation_style']}
+
+{mode_config['ethics']}
+
+## COUPLE INFORMATION - USE THEIR ACTUAL NAMES
+
+**Partner A**: {name_a} ({gender_a})
+**Partner B**: {name_b} ({gender_b})
+
+CRITICAL: Always use their actual names "{name_a}" and "{name_b}" throughout the analysis. 
+NEVER use generic terms like "Partner A", "Partner B", "the man", "the woman".
+
+## LANGUAGE REQUIREMENTS
+
+**Language**: {lang_config['instruction']}
+**Pronoun Rules**: {lang_config.get('pronoun_rule', '')}
+
+**Writing Style**:
+{current_style}
+
+## GENDER-SPECIFIC INTERPRETATION RULES
+
+For {name_a} ({gender_a}):
+{get_gender_instruction(gender_a, lang_code)['bazi_rules']}
+
+For {name_b} ({gender_b}):
+{get_gender_instruction(gender_b, lang_code)['bazi_rules']}
+
+## MANDATORY STRUCTURE
+
+- START your response EXACTLY with: "{current_opening}"
+- END your response EXACTLY with: "{current_closing}"
+- Do NOT add greetings or preambles
+- Write 2500+ words with proper Markdown formatting
+- Include Chinese terms with translations
+- Do NOT use any horizontal lines
+"""
+
+        # ================= 各章节详细指令 =================
+        specific_prompt = ""
+        
+        if section_type == 'overview':
+            specific_prompt = f"""
+## TASK: Write Chapter 1 - Both Partners Overview (双方命局概览)
+
+{context_str}
+
+### REQUIRED ANALYSIS:
+
+## 1. {name_a}'s BaZi Profile ({name_a}的命局分析)
+
+Provide a comprehensive analysis of {name_a}'s chart:
+
+### Day Master Analysis 日主分析
+- Day Master element and Yin/Yang nature
+- Is Day Master strong (身强) or weak (身弱)?
+- Personality traits based on Day Master
+- Natural strengths and challenges
+
+### Ten Gods Pattern 十神格局
+- Which Ten Gods dominate the chart?
+- What does this reveal about personality?
+- Key psychological traits and tendencies
+
+### Five Elements Balance 五行平衡
+- What elements are strong/weak/missing?
+- How does this affect personality and needs?
+- What does {name_a} need from a partner?
+
+### Relationship Tendencies 感情倾向
+- Based on gender-specific rules, what are the relationship stars?
+- Natural approach to love and commitment
+- What {name_a} needs emotionally
+
+## 2. {name_b}'s BaZi Profile ({name_b}的命局分析)
+
+Provide the same comprehensive analysis for {name_b}:
+
+### Day Master Analysis 日主分析
+### Ten Gods Pattern 十神格局
+### Five Elements Balance 五行平衡
+### Relationship Tendencies 感情倾向
+
+## 3. First Impressions & Natural Attraction (初见与天然吸引力)
+
+Based on both charts:
+- What would attract them to each other initially?
+- What energy does each bring to the relationship?
+- Natural chemistry and magnetic pull
+- Potential first impression issues
+
+{"深入分析每个人的命局特点，让双方都能更好地理解自己和对方。" if reading_mode == "gentle" else "直言每个人的命局优缺点，不要回避问题，让双方清楚自己和对方的真实情况。"}
+"""
+
+        elif section_type == 'compatibility':
+            specific_prompt = f"""
+## TASK: Write Chapter 2 - Core Compatibility Analysis (核心配对分析)
+
+{context_str}
+
+{scores_str}
+
+### REQUIRED ANALYSIS:
+
+You have been provided with pre-calculated compatibility scores. Your task is to EXPLAIN these scores in depth, not recalculate them.
+
+## 1. Day Master Compatibility 日主相合 (Score: {scores.get('breakdown', {}).get('dayMaster', {}).get('score', 0)}/25)
+
+Analyze how {name_a}'s and {name_b}'s Day Masters interact:
+- What is the relationship between their Day Master elements?
+- Is there 天干五合 (Heavenly Stem combination)?
+- How do their energies complement or clash?
+- What does this mean for daily life compatibility?
+
+## 2. Zodiac Connection 生肖配对 (Score: {scores.get('breakdown', {}).get('zodiac', {}).get('score', 0)}/20)
+
+Analyze their Chinese zodiac relationship:
+- Are they in 六合 (Six Harmony), 三合 (Three Harmony), 六冲 (Six Clash), or 六害 (Six Harm)?
+- What does this mean for intuitive understanding?
+- How naturally do they "get" each other?
+
+## 3. Five Elements Balance 五行互补 (Score: {scores.get('breakdown', {}).get('elements', {}).get('score', 0)}/20)
+
+Analyze elemental complementarity:
+- What elements does {name_a} need that {name_b} has?
+- What elements does {name_b} need that {name_a} has?
+- Do they fill each other's gaps like puzzle pieces?
+- Any elemental clashes to be aware of?
+
+## 4. Na Yin Harmony 纳音合婚 (Score: {scores.get('breakdown', {}).get('naYin', {}).get('score', 0)}/15)
+
+Analyze their Na Yin (year pillar sound element) relationship:
+- What are their Na Yin elements?
+- Do they support, clash, or remain neutral?
+- What does this mean for their life philosophies and values?
+
+## 5. Gan Zhi Synergy 干支配合 (Score: {scores.get('breakdown', {}).get('ganZhi', {}).get('score', 0)}/10)
+
+Analyze deeper stem-branch connections:
+- Any 天干合 between their pillars?
+- Any 地支合 between their pillars?
+- Count of harmonious connections across all four pillars
+
+## 6. Spouse Palace Analysis 婚姻宫位 (Score: {scores.get('breakdown', {}).get('spousePalace', {}).get('score', 0)}/10)
+
+Analyze their Day Branches (Spouse Palaces):
+- How do their spouse palaces interact?
+- Any 合 (combination), 冲 (clash), or 害 (harm)?
+- What does this mean for their approach to marriage?
+
+## 7. Overall Compatibility Summary 总体评估
+
+Based on all six dimensions:
+- Total Score: {scores.get('total', 0)}/100 ({scores.get('level', {}).get('name', 'N/A')})
+- Key strengths of this pairing
+- Main challenges to work on
+- Overall assessment of marriage potential
+
+{"用积极的视角解读每个维度，即使分数不高也要找到正面意义。" if reading_mode == "gentle" else "直接说明每个维度的真实情况，分数高的要说好在哪里，分数低的要指出问题所在。"}
+"""
+
+        elif section_type == 'communication':
+            specific_prompt = f"""
+## TASK: Write Chapter 3 - Communication & Conflict Patterns (相处与沟通模式)
+
+{context_str}
+
+### REQUIRED ANALYSIS:
+
+## 1. Communication Styles 沟通方式
+
+### {name_a}'s Communication Style
+Based on Ten Gods pattern and Day Master:
+- How does {name_a} express thoughts and feelings?
+- What is their natural communication tempo?
+- How do they handle emotional discussions?
+- What triggers them to shut down or open up?
+
+### {name_b}'s Communication Style
+- How does {name_b} express thoughts and feelings?
+- What is their natural communication tempo?
+- How do they handle emotional discussions?
+- What triggers them to shut down or open up?
+
+### Communication Compatibility
+- Do their styles complement or clash?
+- Potential misunderstandings to watch for
+- How can they bridge communication gaps?
+
+## 2. Conflict Patterns 冲突模式
+
+### How They Fight 他们如何吵架
+
+Based on their charts, predict their typical conflict pattern:
+
+**Conflict Trigger 导火索**
+- What topics are likely to cause friction?
+- Which element imbalances create tension?
+
+**{name_a}'s Conflict Style**
+Based on Ten Gods and elements:
+- Do they explode, withdraw, or become passive-aggressive?
+- How do they express anger or frustration?
+- What do they need during conflict?
+
+**{name_b}'s Conflict Style**
+- Do they explode, withdraw, or become passive-aggressive?
+- How do they express anger or frustration?
+- What do they need during conflict?
+
+**A Typical Argument Scenario 典型吵架场景**
+Write a vivid hypothetical scenario of how a disagreement might unfold between them, based on their charts.
+
+## 3. Resolution Patterns 和解模式
+
+### Who Apologizes First? 谁先道歉？
+Based on Day Master strength and Ten Gods, analyze:
+- Who is more likely to break the silence?
+- Who holds grudges longer?
+- What does each person need to hear to feel resolved?
+
+### How They Make Up 如何和好
+- Their natural reconciliation style
+- What works and what doesn't
+- How to repair after major conflicts
+
+## 4. Daily Life Compatibility 日常相处
+
+### Living Together 一起生活
+- How do their rhythms align?
+- Decision-making dynamics
+- Household responsibility distribution tendencies
+
+### Supporting Each Other 相互支持
+- How can {name_a} best support {name_b}?
+- How can {name_b} best support {name_a}?
+- What each person needs but might not ask for
+
+## 5. Communication Advice 沟通建议
+
+Provide specific, actionable advice for:
+- How to improve daily communication
+- How to prevent conflicts from escalating
+- How to create a safe space for difficult conversations
+- Key phrases or approaches that work for this pairing
+
+{"让他们看到沟通的希望和改善的可能性，强调每对情侣都可以学习更好的沟通方式。" if reading_mode == "gentle" else "直接指出他们沟通中可能存在的问题，比如'你们可能经常因为钱吵架'或'一方太强势导致另一方压抑'。"}
+"""
+
+        elif section_type == 'wealth_career':
+            specific_prompt = f"""
+## TASK: Write Chapter 4 - Wealth & Career Together (财运与事业配合)
+
+{context_str}
+
+### REQUIRED ANALYSIS:
+
+## 1. Individual Financial Profiles 各自的财运特点
+
+### {name_a}'s Wealth Profile
+- Wealth stars in the chart (正财/偏财 position and strength)
+- Natural relationship with money
+- Earning style: steady income vs. windfall opportunities
+- Spending and saving tendencies
+- Financial strengths and weaknesses
+
+### {name_b}'s Wealth Profile
+- Same analysis for {name_b}
+- Wealth stars position and strength
+- Earning, spending, and saving patterns
+
+## 2. Combined Financial Energy 共同财运
+
+### Wealth Synergy 财运协同
+- Do their wealth stars support each other?
+- Combined five elements effect on family wealth
+- Who is better at earning? Who is better at managing?
+- Potential financial blind spots as a couple
+
+### Financial Roles 财务角色分配
+Based on their charts:
+- Who should handle investments?
+- Who should manage daily expenses?
+- Who is the risk-taker vs. the conservative one?
+- How to balance different money attitudes?
+
+## 3. Career Compatibility 事业配合
+
+### Working Together 一起工作
+If they were to work together or run a business:
+- Would they complement each other?
+- What roles would suit each person?
+- Potential power struggles or collaboration issues
+
+### Supporting Each Other's Careers 支持对方的事业
+- How can {name_a} support {name_b}'s career?
+- How can {name_b} support {name_a}'s career?
+- Timing considerations for major career moves
+
+## 4. Major Financial Decisions 重大财务决策
+
+### Property and Investments 房产与投资
+- Best timing for major purchases based on luck cycles
+- What types of investments suit this couple?
+- Real estate considerations
+
+### Business Ventures 创业合作
+- Should they start a business together?
+- What industries would suit them as a couple?
+- Partnership dynamics and potential issues
+
+## 5. Wealth-Building Strategy as a Couple 夫妻财富策略
+
+### Short-term (1-3 years) 短期策略
+- Immediate financial focus areas
+- Quick wins for this pairing
+
+### Medium-term (3-10 years) 中期策略
+- Major milestones to aim for
+- Investment directions
+
+### Long-term (10+ years) 长期策略
+- Retirement planning considerations
+- Wealth preservation for this combination
+
+## 6. Financial Advice 财务建议
+
+Specific recommendations for:
+- How to handle money disagreements
+- Joint vs. separate accounts considerations
+- Key financial habits to develop together
+- Warning signs to watch for
+
+{"强调他们共同创造财富的潜力，用积极的视角看待财务配合。" if reading_mode == "gentle" else "直接指出财务上可能的问题，比如'一方可能大手大脚'、'容易因为钱吵架'、'某些年份要特别注意破财'。"}
+"""
+
+        elif section_type == 'love_marriage':
+            specific_prompt = f"""
+## TASK: Write Chapter 5 - Love & Marriage Stability (感情与婚姻稳定性)
+
+{context_str}
+
+### GENDER-SPECIFIC REMINDER:
+- For {name_a} ({bazi_a.get('gender', 'unknown')}): Apply correct relationship star rules
+- For {name_b} ({bazi_b.get('gender', 'unknown')}): Apply correct relationship star rules
+
+### REQUIRED ANALYSIS:
+
+## 1. Spouse Palace Analysis 配偶宫详解
+
+### {name_a}'s Spouse Palace (Day Branch: {bazi_a.get('pillars', {}).get('day', {}).get('zhi', 'N/A')})
+- What does this reveal about their ideal partner?
+- How do they naturally behave in marriage?
+- Any 空亡 (void), 刑冲 (clash/punishment) to note?
+- What kind of spouse energy do they attract?
+
+### {name_b}'s Spouse Palace (Day Branch: {bazi_b.get('pillars', {}).get('day', {}).get('zhi', 'N/A')})
+- Same analysis for {name_b}
+
+### Spouse Palace Interaction 配偶宫互动
+- How do their spouse palaces interact with each other?
+- Any 合 (combination) or 冲 (clash)?
+- What does this mean for marital harmony?
+
+## 2. Relationship Stars Analysis 婚恋星分析
+
+### {name_a}'s Relationship Stars
+Based on gender:
+- Where are the key relationship stars?
+- Are they strong or weak?
+- What type of partner do they attract?
+
+### {name_b}'s Relationship Stars
+- Same analysis for {name_b}
+
+### Cross-Analysis 交叉分析
+- Does {name_a} fit what {name_b}'s chart indicates they need?
+- Does {name_b} fit what {name_a}'s chart indicates they need?
+- Are they each other's "type" according to BaZi?
+
+## 3. Romantic Patterns 感情模式
+
+### Attraction Dynamics 吸引力动态
+- What keeps the spark alive?
+- Physical and emotional chemistry indicators
+- Long-term attraction sustainability
+
+### Emotional Needs 情感需求
+- What does {name_a} need emotionally?
+- What does {name_b} need emotionally?
+- Can they meet each other's needs?
+
+### Intimacy Compatibility 亲密关系
+- Energy alignment in intimate matters
+- Potential mismatches and solutions
+- How to maintain connection over time
+
+## 4. Marriage Stability Indicators 婚姻稳定性指标
+
+### Positive Indicators 有利因素
+List all factors supporting marriage stability:
+- Harmonious combinations
+- Complementary elements
+- Supportive luck cycles
+
+### Challenge Indicators 挑战因素
+List factors that may challenge the marriage:
+- Any 刑冲破害 between charts
+- Problematic Ten Gods patterns
+- Timing challenges
+
+### Stability Assessment 稳定性评估
+Overall assessment of marriage longevity:
+- First marriage success probability
+- Key years that may be challenging
+- How to strengthen the foundation
+
+## 5. Children & Family 子女与家庭
+
+### Children Indicators 子女缘分
+Based on both charts:
+- Overall fertility indicators
+- Best timing for children
+- What kind of parents would they be?
+
+### Family Dynamics 家庭关系
+- In-law relationships potential
+- Extended family harmony
+- Creating their own family culture
+
+## 6. Marriage Advice 婚姻建议
+
+### Before Marriage 婚前建议
+- What to discuss before committing
+- Potential deal-breakers to address
+- How to prepare for marriage
+
+### During Marriage 婚后建议
+- How to maintain love and respect
+- Key habits for a happy marriage
+- How to navigate difficult periods
+
+### Preventing Problems 预防问题
+- Red flags to watch for
+- When to seek help
+- How to keep the marriage strong
+
+{"强调他们感情的美好之处，给他们对婚姻的信心和希望。" if reading_mode == "gentle" else "直接指出可能影响婚姻稳定的因素，比如'某方可能有外遇倾向'、'第一段婚姻可能不稳定'、'某些年份是婚姻危险期'。"}
+"""
+
+        elif section_type == 'forecast_2026':
+            specific_prompt = f"""
+## TASK: Write Chapter 6 - 2026 Forecast & Harmony Tips (2026流年预测与和谐建议)
+
+{context_str}
+
+### REQUIRED ANALYSIS:
+
+## 1. 2026 丙午年 (Fire Horse Year) Overview
+
+### How 2026 Affects {name_a}
+- How does 丙午 interact with {name_a}'s Day Master?
+- Any 冲合 with {name_a}'s branches?
+- Key themes for {name_a} in 2026
+- Opportunities and challenges
+
+### How 2026 Affects {name_b}
+- How does 丙午 interact with {name_b}'s Day Master?
+- Any 冲合 with {name_b}'s branches?
+- Key themes for {name_b} in 2026
+- Opportunities and challenges
+
+## 2. 2026 as a Couple 作为夫妻的2026年
+
+### Relationship Energy in 2026 感情运势
+- How does 2026 affect their relationship?
+- Is it a year to deepen commitment or navigate challenges?
+- Key relationship themes for this year
+
+### Combined Luck Assessment 综合运势
+- Areas where both benefit
+- Areas requiring joint attention
+- Overall year rating for this couple
+
+## 3. Month-by-Month Guidance 逐月指导
+
+Provide brief guidance for key months:
+
+**寅月 (Feb 4 - Mar 5)**: 
+- Relationship energy
+- Key advice
+
+**卯月 (Mar 6 - Apr 4)**:
+**辰月 (Apr 5 - May 5)**:
+**巳月 (May 6 - Jun 5)**:
+**午月 (Jun 6 - Jul 6)**: [Double Fire - important month!]
+**未月 (Jul 7 - Aug 7)**:
+**申月 (Aug 8 - Sep 7)**:
+**酉月 (Sep 8 - Oct 7)**:
+**戌月 (Oct 8 - Nov 7)**:
+**亥月 (Nov 8 - Dec 6)**:
+**子月 (Dec 7 - Jan 5)**: [子午冲 if applicable!]
+**丑月 (Jan 6 - Feb 3 2027)**:
+
+## 4. Important Dates & Decisions 重要日期与决策
+
+### Best Timing for Major Events 重要事件吉时
+If they're planning in 2026:
+- Wedding/engagement best months
+- Moving in together
+- Major purchases
+- Travel together
+
+### Dates to Be Careful 需谨慎的日期
+- Months to avoid major decisions
+- Times when conflict is more likely
+- How to navigate difficult periods
+
+## 5. Harmony Enhancement Tips 和谐增进建议
+
+### Five Elements Adjustments 五行调整
+Based on their combined chart:
+- What elements benefit their relationship?
+- Colors to incorporate
+- Directions that support harmony
+
+### Practical Harmony Tips 实用和谐建议
+- Daily habits to strengthen bond
+- Weekly/monthly rituals
+- How to handle 2026's challenging moments
+
+### Communication Focus 沟通重点
+- Key topics to discuss in 2026
+- How to support each other through changes
+- Building stronger foundations
+
+## 6. Long-term Outlook 长期展望
+
+### Beyond 2026 展望未来
+- How does 2026 set up 2027 and beyond?
+- Long-term relationship trajectory
+- Major milestone years to anticipate
+
+### Final Blessing 最终祝福
+End with:
+- Affirmation of their connection
+- Key strengths to remember
+- Encouragement for the journey ahead
+
+{"以温暖积极的祝福结束，让他们对未来充满期待。" if reading_mode == "gentle" else "实事求是地告诉他们2026年可能面临的挑战，以及具体的化解方法。不要只说好听的，要给出实用的预警和建议。"}
+"""
+
+        else:
+            return jsonify({"error": f"Unknown marriage section type: {section_type}"}), 400
+
+        # 调用 AI
+        print(f"Calling AI for marriage section: {section_type}")
+        ai_result = ask_ai(base_system_prompt, specific_prompt)
+        
+        if ai_result and 'choices' in ai_result:
+            content = ai_result['choices'][0]['message']['content']
+            print(f"Success! Marriage section content length: {len(content)}")
+            return jsonify({"content": content})
+        elif ai_result and 'error' in ai_result:
+            print(f"AI Error: {ai_result}")
+            return jsonify(ai_result), 500
+        else:
+            print(f"Unknown AI response: {ai_result}")
+            return jsonify({"error": "AI response format invalid"}), 500
+
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in generate_marriage_section: {error_msg}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+
+@app.route('/api/finalize-marriage-report', methods=['OPTIONS'])
+def finalize_marriage_options_handler():
+    return '', 204
+
+
+@app.route('/api/finalize-marriage-report', methods=['POST'])
+def finalize_marriage_report():
+    """合婚报告完成处理：AI自检 + 客户消息生成"""
+    try:
+        print("=== Finalize Marriage Report Request ===")
+        
+        req_data = request.json
+        if not req_data:
+            return jsonify({"error": "No JSON received"}), 400
+        
+        full_report = req_data.get('full_report', '')
+        bazi_a = req_data.get('bazi_a', {})
+        bazi_b = req_data.get('bazi_b', {})
+        scores = req_data.get('scores', {})
+        language = req_data.get('language', 'en')
+        
+        name_a = bazi_a.get('name', 'Partner A')
+        name_b = bazi_b.get('name', 'Partner B')
+        
+        if not full_report:
+            return jsonify({"error": "No report content provided"}), 400
+        
+        print(f"Processing marriage report for: {name_a} & {name_b}")
+        print(f"Report length: {len(full_report)} characters")
+        
+        result = {
+            "couple_names": f"{name_a} & {name_b}",
+            "validation": None,
+            "customer_message": None
+        }
+        
+        # 1. AI 自检
+        print("Step 1: Validating marriage report...")
+        try:
+            validation_prompt = f"""
+You are a senior BaZi marriage compatibility expert reviewer.
+Review this marriage compatibility report for accuracy.
+
+## COUPLE DATA:
+- Partner A: {name_a} ({bazi_a.get('gender', 'unknown')})
+  - Day Master: {bazi_a.get('dayMaster', 'N/A')} ({bazi_a.get('dayMasterElement', '')})
+  - Four Pillars: {bazi_a.get('pillars', {}).get('year', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('month', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('day', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('hour', {}).get('ganZhi', '?')}
+
+- Partner B: {name_b} ({bazi_b.get('gender', 'unknown')})
+  - Day Master: {bazi_b.get('dayMaster', 'N/A')} ({bazi_b.get('dayMasterElement', '')})
+  - Four Pillars: {bazi_b.get('pillars', {}).get('year', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('month', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('day', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('hour', {}).get('ganZhi', '?')}
+
+- Compatibility Score: {scores.get('total', 'N/A')}/100
+
+## REPORT TO REVIEW (first 6000 chars):
+{full_report[:6000]}
+
+## TASK:
+Check for:
+1. Correct gender-based interpretations
+2. Accurate Day Master analysis for both
+3. Logical compatibility assessments
+4. Consistent use of names (not "Partner A/B")
+5. Any factual errors
+
+Respond in JSON:
+{{
+    "status": "PASS" or "NEEDS_REVIEW",
+    "confidence_score": 0-100,
+    "summary": "Brief summary",
+    "issues_found": [{{"severity": "high/medium/low", "description": "..."}}],
+    "recommendation": "..."
+}}
+"""
+            validation_result = ask_ai(
+                "You are a BaZi marriage expert reviewer. Respond ONLY in valid JSON.",
+                validation_prompt
+            )
+            
+            if validation_result and 'choices' in validation_result:
+                content = validation_result['choices'][0]['message']['content']
+                content = content.strip()
+                if content.startswith('```json'):
+                    content = content[7:]
+                if content.startswith('```'):
+                    content = content[3:]
+                if content.endswith('```'):
+                    content = content[:-3]
+                result["validation"] = json.loads(content.strip())
+            else:
+                result["validation"] = {"status": "SKIPPED", "summary": "Validation skipped"}
+                
+        except Exception as e:
+            print(f"Validation error: {e}")
+            result["validation"] = {"status": "SKIPPED", "summary": f"Error: {str(e)}"}
+        
+        # 2. 生成客户消息
+        print("Step 2: Generating customer message...")
+        try:
+            pillars_a = bazi_a.get('pillars', {})
+            pillars_b = bazi_b.get('pillars', {})
+            
+            bazi_str_a = f"{pillars_a.get('year', {}).get('ganZhi', '?')} {pillars_a.get('month', {}).get('ganZhi', '?')} {pillars_a.get('day', {}).get('ganZhi', '?')} {pillars_a.get('hour', {}).get('ganZhi', '?')}"
+            bazi_str_b = f"{pillars_b.get('year', {}).get('ganZhi', '?')} {pillars_b.get('month', {}).get('ganZhi', '?')} {pillars_b.get('day', {}).get('ganZhi', '?')} {pillars_b.get('hour', {}).get('ganZhi', '?')}"
+            
+            marriage_summary = f"""
+Couple: {name_a} & {name_b}
+Compatibility Score: {scores.get('total', 'N/A')}/100 ({scores.get('level', {}).get('name', 'N/A')})
+
+{name_a}'s Four Pillars: {bazi_str_a}
+{name_a}'s Day Master: {bazi_a.get('dayMasterFull', bazi_a.get('dayMaster', 'N/A'))}
+
+{name_b}'s Four Pillars: {bazi_str_b}
+{name_b}'s Day Master: {bazi_b.get('dayMasterFull', bazi_b.get('dayMaster', 'N/A'))}
+"""
+            
+            report_preview = full_report[:3000] if len(full_report) > 3000 else full_report
+            
+            if language == "zh":
+                message_prompt = f"""
+请为这对情侣生成一段专业、温暖的消息，告知他们的合婚分析报告已完成。
+
+合婚摘要：
+{marriage_summary}
+
+报告内容预览：
+{report_preview}
+
+要求：
+1. 用中文撰写
+2. 语气专业但温暖
+3. 简要概括报告中的3-5个关键发现（从报告内容中提取）
+4. 给出积极的祝福
+5. 告知如有问题可以随时咨询
+6. 长度200-400字
+7. 不要提及任何链接
+
+直接输出消息内容。
+"""
+            else:
+                lang_name = LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS['en'])['name']
+                message_prompt = f"""
+Generate a professional, warm message for this couple informing them their marriage compatibility reading is complete.
+
+Summary:
+{marriage_summary}
+
+Report Preview:
+{report_preview}
+
+Requirements:
+1. Write in {lang_name}
+2. Professional but warm tone
+3. Summarize 3-5 key findings from the report
+4. Provide positive blessings for their relationship
+5. Let them know they can reach out with questions
+6. 150-300 words
+7. Do NOT mention any links
+
+Output the message directly.
+"""
+
+            msg_result = ask_ai(
+                "You are a professional destiny reading consultant communicating with a valued couple.",
+                message_prompt
+            )
+            
+            if msg_result and 'choices' in msg_result:
+                result["customer_message"] = msg_result['choices'][0]['message']['content']
+            else:
+                result["customer_message"] = f"Your marriage compatibility report for {name_a} & {name_b} is ready!"
+                
+        except Exception as e:
+            print(f"Customer message error: {e}")
+            result["customer_message"] = f"Your marriage compatibility report for {name_a} & {name_b} is ready!"
+        
+        print("=== Finalize Marriage Report Complete ===")
+        return jsonify(result)
+        
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in finalize_marriage_report: {error_msg}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
