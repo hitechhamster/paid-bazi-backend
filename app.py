@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
@@ -35,6 +34,7 @@ LANGUAGE_PROMPTS = {
         "name": "English",
         "instruction": "Write your response in fluent, natural English.",
         "pronoun_rule": "Address the user as 'you'. Maintain a consistent professional yet warm tone.",
+        "pronoun_rule_nonbinary": "Use 'they/them/their' pronouns consistently. Never use 'he/him/his' or 'she/her/hers'. Address the user as 'you'.",
         "style_gentle": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
         "style_authentic": "Use a direct, authoritative tone like a traditional Chinese fortune-telling master who tells it like it is - no sugarcoating.",
         "opening": "In this chapter, I will analyze for you...",
@@ -44,6 +44,7 @@ LANGUAGE_PROMPTS = {
         "name": "中文",
         "instruction": "请用流畅自然的中文撰写。",
         "pronoun_rule": "必须统一使用'您'（尊称）来称呼用户，切勿使用'你'。保持语气的一致性。",
+        "pronoun_rule_nonbinary": "统一使用'您'称呼用户。第三人称使用'Ta'或直接用客户姓名，绝对不要使用'他'或'她'。",
         "style_gentle": "用温暖睿智的语气，像一位通晓古今的智者在与朋友分享人生智慧。",
         "style_authentic": "用传统命理师的直接语气，像老师傅算命一样直言不讳，好就是好，不好就直说，不绕弯子。",
         "opening": "本章为您分析...",
@@ -53,6 +54,7 @@ LANGUAGE_PROMPTS = {
         "name": "Deutsch",
         "instruction": "Schreiben Sie Ihre Antwort in flüssigem, natürlichem Deutsch.",
         "pronoun_rule": "Verwenden Sie KONSEQUENT die Höflichkeitsform 'Sie' und 'Ihre' (formal). Vermeiden Sie unbedingt das 'Du' (informal). Dies ist eine strikte Regel.",
+        "pronoun_rule_nonbinary": "Verwenden Sie geschlechtsneutrale Formulierungen. Vermeiden Sie 'er/sie' und verwenden Sie stattdessen den Namen der Person oder neutrale Umschreibungen.",
         "style_gentle": "Verwenden Sie einen warmen, einfühlsamen Ton wie ein weiser Mentor, der alte Weisheiten mit einem modernen Freund teilt.",
         "style_authentic": "Verwenden Sie einen direkten, autoritativen Ton wie ein traditioneller chinesischer Wahrsagemeister, der die Dinge beim Namen nennt.",
         "opening": "In diesem Kapitel analysiere ich für Sie...",
@@ -62,6 +64,7 @@ LANGUAGE_PROMPTS = {
         "name": "Español",
         "instruction": "Escribe tu respuesta en español fluido y natural.",
         "pronoun_rule": "Utiliza consistentemente la forma 'Usted' (formal) para dirigirte al usuario. No uses 'Tú'.",
+        "pronoun_rule_nonbinary": "Utiliza lenguaje inclusivo y neutral. Evita 'él/ella' y usa el nombre de la persona o formulaciones neutras como 'esta persona'.",
         "style_gentle": "Usa un tono cálido y perspicaz, como un mentor sabio compartiendo sabiduría ancestral con un amigo moderno.",
         "style_authentic": "Usa un tono directo y autoritario, como un maestro tradicional chino de adivinación que dice las cosas como son.",
         "opening": "En este capítulo, analizo para usted...",
@@ -71,6 +74,7 @@ LANGUAGE_PROMPTS = {
         "name": "Français",
         "instruction": "Rédigez votre réponse dans un français fluide et naturel.",
         "pronoun_rule": "Utilisez systématiquement le vouvoiement ('Vous'). Ne tutoyez jamais l'utilisateur.",
+        "pronoun_rule_nonbinary": "Utilisez un langage neutre et inclusif. Évitez 'il/elle' et utilisez le nom de la personne ou des formulations neutres comme 'cette personne'.",
         "style_gentle": "Utilisez un ton chaleureux et perspicace, comme un sage mentor partageant une sagesse ancestrale avec un ami moderne.",
         "style_authentic": "Utilisez un ton direct et autoritaire, comme un maître traditionnel chinois de divination qui dit les choses telles qu'elles sont.",
         "opening": "Dans ce chapitre, j'analyse pour vous...",
@@ -118,6 +122,109 @@ GENDER_INSTRUCTIONS = {
 - 比劫（比肩/劫财）：代表姐妹、女性朋友、竞争者
 - 食伤（食神/伤官）：代表子女、才华，但伤官克正官，对婚姻有挑战
 - 日支为配偶宫：分析丈夫的特征和婚姻状况"""
+        }
+    },
+    "non-binary": {
+        "en": {
+            "pronoun": "they/them/their",
+            "bazi_rules": """## GENDER-INCLUSIVE INTERPRETATION GUIDELINES
+
+**IMPORTANT**: This client identifies as non-binary, transgender, or prefers a gender-neutral reading.
+Use inclusive, respectful language throughout the entire report.
+
+### Strict Language Rules:
+- Use "they/them/their" pronouns CONSISTENTLY throughout the entire report
+- NEVER use "he," "she," "his," "her," "him," "hers" under any circumstances
+- Use "this person," "the client," or their actual name instead of gendered terms
+- AVOID phrases like "as a man..." or "as a woman..." or "for males/females..."
+- Do NOT use terms like "男命", "女命", "乾造", "坤造"
+
+### Relationship Analysis - DUAL INTERPRETATION APPROACH:
+Traditional BaZi assigns different relationship meanings based on birth sex. Since this client 
+prefers a gender-neutral reading, you MUST provide BOTH perspectives and let them choose what resonates:
+
+**Perspective A - Wealth Stars (財星) as Relationship Indicators:**
+- 正財 (Direct Wealth): May represent a stable, nurturing, supportive partner
+- 偏財 (Indirect Wealth): May represent a more dynamic, financially-oriented partner
+- Analyze: Where are Wealth Stars? Strong or weak? What partner qualities do they suggest?
+
+**Perspective B - Officer Stars (官殺) as Relationship Indicators:**
+- 正官 (Direct Officer): May represent a structured, responsible, authoritative partner
+- 七殺 (Seven Killings): May represent a passionate, intense, powerful partner
+- Analyze: Where are Officer Stars? Strong or weak? What partner qualities do they suggest?
+
+**After presenting BOTH perspectives:**
+- Note which interpretation appears stronger based on chart structure
+- Describe ideal partner qualities in COMPLETELY NEUTRAL terms
+- Use "partner," "significant other," "spouse" - NEVER "husband," "wife," "boyfriend," "girlfriend"
+- Focus on: personality traits, values, emotional needs, relationship dynamics
+
+### Spouse Palace (Day Branch) Analysis:
+- Analyze the Day Branch for partnership qualities WITHOUT gendering
+- Describe what kind of ENERGY or QUALITIES the ideal partner may have
+- Focus on: temperament, communication style, shared values, emotional compatibility
+
+### Career and Wealth Analysis:
+- Analyze purely based on chart structure
+- NO gendered career assumptions or stereotypes
+- Focus entirely on individual talents, strengths, and opportunities
+
+### Writing Style:
+- Warm, respectful, and affirming throughout
+- Celebrate their unique chart without any gendered assumptions
+- Focus on universal human experiences: growth, love, success, challenges, self-discovery
+- Make the reading feel personal and validating"""
+        },
+        "zh": {
+            "pronoun": "Ta/TA/您",
+            "bazi_rules": """## 性别包容解读指南
+
+**重要提示**：这位客户认同为非二元性别、跨性别，或希望使用性别中立的解读方式。
+请在整份报告中使用包容、尊重的语言。
+
+### 严格用语规则：
+- 统一使用"您"作为第二人称称呼
+- 第三人称必须使用"Ta"或直接用客户姓名
+- 绝对禁止使用"他"或"她"
+- 绝对禁止使用"作为男性..."或"作为女性..."这类表述
+- 绝对禁止使用"男命"、"女命"、"乾造"、"坤造"等传统性别术语
+- 使用"这位客户"、"命主"等中性称谓
+
+### 婚恋分析 - 双重解读模式：
+传统八字根据出生性别分配不同的感情含义。由于客户希望性别中立的解读，
+您必须同时提供两种视角，让客户自行选择更契合的解读：
+
+**视角A - 从财星角度解读感情关系：**
+- 正财：可能代表稳定、体贴、支持型的伴侣
+- 偏财：可能代表活泼、多变、外向型的伴侣
+- 分析：财星在哪里？强还是弱？暗示什么样的伴侣特质？
+
+**视角B - 从官杀角度解读感情关系：**
+- 正官：可能代表有责任感、稳重、有担当的伴侣
+- 七杀：可能代表热情、强势、有魄力的伴侣
+- 分析：官杀在哪里？强还是弱？暗示什么样的伴侣特质？
+
+**呈现两种视角后：**
+- 指出哪种解读在命盘结构上更为突出
+- 用完全中性的语言描述理想伴侣特质
+- 使用"伴侣"、"另一半"、"爱人" - 绝不使用"丈夫"、"妻子"、"男友"、"女友"
+- 聚焦于：性格特点、价值观、情感需求、相处模式
+
+### 配偶宫（日支）分析：
+- 分析日支的伴侣特质时不要带入性别
+- 描述理想伴侣可能具有的「能量」或「特质」
+- 聚焦于：性情、沟通方式、共同价值观、情感契合度
+
+### 事业和财运分析：
+- 完全基于命盘结构分析
+- 不带任何性别刻板印象的职业假设
+- 完全聚焦于个人才能、优势和机遇
+
+### 整体写作风格：
+- 全文保持温暖、尊重、肯定的语气
+- 不带任何性别假设地解读命盘
+- 聚焦于普世的人生主题：成长、爱情、成功、挑战、自我发现
+- 让解读感觉个人化且具有认同感"""
         }
     }
 }
@@ -222,12 +329,11 @@ def get_gender_instruction(gender, lang_code):
         return GENDER_INSTRUCTIONS["male"].get(rule_lang, GENDER_INSTRUCTIONS["male"]["en"])
     elif gender == "female":
         return GENDER_INSTRUCTIONS["female"].get(rule_lang, GENDER_INSTRUCTIONS["female"]["en"])
+    elif gender == "non-binary":
+        return GENDER_INSTRUCTIONS["non-binary"].get(rule_lang, GENDER_INSTRUCTIONS["non-binary"]["en"])
     else:
-        default = GENDER_INSTRUCTIONS["male"].get(rule_lang, GENDER_INSTRUCTIONS["male"]["en"])
-        return {
-            "pronoun": "they/them/their",
-            "bazi_rules": f"Gender not specified. Defaulting to general interpretation:\n{default['bazi_rules']}"
-        }
+        # 未知性别默认使用非二元/中性解读，更加包容
+        return GENDER_INSTRUCTIONS["non-binary"].get(rule_lang, GENDER_INSTRUCTIONS["non-binary"]["en"])
 
 
 def get_mode_config(mode):
@@ -255,12 +361,15 @@ def format_bazi_context(data):
         zodiac = data.get('zodiac', {})
         shen_sha = data.get('shenSha', {})
         
+        # 性别显示 - 支持非二元性别
         if gender == 'male':
             gender_display = "Male (男命/乾造)"
         elif gender == 'female':
             gender_display = "Female (女命/坤造)"
+        elif gender == 'non-binary':
+            gender_display = "Non-binary / Gender-neutral (性别中立解读)"
         else:
-            gender_display = "Unknown"
+            gender_display = "Not specified (未指定)"
         
         def format_pillar(name_cn, name_en, p):
             if not p:
@@ -385,10 +494,16 @@ def format_bazi_summary(data):
     
     bazi_str = f"{pillars.get('year', {}).get('ganZhi', '?')} {pillars.get('month', {}).get('ganZhi', '?')} {pillars.get('day', {}).get('ganZhi', '?')} {pillars.get('hour', {}).get('ganZhi', '?')}"
     
+    gender = data.get('gender', 'Unknown')
+    if gender == 'non-binary':
+        gender_display = 'Non-binary'
+    else:
+        gender_display = gender.capitalize()
+    
     summary = f"""
 Four Pillars (四柱): {bazi_str}
 Day Master (日主): {data.get('dayMasterFull', data.get('dayMaster', 'N/A'))}
-Gender (性别): {data.get('gender', 'Unknown').capitalize()}
+Gender (性别): {gender_display}
 Birthplace: {data.get('birthInfo', {}).get('location', 'Unknown')}
 True Solar Time: {data.get('birthInfo', {}).get('solarTime', 'N/A')}
 """
@@ -402,6 +517,7 @@ def get_language_config(lang_code, custom_lang=None):
             "name": custom_lang,
             "instruction": f"Write your response in fluent, natural {custom_lang}.",
             "pronoun_rule": "Address the user in a formal and respectful manner consistent with this language.",
+            "pronoun_rule_nonbinary": "Use gender-neutral language consistently. Avoid gendered pronouns.",
             "style_gentle": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
             "style_authentic": "Use a direct, authoritative tone like a traditional fortune-telling master.",
             "opening": f"Analysis for you in {custom_lang}...",
@@ -456,6 +572,17 @@ def ask_ai(system_prompt, user_prompt):
 def validate_report(full_report, bazi_data, language):
     """让 AI 检查报告是否有错误"""
     
+    gender = bazi_data.get('gender', 'unknown')
+    gender_note = ""
+    if gender == "non-binary":
+        gender_note = """
+IMPORTANT: This client selected NON-BINARY gender. Check that:
+- Report uses 'they/them' pronouns (English) or 'Ta' (Chinese)
+- Report does NOT use 'he/she', '他/她', '男命/女命'
+- Relationship analysis provides DUAL interpretation (both Wealth and Officer star perspectives)
+- Language is gender-neutral throughout
+"""
+    
     validation_prompt = f"""
 You are a senior BaZi (Chinese Four Pillars of Destiny) expert reviewer. 
 Your task is to review a generated BaZi report for accuracy and quality.
@@ -470,6 +597,7 @@ Your task is to review a generated BaZi report for accuracy and quality.
   - Day: {bazi_data.get('pillars', {}).get('day', {}).get('ganZhi', 'N/A')}
   - Hour: {bazi_data.get('pillars', {}).get('hour', {}).get('ganZhi', 'N/A')}
 - Five Elements Count: {json.dumps(bazi_data.get('fiveElements', {}), ensure_ascii=False)}
+{gender_note}
 
 ## GENERATED REPORT TO REVIEW:
 {full_report[:8000]}  
@@ -481,6 +609,7 @@ Your task is to review a generated BaZi report for accuracy and quality.
 3. Check if element analysis matches the five elements count
 4. Check if there are any obvious factual errors or contradictions
 5. Check if the language and tone are appropriate
+6. If gender is non-binary, verify gender-neutral language is used consistently
 
 ## RESPONSE FORMAT:
 Respond in JSON format ONLY:
@@ -624,19 +753,19 @@ The Qi Flow Team
 def health_check():
     return jsonify({
         "status": "running", 
-        "version": "5.2-with-marriage", 
+        "version": "5.2-gender-inclusive", 
         "api_key_set": bool(OPENROUTER_API_KEY),
         "endpoints": {
             "personal_report": "/api/generate-section",
             "marriage_report": "/api/generate-marriage-section"
-        }
+        },
+        "supported_genders": ["male", "female", "non-binary"]
     }), 200
 
 
 @app.route('/api/generate-section', methods=['OPTIONS'])
 def options_handler():
     return '', 204
-
 
 @app.route('/api/generate-section', methods=['POST'])
 def generate_section():
@@ -669,7 +798,12 @@ def generate_section():
 
         current_opening = lang_config.get('opening', "In this chapter...")
         current_closing = lang_config.get('closing', "End of chapter.")
-        current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
+        
+        # 根据性别选择合适的代词规则
+        if gender == "non-binary":
+            current_pronoun_rule = lang_config.get('pronoun_rule_nonbinary', lang_config.get('pronoun_rule', "Address the user formally."))
+        else:
+            current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
         
         if reading_mode == "authentic":
             current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
@@ -686,6 +820,31 @@ def generate_section():
         special_palaces = bazi_json.get('specialPalaces', {})
         five_elements = bazi_json.get('fiveElements', {})
         yun_info = bazi_json.get('yunInfo', {})
+
+        # ================= 非二元性别额外指令 =================
+        nonbinary_extra_instruction = ""
+        if gender == "non-binary":
+            nonbinary_extra_instruction = """
+## ⚠️ CRITICAL: GENDER-NEUTRAL LANGUAGE REQUIREMENT ⚠️
+
+This client has selected NON-BINARY gender. You MUST follow these rules STRICTLY:
+
+**ABSOLUTELY FORBIDDEN - DO NOT USE:**
+- English: "he", "him", "his", "she", "her", "hers", "himself", "herself"
+- Chinese: "他", "她", "男命", "女命", "乾造", "坤造", "丈夫", "妻子", "男友", "女友"
+- Any gendered relationship terms
+
+**REQUIRED - USE THESE INSTEAD:**
+- English: "they", "them", "their", "themselves", "this person", "the client", or use client's actual name
+- Chinese: "Ta", "TA", "这位客户", "命主", "伴侣", "另一半", "爱人"
+
+**FOR RELATIONSHIP ANALYSIS:**
+- MUST provide DUAL interpretation (both Wealth Star AND Officer Star perspectives)
+- Let the client choose which resonates more
+- Use "partner", "significant other", "spouse" - NEVER gendered terms
+
+This is NON-NEGOTIABLE. Violations will make the report inappropriate for this client.
+"""
 
         # ================= 核心 System Prompt =================
         base_system_prompt = f"""
@@ -712,6 +871,8 @@ This rule is NON-NEGOTIABLE. Violations will break the PDF rendering.
 {mode_config['interpretation_style']}
 
 {mode_config['ethics']}
+
+{nonbinary_extra_instruction}
 
 ## CLIENT INFORMATION - CRITICAL
 
@@ -860,6 +1021,7 @@ You have access to COMPLETE chart data including:
 """
 
         elif section_type == 'wealth':
+            # 财运章节 - 根据性别调整
             if gender == "female":
                 wealth_gender_note = """
 ### GENDER-SPECIFIC NOTE FOR FEMALE CHART 女命特别说明
@@ -870,6 +1032,16 @@ For women, Wealth Stars (财星) primarily represent:
 
 Focus this chapter on her CAREER and FINANCIAL potential.
 Officer Stars analysis for relationships belongs in the Love chapter.
+"""
+            elif gender == "non-binary":
+                wealth_gender_note = """
+### GENDER-NEUTRAL NOTE 性别中立说明
+For this client who prefers gender-neutral reading:
+- Focus purely on CAREER and FINANCIAL aspects
+- Analyze Wealth Stars for money-making ability and financial patterns
+- Do NOT connect Wealth Stars to romantic relationships in this chapter
+- Use gender-neutral language throughout: "they/them/their" or "Ta"
+- Romantic analysis with dual interpretation will be in the Love chapter
 """
             else:
                 wealth_gender_note = """
@@ -955,7 +1127,108 @@ Make them feel excited about their potential while being realistic about challen
         elif section_type == 'love':
             day_branch = pillars.get('day', {}).get('zhi', 'N/A')
             
-            if gender == "female":
+            # 根据性别选择不同的婚恋分析指令
+            if gender == "non-binary":
+                # 非二元性别的双重解读
+                love_specific_instruction = f"""
+### CRITICAL: GENDER-INCLUSIVE RELATIONSHIP ANALYSIS 性别包容婚恋分析
+
+This client has chosen a GENDER-NEUTRAL reading. You MUST provide DUAL INTERPRETATION.
+
+**STRICT LANGUAGE RULES - VIOLATIONS ARE NOT ACCEPTABLE:**
+- Use "they/them/their" pronouns in English
+- Use "Ta" or client's name in Chinese  
+- NEVER use: he, she, him, her, his, hers, 他, 她, husband, wife, boyfriend, girlfriend, 丈夫, 妻子, 男友, 女友
+- Use: partner, significant other, spouse, loved one, 伴侣, 另一半, 爱人
+
+**Day Branch (Spouse Palace): {day_branch}**
+
+You MUST analyze relationships from BOTH perspectives:
+
+---
+
+## INTERPRETATION A - Wealth Stars (財星) as Relationship Indicators
+
+Analyze as if Wealth Stars represent romantic attraction:
+
+### Where are the Wealth Stars?
+- Locate 正財 (Direct Wealth) and 偏財 (Indirect Wealth) in the four pillars
+- Check shiShenGan and shiShenZhi for each pillar
+
+### What Partner Qualities Do They Suggest?
+- 正財 partner energy: Stable, practical, nurturing, financially responsible, loyal
+- 偏財 partner energy: Outgoing, social, dynamic, generous, enjoys variety
+
+### Wealth Star Strength Assessment
+- Are Wealth Stars strong or weak in this chart?
+- What does this suggest about relationship patterns?
+
+### Timing Based on Wealth Star Cycles
+- Which luck cycles activate Wealth Stars?
+- When are favorable periods for meeting partners or deepening relationships?
+
+---
+
+## INTERPRETATION B - Officer Stars (官殺) as Relationship Indicators
+
+Analyze as if Officer Stars represent romantic attraction:
+
+### Where are the Officer Stars?
+- Locate 正官 (Direct Officer) and 七殺 (Seven Killings) in the four pillars
+- Check shiShenGan and shiShenZhi for each pillar
+
+### What Partner Qualities Do They Suggest?
+- 正官 partner energy: Responsible, structured, traditional, protective, career-oriented
+- 七殺 partner energy: Passionate, powerful, intense, ambitious, transformative
+
+### Officer Star Strength Assessment
+- Are Officer Stars strong or weak in this chart?
+- What does this suggest about relationship patterns?
+
+### Timing Based on Officer Star Cycles
+- Which luck cycles activate Officer Stars?
+- When are favorable periods for meeting partners or deepening relationships?
+
+---
+
+## SYNTHESIS - Bringing Both Perspectives Together
+
+After presenting both interpretations:
+
+### Which Interpretation Appears Stronger?
+Based on the chart structure (which stars are more prominent, better positioned, or in better stages), indicate which interpretation may be more relevant - but emphasize the client should trust their own resonance.
+
+### Spouse Palace Analysis (Day Branch: {day_branch})
+- Analyze the Day Branch for partnership QUALITIES without gendering
+- What ENERGY does the ideal partner bring?
+- Focus on: temperament, values, communication style, emotional needs
+
+### Universal Relationship Themes
+- Attachment style based on chart structure
+- What they need emotionally in a relationship
+- Potential relationship challenges and growth areas
+- How they express and receive love
+
+### Relationship Timing
+- Combine insights from both Wealth and Officer star cycles
+- Best periods for relationship milestones
+- Periods requiring extra attention to relationship harmony
+"""
+                love_closing_guidance = f"""
+### GENDER-INCLUSIVE CLOSING GUIDANCE:
+
+Present both interpretations with equal respect and depth. 
+
+End with an affirming message:
+- Acknowledge the validity of their identity
+- Emphasize that authentic love transcends traditional categories
+- Encourage them to trust which interpretation resonates with their lived experience
+- Provide hope and practical wisdom for finding genuine connection
+
+REMEMBER: Use "they/them/their" or "Ta" throughout. NEVER use gendered pronouns or relationship terms.
+"""
+
+            elif gender == "female":
                 love_specific_instruction = f"""
 ### CRITICAL: FEMALE CHART RELATIONSHIP ANALYSIS 女命婚恋分析 - 关键
 
@@ -983,7 +1256,25 @@ For this FEMALE client, you MUST analyze relationships using these rules:
 4. What does her spouse palace [{day_branch}] reveal about her ideal husband's personality?
 5. What luck cycles activate romance (Officer Star luck cycles)?
 """
+                if reading_mode == "authentic":
+                    love_closing_guidance = f"""
+### AUTHENTIC MODE 真实版婚恋分析要求:
+- 如果婚姻宫有刑冲，直接说"第一段感情不稳定，容易有波折"
+- 如果伤官见官（女命），直接说"对婚姻有挑战，可能经历分手或离婚"
+- 如果日支空亡，直接说"配偶宫空亡，晚婚更稳定，或婚后聚少离多"
+- 给出具体的结婚年龄建议："28-32岁结婚最合适"
+- 给出配偶的具体画像："对方可能从事金融/教育行业，性格偏内向/外向"
+
+Use correct pronouns: {gender_info['pronoun']}
+"""
+                else:
+                    love_closing_guidance = f"""
+Be warm and hopeful while being honest about challenges.
+Use correct pronouns: {gender_info['pronoun']}
+"""
+
             else:
+                # 男性
                 love_specific_instruction = f"""
 ### CRITICAL: MALE CHART RELATIONSHIP ANALYSIS 男命婚恋分析 - 关键
 
@@ -1011,12 +1302,10 @@ For this MALE client, you MUST analyze relationships using these rules:
 4. What does his spouse palace [{day_branch}] reveal about his ideal wife's personality?
 5. What luck cycles activate romance (Wealth Star luck cycles)?
 """
-
-            if reading_mode == "authentic":
-                love_closing_guidance = f"""
+                if reading_mode == "authentic":
+                    love_closing_guidance = f"""
 ### AUTHENTIC MODE 真实版婚恋分析要求:
 - 如果婚姻宫有刑冲，直接说"第一段感情不稳定，容易有波折"
-- 如果伤官见官（女命），直接说"对婚姻有挑战，可能经历分手或离婚"
 - 如果比劫夺财（男命），直接说"容易遇到竞争者，或因女人破财"
 - 如果日支空亡，直接说"配偶宫空亡，晚婚更稳定，或婚后聚少离多"
 - 给出具体的结婚年龄建议："28-32岁结婚最合适"
@@ -1024,8 +1313,8 @@ For this MALE client, you MUST analyze relationships using these rules:
 
 Use correct pronouns: {gender_info['pronoun']}
 """
-            else:
-                love_closing_guidance = f"""
+                else:
+                    love_closing_guidance = f"""
 Be warm and hopeful while being honest about challenges.
 Use correct pronouns: {gender_info['pronoun']}
 """
@@ -1082,6 +1371,21 @@ Use correct pronouns: {gender_info['pronoun']}
 """
 
         elif section_type == '2026_forecast':
+            # 2026流年预测 - 根据性别调整
+            if gender == "non-binary":
+                forecast_gender_note = """
+### GENDER-NEUTRAL FORECAST NOTE:
+- Use "they/them/their" pronouns throughout
+- For relationship predictions, mention BOTH Wealth Star and Officer Star activations
+- Let the client determine which resonates with their experience
+- Avoid any gendered language or assumptions
+"""
+            else:
+                forecast_gender_note = f"""
+### GENDER REMINDER:
+Client is {gender.upper()}. Apply correct gender-based star interpretations for all predictions.
+"""
+
             if reading_mode == "authentic":
                 forecast_mode_instruction = """
 ### AUTHENTIC MODE 真实版流年预测要求:
@@ -1102,8 +1406,7 @@ Make this feel like a practical roadmap they can actually use throughout 2026.
 ### COMPLETE CHART DATA:
 {context_str}
 
-### GENDER REMINDER:
-Client is {gender.upper()}. Apply correct gender-based star interpretations for all predictions.
+{forecast_gender_note}
 
 {forecast_mode_instruction}
 
@@ -1296,7 +1599,15 @@ def format_marriage_bazi_context(bazi_a, bazi_b):
         pillars = data.get('pillars', {})
         five_elements = data.get('fiveElements', {})
         
-        gender_display = "Male (男命)" if gender == 'male' else "Female (女命)" if gender == 'female' else "Unknown"
+        # 支持非二元性别显示
+        if gender == 'male':
+            gender_display = "Male (男命)"
+        elif gender == 'female':
+            gender_display = "Female (女命)"
+        elif gender == 'non-binary':
+            gender_display = "Non-binary (性别中立)"
+        else:
+            gender_display = "Unknown"
         
         bazi_str = f"{pillars.get('year', {}).get('ganZhi', '?')} {pillars.get('month', {}).get('ganZhi', '?')} {pillars.get('day', {}).get('ganZhi', '?')} {pillars.get('hour', {}).get('ganZhi', '?')}"
         
@@ -1384,6 +1695,66 @@ def format_compatibility_scores(scores):
 """
 
 
+def get_marriage_gender_instruction(gender_a, gender_b, lang_code):
+    """获取合婚报告的性别相关指令"""
+    rule_lang = "zh" if lang_code == "zh" else "en"
+    
+    # 检查是否有非二元性别
+    has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
+    
+    if has_nonbinary:
+        if rule_lang == "zh":
+            return """
+## 性别包容合婚指南
+
+这对伴侣中至少有一方选择了性别中立的解读方式。请遵循以下规则：
+
+### 语言规则：
+- 使用"伴侣"、"另一半"、"爱人"等中性称谓
+- 避免使用"丈夫"、"妻子"、"男方"、"女方"
+- 第三人称使用"Ta"或直接用名字
+- 避免"男命"、"女命"等术语
+
+### 分析方式：
+- 不按传统性别角色分配十神含义
+- 重点分析两人五行互补、日主配合、生肖关系
+- 配偶宫分析聚焦于伴侣特质而非性别特征
+- 尊重每段关系的独特性
+"""
+        else:
+            return """
+## GENDER-INCLUSIVE MARRIAGE ANALYSIS GUIDELINES
+
+At least one partner in this couple has selected a gender-neutral reading. Follow these rules:
+
+### Language Rules:
+- Use "partner," "significant other," "spouse" - avoid "husband," "wife"
+- Use "they/them" for any partner who selected non-binary
+- Use their actual names instead of gendered terms
+- Avoid traditional terms like "male chart," "female chart"
+
+### Analysis Approach:
+- Do not assign Ten Gods meanings based on traditional gender roles
+- Focus on Five Elements complementarity, Day Master harmony, Zodiac relationships
+- Spouse Palace analysis should focus on partner qualities, not gendered traits
+- Respect the unique nature of every relationship
+"""
+    else:
+        # 传统男女配对
+        gender_info_a = get_gender_instruction(gender_a, lang_code)
+        gender_info_b = get_gender_instruction(gender_b, lang_code)
+        
+        return f"""
+## GENDER-SPECIFIC INTERPRETATION RULES
+
+For Partner A ({gender_a}):
+{gender_info_a['bazi_rules']}
+
+For Partner B ({gender_b}):
+{gender_info_b['bazi_rules']}
+"""
+
+
 @app.route('/api/generate-marriage-section', methods=['OPTIONS'])
 def marriage_options_handler():
     return '', 204
@@ -1432,6 +1803,23 @@ def generate_marriage_section():
         context_str = format_marriage_bazi_context(bazi_a, bazi_b)
         scores_str = format_compatibility_scores(scores)
         
+        # 获取性别相关指令
+        gender_instruction = get_marriage_gender_instruction(gender_a, gender_b, lang_code)
+        
+        # 检查是否需要性别中立语言
+        has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
+        nonbinary_reminder = ""
+        if has_nonbinary:
+            nonbinary_reminder = """
+## ⚠️ GENDER-NEUTRAL LANGUAGE REQUIRED ⚠️
+
+At least one partner selected non-binary gender. You MUST:
+- Use "they/them" or "Ta" for any non-binary partner
+- Use "partner," "spouse," not "husband/wife"
+- Avoid traditional gendered analysis terms
+- Respect both partners' identities throughout
+"""
+        
         # ================= 合婚专用 System Prompt =================
         base_system_prompt = f"""
 You are a master of BaZi (Chinese Four Pillars of Destiny) marriage compatibility analysis, with deep knowledge of classical texts and traditional 合婚 (marriage matching) techniques.
@@ -1454,6 +1842,8 @@ You are a master of BaZi (Chinese Four Pillars of Destiny) marriage compatibilit
 
 {mode_config['ethics']}
 
+{nonbinary_reminder}
+
 ## COUPLE INFORMATION - USE THEIR ACTUAL NAMES
 
 **Partner A**: {name_a} ({gender_a})
@@ -1470,13 +1860,7 @@ NEVER use generic terms like "Partner A", "Partner B", "the man", "the woman".
 **Writing Style**:
 {current_style}
 
-## GENDER-SPECIFIC INTERPRETATION RULES
-
-For {name_a} ({gender_a}):
-{get_gender_instruction(gender_a, lang_code)['bazi_rules']}
-
-For {name_b} ({gender_b}):
-{get_gender_instruction(gender_b, lang_code)['bazi_rules']}
+{gender_instruction}
 
 ## MANDATORY STRUCTURE
 
@@ -2049,6 +2433,8 @@ def finalize_marriage_report():
         
         name_a = bazi_a.get('name', 'Partner A')
         name_b = bazi_b.get('name', 'Partner B')
+        gender_a = bazi_a.get('gender', 'unknown')
+        gender_b = bazi_b.get('gender', 'unknown')
         
         if not full_report:
             return jsonify({"error": "No report content provided"}), 400
@@ -2062,6 +2448,18 @@ def finalize_marriage_report():
             "customer_message": None
         }
         
+        # 检查是否有非二元性别
+        has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
+        gender_check_note = ""
+        if has_nonbinary:
+            gender_check_note = """
+IMPORTANT: At least one partner selected NON-BINARY gender. Verify that:
+- Report uses gender-neutral language appropriately
+- Uses "they/them" or "Ta" for non-binary partner(s)
+- Uses "partner/spouse" instead of "husband/wife"
+- Avoids traditional gendered BaZi terms for non-binary partner(s)
+"""
+        
         # 1. AI 自检
         print("Step 1: Validating marriage report...")
         try:
@@ -2070,22 +2468,23 @@ You are a senior BaZi marriage compatibility expert reviewer.
 Review this marriage compatibility report for accuracy.
 
 ## COUPLE DATA:
-- Partner A: {name_a} ({bazi_a.get('gender', 'unknown')})
+- Partner A: {name_a} ({gender_a})
   - Day Master: {bazi_a.get('dayMaster', 'N/A')} ({bazi_a.get('dayMasterElement', '')})
   - Four Pillars: {bazi_a.get('pillars', {}).get('year', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('month', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('day', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('hour', {}).get('ganZhi', '?')}
 
-- Partner B: {name_b} ({bazi_b.get('gender', 'unknown')})
+- Partner B: {name_b} ({gender_b})
   - Day Master: {bazi_b.get('dayMaster', 'N/A')} ({bazi_b.get('dayMasterElement', '')})
   - Four Pillars: {bazi_b.get('pillars', {}).get('year', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('month', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('day', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('hour', {}).get('ganZhi', '?')}
 
 - Compatibility Score: {scores.get('total', 'N/A')}/100
+{gender_check_note}
 
 ## REPORT TO REVIEW (first 6000 chars):
 {full_report[:6000]}
 
 ## TASK:
 Check for:
-1. Correct gender-based interpretations
+1. Correct gender-based interpretations (or gender-neutral if applicable)
 2. Accurate Day Master analysis for both
 3. Logical compatibility assessments
 4. Consistent use of names (not "Partner A/B")
@@ -2214,4 +2613,3 @@ Output the message directly.
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
