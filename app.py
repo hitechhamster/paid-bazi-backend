@@ -332,7 +332,6 @@ def get_gender_instruction(gender, lang_code):
     elif gender == "non-binary":
         return GENDER_INSTRUCTIONS["non-binary"].get(rule_lang, GENDER_INSTRUCTIONS["non-binary"]["en"])
     else:
-        # 未知性别默认使用非二元/中性解读，更加包容
         return GENDER_INSTRUCTIONS["non-binary"].get(rule_lang, GENDER_INSTRUCTIONS["non-binary"]["en"])
 
 
@@ -361,7 +360,6 @@ def format_bazi_context(data):
         zodiac = data.get('zodiac', {})
         shen_sha = data.get('shenSha', {})
         
-        # 性别显示 - 支持非二元性别
         if gender == 'male':
             gender_display = "Male (男命/乾造)"
         elif gender == 'female':
@@ -526,7 +524,7 @@ def get_language_config(lang_code, custom_lang=None):
     return LANGUAGE_PROMPTS.get(lang_code, LANGUAGE_PROMPTS["en"])
 
 
-def ask_ai(system_prompt, user_prompt):
+def ask_ai(system_prompt, user_prompt, max_tokens=16000):
     if not OPENROUTER_API_KEY:
         print("ERROR: OPENROUTER_API_KEY is missing!")
         return {"error": "Server Configuration Error: API Key missing"}
@@ -545,16 +543,16 @@ def ask_ai(system_prompt, user_prompt):
             {"role": "user", "content": user_prompt}
         ],
         "temperature": 0.75,
-        "max_tokens": 16000
+        "max_tokens": max_tokens
     }
 
     try:
-        print(f"Calling OpenRouter with model: {MODEL_ID}")
+        print(f"Calling OpenRouter with model: {MODEL_ID}, max_tokens: {max_tokens}")
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
             json=payload,
-            timeout=280
+            timeout=360
         )
         print(f"OpenRouter response status: {response.status_code}")
         response.raise_for_status()
@@ -721,7 +719,6 @@ Output the message content directly without any additional explanation or title.
     if result and 'choices' in result:
         return result['choices'][0]['message']['content']
     
-    # Fallback message
     if language == "zh":
         return f"""亲爱的 {client_name}，
 
@@ -753,13 +750,14 @@ The Qi Flow Team
 def health_check():
     return jsonify({
         "status": "running", 
-        "version": "5.2-gender-inclusive", 
+        "version": "5.3-dual-year-forecast", 
         "api_key_set": bool(OPENROUTER_API_KEY),
         "endpoints": {
             "personal_report": "/api/generate-section",
             "marriage_report": "/api/generate-marriage-section"
         },
-        "supported_genders": ["male", "female", "non-binary"]
+        "supported_genders": ["male", "female", "non-binary"],
+        "forecast_years": ["2026", "2027"]
     }), 200
 
 
@@ -799,7 +797,6 @@ def generate_section():
         current_opening = lang_config.get('opening', "In this chapter...")
         current_closing = lang_config.get('closing', "End of chapter.")
         
-        # 根据性别选择合适的代词规则
         if gender == "non-binary":
             current_pronoun_rule = lang_config.get('pronoun_rule_nonbinary', lang_config.get('pronoun_rule', "Address the user formally."))
         else:
@@ -1021,7 +1018,6 @@ You have access to COMPLETE chart data including:
 """
 
         elif section_type == 'wealth':
-            # 财运章节 - 根据性别调整
             if gender == "female":
                 wealth_gender_note = """
 ### GENDER-SPECIFIC NOTE FOR FEMALE CHART 女命特别说明
@@ -1127,9 +1123,7 @@ Make them feel excited about their potential while being realistic about challen
         elif section_type == 'love':
             day_branch = pillars.get('day', {}).get('zhi', 'N/A')
             
-            # 根据性别选择不同的婚恋分析指令
             if gender == "non-binary":
-                # 非二元性别的双重解读
                 love_specific_instruction = f"""
 ### CRITICAL: GENDER-INCLUSIVE RELATIONSHIP ANALYSIS 性别包容婚恋分析
 
@@ -1274,7 +1268,6 @@ Use correct pronouns: {gender_info['pronoun']}
 """
 
             else:
-                # 男性
                 love_specific_instruction = f"""
 ### CRITICAL: MALE CHART RELATIONSHIP ANALYSIS 男命婚恋分析 - 关键
 
@@ -1371,7 +1364,7 @@ Use correct pronouns: {gender_info['pronoun']}
 """
 
         elif section_type == '2026_forecast':
-            # 2026流年预测 - 根据性别调整
+            # ================= 2026-2027 双年流年预测 =================
             if gender == "non-binary":
                 forecast_gender_note = """
 ### GENDER-NEUTRAL FORECAST NOTE:
@@ -1392,16 +1385,19 @@ Client is {gender.upper()}. Apply correct gender-based star interpretations for 
 - 直接说哪几个月好、哪几个月差
 - 如果有冲克，直接说"这个月犯太岁/逢冲，不宜做重大决定"
 - 具体到事项："6月不宜投资"、"9月防小人"、"12月注意身体"
-- 如果整年运势不好，直接说"2026年宜守不宜攻，稳扎稳打为主"
+- 如果整年运势不好，直接说"宜守不宜攻，稳扎稳打为主"
 - 每个问题都要给出化解方法：佩戴什么、摆放什么、去什么方位
+- 2026和2027两年要做对比分析，让读者清楚哪一年更有利
 """
             else:
                 forecast_mode_instruction = """
-Make this feel like a practical roadmap they can actually use throughout 2026.
+Make this feel like a practical roadmap they can actually use throughout 2026 and 2027.
+Compare the two years so they know which year favors which activities.
 """
 
             specific_prompt = f"""
-## TASK: Write Chapter 4 - 2026 Year of the Fire Horse (丙午) Complete Forecast (2026流年预测)
+## TASK: Write Chapter 4 - 2026-2027 Two-Year Forecast (2026-2027双年流年预测)
+## 2026 Year of the Fire Horse (丙午) & 2027 Year of the Fire Goat (丁未)
 
 ### COMPLETE CHART DATA:
 {context_str}
@@ -1412,6 +1408,8 @@ Make this feel like a practical roadmap they can actually use throughout 2026.
 
 ### REQUIRED ANALYSIS:
 
+# ========== PART ONE: 2026 丙午年 (FIRE HORSE) ==========
+
 ## 1. 2026 Fire Horse (丙午) Overview (2026火马年总览)
 - 2026 is 丙午 year - Fire Horse (Yang Fire + Horse)
 - How does 丙午 interact with their Day Master [{day_master}]?
@@ -1420,7 +1418,7 @@ Make this feel like a practical roadmap they can actually use throughout 2026.
 - Any combinations (合) or harms (害) with 午?
 - Overall energy theme of 2026 for this person
 
-## 2. Impact on Current Luck Cycle (与当前大运的交互)
+## 2. Impact on Current Luck Cycle (与当前大运的交互 - 2026)
 - Current luck cycle: [{current_dayun.get('ganZhi', 'N/A')}]
 - How does 2026 丙午 interact with their current 大运?
 - Is this a supportive or challenging combination?
@@ -1440,7 +1438,7 @@ Make this feel like a practical roadmap they can actually use throughout 2026.
 - Career or financial cautions
 - How to mitigate challenges
 
-## 5. Month-by-Month Breakdown (逐月分析)
+## 5. 2026 Month-by-Month Breakdown (2026逐月分析)
 Provide specific guidance for each Chinese lunar month:
 
 - **Month 1 (寅月 - Feb 4 to Mar 5)**: Tiger month...
@@ -1469,17 +1467,103 @@ For each month, briefly note:
 - Feng shui recommendations
 - Any specific remedies if challenges are significant
 
-## 7. Looking Ahead (展望未来)
-- How does 2026 set up 2027?
-- Any long-term themes emerging?
-- Final empowering message for the year ahead
+# ========== PART TWO: 2027 丁未年 (FIRE GOAT) ==========
+
+## 7. 2027 Fire Goat (丁未) Overview (2027火羊年总览)
+- 2027 is 丁未 year - Fire Goat (Yin Fire + Goat/Sheep)
+- How does 丁未 interact with their Day Master [{day_master}]?
+- How does 丁 (Yin Fire) differ from 2026's 丙 (Yang Fire)? What shift does this bring?
+- How does 未 (Goat) interact with their four branches?
+- CHECK SPECIFICALLY:
+  - Is there 丑未冲 (Ox-Goat clash) with any branch?
+  - Is there 未午合 or 未戌合 (combinations) with any branch?
+  - Any 三刑 (Three Penalties) involving 未?
+- Overall energy theme of 2027 for this person
+
+## 8. Impact on Luck Cycle (与大运的交互 - 2027)
+- Is the client still in the same 大运 in 2027, or transitioning to a new one?
+- How does 2027 丁未 interact with their 大运?
+- What themes carry over from 2026 and what shifts?
+
+## 9. Key Opportunities in 2027 (2027机遇)
+- Which life areas get activated positively?
+- Career opportunities - how do they differ from 2026?
+- Relationship opportunities (apply gender-specific rules)
+- Wealth opportunities
+- Best timing for major decisions in 2027
+
+## 10. Challenges to Navigate in 2027 (2027挑战)
+- Potential obstacles or difficult periods
+- Health areas to watch (未属土，注意脾胃/消化系统)
+- Relationship cautions
+- Career or financial cautions
+- How to mitigate challenges
+
+## 11. 2027 Month-by-Month Breakdown (2027逐月分析)
+Provide specific guidance for each Chinese lunar month:
+
+- **Month 1 (寅月 - Feb 4 to Mar 5)**: Tiger month...
+- **Month 2 (卯月 - Mar 6 to Apr 4)**: Rabbit month (卯未半合木局?)...
+- **Month 3 (辰月 - Apr 5 to May 5)**: Dragon month...
+- **Month 4 (巳月 - May 6 to Jun 5)**: Snake month...
+- **Month 5 (午月 - Jun 6 to Jul 6)**: Horse month (午未合!)...
+- **Month 6 (未月 - Jul 7 to Aug 7)**: Goat month (double 未! 本命年效应?)...
+- **Month 7 (申月 - Aug 8 to Sep 7)**: Monkey month...
+- **Month 8 (酉月 - Sep 8 to Oct 7)**: Rooster month...
+- **Month 9 (戌月 - Oct 8 to Nov 7)**: Dog month (未戌刑?)...
+- **Month 10 (亥月 - Nov 8 to Dec 6)**: Pig month (亥未半合木局?)...
+- **Month 11 (子月 - Dec 7 to Jan 5)**: Rat month...
+- **Month 12 (丑月 - Jan 6 to Feb 3 2028)**: Ox month (丑未冲!)...
+
+For each month, briefly note:
+- Key theme or energy
+- Opportunities
+- Cautions
+
+## 12. 2027 Action Plan (2027行动计划)
+- Top 3 things to focus on in 2027
+- Top 3 things to avoid or be cautious about
+- Lucky elements, colors, and directions for 2027
+- Feng shui recommendations
+
+# ========== PART THREE: TWO-YEAR COMPARISON & STRATEGY ==========
+
+## 13. 2026 vs 2027 Comparison (双年对比分析)
+Create a clear comparison:
+
+| Dimension 维度 | 2026 丙午 | 2027 丁未 | Which Year is Better 哪年更优 |
+|---------------|-----------|-----------|------------------------------|
+| Career 事业    |           |           |                              |
+| Wealth 财运    |           |           |                              |
+| Love 感情      |           |           |                              |
+| Health 健康    |           |           |                              |
+| Study 学业     |           |           |                              |
+| Overall 综合   |           |           |                              |
+
+## 14. Two-Year Strategic Plan (双年战略规划)
+- What should be done in 2026 vs. deferred to 2027?
+- Key transitions between the two years
+- How the energy shifts from Yang Fire (丙) to Yin Fire (丁)
+- How the energy shifts from Horse (午) to Goat (未)
+- Specific advice: "Do X in 2026, wait until 2027 for Y"
+
+## 15. Looking Ahead (展望未来)
+- How does 2026-2027 set up 2028 (戊申)?
+- Any long-term themes emerging across these years?
+- Final empowering message for the two years ahead
 """
 
         else:
             return jsonify({"error": f"Unknown section type: {section_type}"}), 400
 
         print(f"Calling AI for section: {section_type} in language: {lang_config['name']} with mode: {reading_mode}")
-        ai_result = ask_ai(base_system_prompt, specific_prompt)
+        
+        # 2026_forecast 章节内容量大，使用更大的 max_tokens
+        if section_type == '2026_forecast':
+            ai_result = ask_ai(base_system_prompt, specific_prompt, max_tokens=24000)
+        else:
+            ai_result = ask_ai(base_system_prompt, specific_prompt)
+        
         print(f"AI result keys: {ai_result.keys() if isinstance(ai_result, dict) else 'not a dict'}")
 
         if ai_result and 'choices' in ai_result:
@@ -1528,7 +1612,6 @@ def finalize_report():
         print(f"Processing report for: {client_name}")
         print(f"Report length: {len(full_report)} characters")
         
-        # 生成八字摘要
         bazi_summary = format_bazi_summary(bazi_data)
         
         result = {
@@ -1585,7 +1668,7 @@ MARRIAGE_SECTIONS = [
     {'type': 'communication', 'title': 'Chapter 3: Communication & Conflict Patterns', 'zh': '第三章：相处与沟通模式'},
     {'type': 'wealth_career', 'title': 'Chapter 4: Wealth & Career Together', 'zh': '第四章：财运与事业配合'},
     {'type': 'love_marriage', 'title': 'Chapter 5: Love & Marriage Stability', 'zh': '第五章：感情与婚姻稳定性'},
-    {'type': 'forecast_2026', 'title': 'Chapter 6: 2026 Forecast & Harmony Tips', 'zh': '第六章：2026流年预测与和谐建议'},
+    {'type': 'forecast_2026', 'title': 'Chapter 6: 2026-2027 Forecast & Harmony Tips', 'zh': '第六章：2026-2027双年流年预测与和谐建议'},
 ]
 
 
@@ -1599,7 +1682,6 @@ def format_marriage_bazi_context(bazi_a, bazi_b):
         pillars = data.get('pillars', {})
         five_elements = data.get('fiveElements', {})
         
-        # 支持非二元性别显示
         if gender == 'male':
             gender_display = "Male (男命)"
         elif gender == 'female':
@@ -1699,7 +1781,6 @@ def get_marriage_gender_instruction(gender_a, gender_b, lang_code):
     """获取合婚报告的性别相关指令"""
     rule_lang = "zh" if lang_code == "zh" else "en"
     
-    # 检查是否有非二元性别
     has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
     
     if has_nonbinary:
@@ -1740,7 +1821,6 @@ At least one partner in this couple has selected a gender-neutral reading. Follo
 - Respect the unique nature of every relationship
 """
     else:
-        # 传统男女配对
         gender_info_a = get_gender_instruction(gender_a, lang_code)
         gender_info_b = get_gender_instruction(gender_b, lang_code)
         
@@ -1790,7 +1870,6 @@ def generate_marriage_section():
         print(f"Marriage Section: {section_type}, Mode: {reading_mode}, Lang: {lang_code}")
         print(f"Partner A: {name_a} ({gender_a}), Partner B: {name_b} ({gender_b})")
         
-        # 获取语言配置
         current_opening = lang_config.get('opening', "In this chapter...")
         current_closing = lang_config.get('closing', "End of chapter.")
         
@@ -1799,14 +1878,11 @@ def generate_marriage_section():
         else:
             current_style = lang_config.get('style_gentle')
         
-        # 格式化双人数据
         context_str = format_marriage_bazi_context(bazi_a, bazi_b)
         scores_str = format_compatibility_scores(scores)
         
-        # 获取性别相关指令
         gender_instruction = get_marriage_gender_instruction(gender_a, gender_b, lang_code)
         
-        # 检查是否需要性别中立语言
         has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
         nonbinary_reminder = ""
         if has_nonbinary:
@@ -2285,12 +2361,16 @@ Based on both charts:
 """
 
         elif section_type == 'forecast_2026':
+            # ================= 合婚 2026-2027 双年预测 =================
             specific_prompt = f"""
-## TASK: Write Chapter 6 - 2026 Forecast & Harmony Tips (2026流年预测与和谐建议)
+## TASK: Write Chapter 6 - 2026-2027 Two-Year Forecast & Harmony Tips
+## (2026-2027双年流年预测与和谐建议)
 
 {context_str}
 
 ### REQUIRED ANALYSIS:
+
+# ========== PART ONE: 2026 丙午年 (FIRE HORSE) ==========
 
 ## 1. 2026 丙午年 (Fire Horse Year) Overview
 
@@ -2306,7 +2386,7 @@ Based on both charts:
 - Key themes for {name_b} in 2026
 - Opportunities and challenges
 
-## 2. 2026 as a Couple 作为夫妻的2026年
+## 2. 2026 as a Couple 作为伴侣的2026年
 
 ### Relationship Energy in 2026 感情运势
 - How does 2026 affect their relationship?
@@ -2318,13 +2398,12 @@ Based on both charts:
 - Areas requiring joint attention
 - Overall year rating for this couple
 
-## 3. Month-by-Month Guidance 逐月指导
+## 3. 2026 Month-by-Month Guidance (2026逐月指导)
 
 Provide brief guidance for key months:
 
 **寅月 (Feb 4 - Mar 5)**: 
-- Relationship energy
-- Key advice
+- Relationship energy & key advice
 
 **卯月 (Mar 6 - Apr 4)**:
 **辰月 (Apr 5 - May 5)**:
@@ -2338,42 +2417,99 @@ Provide brief guidance for key months:
 **子月 (Dec 7 - Jan 5)**: [子午冲 if applicable!]
 **丑月 (Jan 6 - Feb 3 2027)**:
 
-## 4. Important Dates & Decisions 重要日期与决策
+# ========== PART TWO: 2027 丁未年 (FIRE GOAT) ==========
 
-### Best Timing for Major Events 重要事件吉时
-If they're planning in 2026:
-- Wedding/engagement best months
-- Moving in together
-- Major purchases
-- Travel together
+## 4. 2027 丁未年 (Fire Goat Year) Overview
 
-### Dates to Be Careful 需谨慎的日期
-- Months to avoid major decisions
-- Times when conflict is more likely
+### How 2027 Affects {name_a}
+- How does 丁未 interact with {name_a}'s Day Master?
+- Any 冲合 with {name_a}'s branches?
+- Key themes for {name_a} in 2027
+- How does 2027 differ from 2026 for {name_a}?
+
+### How 2027 Affects {name_b}
+- How does 丁未 interact with {name_b}'s Day Master?
+- Any 冲合 with {name_b}'s branches?
+- Key themes for {name_b} in 2027
+- How does 2027 differ from 2026 for {name_b}?
+
+## 5. 2027 as a Couple 作为伴侣的2027年
+
+### Relationship Energy in 2027 感情运势
+- How does 2027 affect their relationship compared to 2026?
+- Energy shift from Yang Fire (丙) to Yin Fire (丁)
+- Energy shift from Horse (午) to Goat (未)
+- Key relationship themes for 2027
+
+### Combined Luck Assessment 综合运势
+- Areas where both benefit in 2027
+- Areas requiring joint attention
+- Overall year rating for this couple in 2027
+
+## 6. 2027 Month-by-Month Guidance (2027逐月指导)
+
+**寅月 (Feb 4 - Mar 5)**:
+**卯月 (Mar 6 - Apr 4)**: [卯未半合木局?]
+**辰月 (Apr 5 - May 5)**:
+**巳月 (May 6 - Jun 5)**:
+**午月 (Jun 6 - Jul 6)**: [午未合! Important for couple energy]
+**未月 (Jul 7 - Aug 7)**: [Double 未! Intensified energy]
+**申月 (Aug 8 - Sep 7)**:
+**酉月 (Sep 8 - Oct 7)**:
+**戌月 (Oct 8 - Nov 7)**: [未戌刑 if applicable]
+**亥月 (Nov 8 - Dec 6)**:
+**子月 (Dec 7 - Jan 5)**:
+**丑月 (Jan 6 - Feb 3 2028)**: [丑未冲!]
+
+# ========== PART THREE: TWO-YEAR COMPARISON & HARMONY ==========
+
+## 7. 2026 vs 2027 Comparison for This Couple (双年对比)
+
+Create a clear comparison:
+
+| Dimension 维度 | 2026 丙午 | 2027 丁未 | Better Year 哪年更优 |
+|---------------|-----------|-----------|---------------------|
+| Romance 感情   |           |           |                     |
+| Finances 财务  |           |           |                     |
+| Harmony 和谐   |           |           |                     |
+| Growth 成长    |           |           |                     |
+| Overall 综合   |           |           |                     |
+
+## 8. Two-Year Harmony Plan (双年和谐计划)
+- What to focus on in 2026 vs 2027
+- Best timing across BOTH years for major couple milestones:
+  - Wedding/engagement best months
+  - Moving in together
+  - Having children
+  - Major purchases
+  - Travel together
+- How to navigate the energy shift between years
+
+## 9. Important Dates & Decisions (重要日期与决策)
+
+### Best Timing Across Both Years 两年最佳时机
+- Months to avoid major decisions in each year
+- Times when conflict is more likely in each year
 - How to navigate difficult periods
 
-## 5. Harmony Enhancement Tips 和谐增进建议
+## 10. Harmony Enhancement Tips (和谐增进建议)
 
 ### Five Elements Adjustments 五行调整
 Based on their combined chart:
-- What elements benefit their relationship?
-- Colors to incorporate
+- What elements benefit their relationship in 2026?
+- What elements benefit their relationship in 2027?
+- Colors to incorporate for each year
 - Directions that support harmony
 
 ### Practical Harmony Tips 实用和谐建议
 - Daily habits to strengthen bond
 - Weekly/monthly rituals
-- How to handle 2026's challenging moments
+- Communication focus areas for each year
 
-### Communication Focus 沟通重点
-- Key topics to discuss in 2026
-- How to support each other through changes
-- Building stronger foundations
+## 11. Long-term Outlook (长期展望)
 
-## 6. Long-term Outlook 长期展望
-
-### Beyond 2026 展望未来
-- How does 2026 set up 2027 and beyond?
+### Beyond 2027 展望未来
+- How does 2026-2027 set up 2028 (戊申)?
 - Long-term relationship trajectory
 - Major milestone years to anticipate
 
@@ -2383,7 +2519,7 @@ End with:
 - Key strengths to remember
 - Encouragement for the journey ahead
 
-{"以温暖积极的祝福结束，让他们对未来充满期待。" if reading_mode == "gentle" else "实事求是地告诉他们2026年可能面临的挑战，以及具体的化解方法。不要只说好听的，要给出实用的预警和建议。"}
+{"以温暖积极的祝福结束，让他们对未来两年充满期待。" if reading_mode == "gentle" else "实事求是地告诉他们两年内可能面临的挑战，以及具体的化解方法。对比哪一年更适合做什么。"}
 """
 
         else:
@@ -2391,7 +2527,12 @@ End with:
 
         # 调用 AI
         print(f"Calling AI for marriage section: {section_type}")
-        ai_result = ask_ai(base_system_prompt, specific_prompt)
+        
+        # forecast_2026 章节内容量大，使用更大的 max_tokens
+        if section_type == 'forecast_2026':
+            ai_result = ask_ai(base_system_prompt, specific_prompt, max_tokens=24000)
+        else:
+            ai_result = ask_ai(base_system_prompt, specific_prompt)
         
         if ai_result and 'choices' in ai_result:
             content = ai_result['choices'][0]['message']['content']
@@ -2448,7 +2589,6 @@ def finalize_marriage_report():
             "customer_message": None
         }
         
-        # 检查是否有非二元性别
         has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
         gender_check_note = ""
         if has_nonbinary:
