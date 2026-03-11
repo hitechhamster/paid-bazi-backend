@@ -25,7 +25,7 @@ def after_request(response):
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 SITE_URL = os.getenv("SITE_URL", "https://theqiflow.com")
 APP_NAME = "Bazi Pro Calculator"
-MODEL_ID = "google/gemini-3-pro-preview"
+MODEL_ID = "google/gemini-3.1-pro-preview"
 # ===========================================
 
 # ================= 多语言配置 =================
@@ -2753,4 +2753,5 @@ Output the message directly.
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
 
