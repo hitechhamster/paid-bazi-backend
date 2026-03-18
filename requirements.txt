@@ -4,3 +4,6 @@ requests
 gunicorn
 google-auth
 google-api-python-client
+lunar-python
+requests
+schedule
