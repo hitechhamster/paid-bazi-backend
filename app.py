@@ -22,10 +22,11 @@ def after_request(response):
     return response
 
 # ================= 配置区域 =================
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+GOOGLE_GEMINI_API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
 SITE_URL = os.getenv("SITE_URL", "https://theqiflow.com")
 APP_NAME = "Bazi Pro Calculator"
-MODEL_ID = "google/gemini-3.1-pro-preview"
+MODEL_ID = "gemini-3.1-pro-preview"
+
 # ===========================================
 
 # ================= 多语言配置 =================
@@ -535,46 +536,37 @@ def get_language_config(lang_code, custom_lang=None):
 
 
 def ask_ai(system_prompt, user_prompt, max_tokens=16000):
-    if not OPENROUTER_API_KEY:
-        print("ERROR: OPENROUTER_API_KEY is missing!")
+    if not GOOGLE_GEMINI_API_KEY:
+        print("ERROR: GOOGLE_GEMINI_API_KEY is missing!")
         return {"error": "Server Configuration Error: API Key missing"}
 
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": SITE_URL,
-        "X-Title": APP_NAME,
-    }
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_ID}:generateContent?key={GOOGLE_GEMINI_API_KEY}"
 
     payload = {
-        "model": MODEL_ID,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+        "contents": [
+            {"role": "user", "parts": [{"text": system_prompt + "\n\n" + user_prompt}]}
         ],
-        "temperature": 0.75,
-        "max_tokens": max_tokens
+        "generationConfig": {
+            "temperature": 0.75,
+            "maxOutputTokens": max_tokens
+        }
     }
 
     try:
-        print(f"Calling OpenRouter with model: {MODEL_ID}, max_tokens: {max_tokens}")
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=360
-        )
-        print(f"OpenRouter response status: {response.status_code}")
+        print(f"Calling Gemini API with model: {MODEL_ID}, max_tokens: {max_tokens}")
+        response = requests.post(url, json=payload, timeout=360)
+        print(f"Gemini response status: {response.status_code}")
         response.raise_for_status()
-        return response.json()
+        result = response.json()
+        content = result["candidates"][0]["content"]["parts"][0]["text"]
+        return {"choices": [{"message": {"content": content}}]}
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP Error: {http_err}")
         print(f"Response body: {response.text}")
         return {"error": f"HTTP Error: {str(http_err)}", "details": response.text}
     except Exception as e:
-        print(f"OpenRouter API Error: {str(e)}")
+        print(f"Gemini API Error: {str(e)}")
         return {"error": str(e)}
-
 
 # ================= AI 自检功能 =================
 def validate_report(full_report, bazi_data, language):
@@ -761,7 +753,7 @@ def health_check():
     return jsonify({
         "status": "running", 
         "version": "5.3-dual-year-forecast", 
-        "api_key_set": bool(OPENROUTER_API_KEY),
+        "api_key_set": bool(GOOGLE_GEMINI_API_KEY),
         "endpoints": {
             "personal_report": "/api/generate-section",
             "marriage_report": "/api/generate-marriage-section"
