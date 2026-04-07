@@ -50,6 +50,16 @@ LANGUAGE_PROMPTS = {
         "opening": "本章为您分析...",
         "closing": "此章节完"
     },
+     "zh-tw": {
+        "name": "繁體中文",
+        "instruction": "請用流暢自然的繁體中文撰寫。",
+        "pronoun_rule": "必須統一使用'您'（尊稱）來稱呼用戶，切勿使用'你'。保持語氣的一致性。",
+        "pronoun_rule_nonbinary": "統一使用'您'稱呼用戶。第三人稱使用'Ta'或直接用客戶姓名，絕對不要使用'他'或'她'。",
+        "style_gentle": "用溫暖睿智的語氣，像一位通曉古今的智者在與朋友分享人生智慧。",
+        "style_authentic": "用傳統命理師的直接語氣，像老師傅算命一樣直言不諱，好就是好，不好就直說，不繞彎子。",
+        "opening": "本章為您分析...",
+        "closing": "此章節完"
+    },
     "de": {
         "name": "Deutsch",
         "instruction": "Schreiben Sie Ihre Antwort in flüssigem, natürlichem Deutsch.",
