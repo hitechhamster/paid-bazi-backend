@@ -333,7 +333,7 @@ MODE_CONFIGS = {
 
 def get_gender_instruction(gender, lang_code):
     """获取性别相关的解读指令"""
-    rule_lang = "zh" if lang_code == "zh" else "en"
+    rule_lang = "zh" if lang_code in ("zh", "zh-tw") else "en"
     
     if gender == "male":
         return GENDER_INSTRUCTIONS["male"].get(rule_lang, GENDER_INSTRUCTIONS["male"]["en"])
