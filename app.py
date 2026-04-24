@@ -36,10 +36,8 @@ LANGUAGE_PROMPTS = {
         "instruction": "Write your response in fluent, natural English.",
         "pronoun_rule": "Address the user as 'you'. Maintain a consistent professional yet warm tone.",
         "pronoun_rule_nonbinary": "Use 'they/them/their' pronouns consistently. Never use 'he/him/his' or 'she/her/hers'. Address the user as 'you'.",
-        "pronoun_rule_minor": "This report is written FOR THE PARENTS to read about their child. Address the parents as 'you' when giving advice, and refer to the child by name or as 'your child'. Use a warm, supportive tone suitable for parents seeking guidance.",
         "style_gentle": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
         "style_authentic": "Use a direct, authoritative tone like a traditional Chinese fortune-telling master who tells it like it is - no sugarcoating.",
-        "style_minor": "Use a warm, nurturing tone like a wise grandparent or experienced teacher sharing insights with loving parents about their child's unique nature and potential.",
         "opening": "In this chapter, I will analyze for you...",
         "closing": "End of this chapter."
     },
@@ -48,22 +46,18 @@ LANGUAGE_PROMPTS = {
         "instruction": "请用流畅自然的中文撰写。",
         "pronoun_rule": "必须统一使用'您'（尊称）来称呼用户，切勿使用'你'。保持语气的一致性。",
         "pronoun_rule_nonbinary": "统一使用'您'称呼用户。第三人称使用'Ta'或直接用客户姓名，绝对不要使用'他'或'她'。",
-        "pronoun_rule_minor": "本报告是写给父母看的，帮助他们了解孩子。称呼父母时用'您'，提到孩子时直接用孩子的名字或'您的孩子'。语气温暖、支持，像一位智慧长辈与用心的父母分享对孩子的洞察。",
         "style_gentle": "用温暖睿智的语气，像一位通晓古今的智者在与朋友分享人生智慧。",
         "style_authentic": "用传统命理师的直接语气，像老师傅算命一样直言不讳，好就是好，不好就直说，不绕弯子。",
-        "style_minor": "用温暖、滋养的语气，像一位智慧的长辈或经验丰富的老师，与满怀爱意的父母分享孩子独特天性和潜能的洞察。",
         "opening": "本章为您分析...",
         "closing": "此章节完"
     },
-    "zh-tw": {
+     "zh-tw": {
         "name": "繁體中文",
         "instruction": "請用流暢自然的繁體中文撰寫。",
         "pronoun_rule": "必須統一使用'您'（尊稱）來稱呼用戶，切勿使用'你'。保持語氣的一致性。",
         "pronoun_rule_nonbinary": "統一使用'您'稱呼用戶。第三人稱使用'Ta'或直接用客戶姓名，絕對不要使用'他'或'她'。",
-        "pronoun_rule_minor": "本報告是寫給父母看的，幫助他們了解孩子。稱呼父母時用'您'，提到孩子時直接用孩子的名字或'您的孩子'。",
         "style_gentle": "用溫暖睿智的語氣，像一位通曉古今的智者在與朋友分享人生智慧。",
         "style_authentic": "用傳統命理師的直接語氣，像老師傅算命一樣直言不諱，好就是好，不好就直說，不繞彎子。",
-        "style_minor": "用溫暖、滋養的語氣，像一位智慧的長輩與用心的父母分享對孩子的洞察。",
         "opening": "本章為您分析...",
         "closing": "此章節完"
     },
@@ -72,34 +66,28 @@ LANGUAGE_PROMPTS = {
         "instruction": "Schreiben Sie Ihre Antwort in flüssigem, natürlichem Deutsch.",
         "pronoun_rule": "Verwenden Sie KONSEQUENT die Höflichkeitsform 'Sie' und 'Ihre' (formal). Vermeiden Sie unbedingt das 'Du' (informal). Dies ist eine strikte Regel.",
         "pronoun_rule_nonbinary": "Verwenden Sie geschlechtsneutrale Formulierungen. Vermeiden Sie 'er/sie' und verwenden Sie stattdessen den Namen der Person oder neutrale Umschreibungen.",
-        "pronoun_rule_minor": "Dieser Bericht wurde FÜR DIE ELTERN verfasst, um ihr Kind besser zu verstehen. Sprechen Sie die Eltern mit 'Sie' an und beziehen Sie sich auf das Kind mit seinem Namen oder 'Ihr Kind'.",
-        "style_gentle": "Verwenden Sie einen warmen, einfühlsamen Ton wie ein weiser Mentor.",
-        "style_authentic": "Verwenden Sie einen direkten, autoritativen Ton wie ein traditioneller chinesischer Wahrsagemeister.",
-        "style_minor": "Verwenden Sie einen warmen, fürsorglichen Ton wie ein weiser Großelternteil, der liebevollen Eltern Einblicke über ihr Kind gibt.",
+        "style_gentle": "Verwenden Sie einen warmen, einfühlsamen Ton wie ein weiser Mentor, der alte Weisheiten mit einem modernen Freund teilt.",
+        "style_authentic": "Verwenden Sie einen direkten, autoritativen Ton wie ein traditioneller chinesischer Wahrsagemeister, der die Dinge beim Namen nennt.",
         "opening": "In diesem Kapitel analysiere ich für Sie...",
         "closing": "Ende dieses Kapitels."
     },
     "es": {
         "name": "Español",
         "instruction": "Escribe tu respuesta en español fluido y natural.",
-        "pronoun_rule": "Utiliza consistentemente la forma 'Usted' (formal). No uses 'Tú'.",
-        "pronoun_rule_nonbinary": "Utiliza lenguaje inclusivo y neutral. Evita 'él/ella' y usa el nombre de la persona.",
-        "pronoun_rule_minor": "Este informe está escrito PARA LOS PADRES para entender mejor a su hijo/a. Dirígete a los padres con 'Usted' y refiérete al niño/a por su nombre o como 'su hijo/a'.",
-        "style_gentle": "Usa un tono cálido y perspicaz, como un mentor sabio.",
-        "style_authentic": "Usa un tono directo y autoritario, como un maestro tradicional chino.",
-        "style_minor": "Usa un tono cálido y cariñoso, como un abuelo sabio compartiendo con padres amorosos sobre la naturaleza única de su hijo/a.",
+        "pronoun_rule": "Utiliza consistentemente la forma 'Usted' (formal) para dirigirte al usuario. No uses 'Tú'.",
+        "pronoun_rule_nonbinary": "Utiliza lenguaje inclusivo y neutral. Evita 'él/ella' y usa el nombre de la persona o formulaciones neutras como 'esta persona'.",
+        "style_gentle": "Usa un tono cálido y perspicaz, como un mentor sabio compartiendo sabiduría ancestral con un amigo moderno.",
+        "style_authentic": "Usa un tono directo y autoritario, como un maestro tradicional chino de adivinación que dice las cosas como son.",
         "opening": "En este capítulo, analizo para usted...",
         "closing": "Fin de este capítulo."
     },
     "fr": {
         "name": "Français",
         "instruction": "Rédigez votre réponse dans un français fluide et naturel.",
-        "pronoun_rule": "Utilisez systématiquement le vouvoiement ('Vous').",
-        "pronoun_rule_nonbinary": "Utilisez un langage neutre et inclusif. Évitez 'il/elle'.",
-        "pronoun_rule_minor": "Ce rapport est rédigé POUR LES PARENTS afin de mieux comprendre leur enfant. Adressez-vous aux parents avec 'Vous' et référez-vous à l'enfant par son prénom ou 'votre enfant'.",
-        "style_gentle": "Utilisez un ton chaleureux et perspicace, comme un sage mentor.",
-        "style_authentic": "Utilisez un ton direct et autoritaire, comme un maître traditionnel chinois.",
-        "style_minor": "Utilisez un ton chaleureux et bienveillant, comme un grand-parent sage partageant avec des parents aimants sur la nature unique de leur enfant.",
+        "pronoun_rule": "Utilisez systématiquement le vouvoiement ('Vous'). Ne tutoyez jamais l'utilisateur.",
+        "pronoun_rule_nonbinary": "Utilisez un langage neutre et inclusif. Évitez 'il/elle' et utilisez le nom de la personne ou des formulations neutres comme 'cette personne'.",
+        "style_gentle": "Utilisez un ton chaleureux et perspicace, comme un sage mentor partageant une sagesse ancestrale avec un ami moderne.",
+        "style_authentic": "Utilisez un ton direct et autoritaire, comme un maître traditionnel chinois de divination qui dit les choses telles qu'elles sont.",
         "opening": "Dans ce chapitre, j'analyse pour vous...",
         "closing": "Fin de ce chapitre."
     }
@@ -169,35 +157,85 @@ prefers a gender-neutral reading, you MUST provide BOTH perspectives and let the
 **Perspective A - Wealth Stars (財星) as Relationship Indicators:**
 - 正財 (Direct Wealth): May represent a stable, nurturing, supportive partner
 - 偏財 (Indirect Wealth): May represent a more dynamic, financially-oriented partner
+- Analyze: Where are Wealth Stars? Strong or weak? What partner qualities do they suggest?
 
 **Perspective B - Officer Stars (官殺) as Relationship Indicators:**
 - 正官 (Direct Officer): May represent a structured, responsible, authoritative partner
 - 七殺 (Seven Killings): May represent a passionate, intense, powerful partner
+- Analyze: Where are Officer Stars? Strong or weak? What partner qualities do they suggest?
 
 **After presenting BOTH perspectives:**
 - Note which interpretation appears stronger based on chart structure
 - Describe ideal partner qualities in COMPLETELY NEUTRAL terms
 - Use "partner," "significant other," "spouse" - NEVER "husband," "wife," "boyfriend," "girlfriend"
-"""
+- Focus on: personality traits, values, emotional needs, relationship dynamics
+
+### Spouse Palace (Day Branch) Analysis:
+- Analyze the Day Branch for partnership qualities WITHOUT gendering
+- Describe what kind of ENERGY or QUALITIES the ideal partner may have
+- Focus on: temperament, communication style, shared values, emotional compatibility
+
+### Career and Wealth Analysis:
+- Analyze purely based on chart structure
+- NO gendered career assumptions or stereotypes
+- Focus entirely on individual talents, strengths, and opportunities
+
+### Writing Style:
+- Warm, respectful, and affirming throughout
+- Celebrate their unique chart without any gendered assumptions
+- Focus on universal human experiences: growth, love, success, challenges, self-discovery
+- Make the reading feel personal and validating"""
         },
         "zh": {
             "pronoun": "Ta/TA/您",
             "bazi_rules": """## 性别包容解读指南
 
 **重要提示**：这位客户认同为非二元性别、跨性别，或希望使用性别中立的解读方式。
+请在整份报告中使用包容、尊重的语言。
 
 ### 严格用语规则：
 - 统一使用"您"作为第二人称称呼
 - 第三人称必须使用"Ta"或直接用客户姓名
 - 绝对禁止使用"他"或"她"
-- 绝对禁止使用"男命"、"女命"、"乾造"、"坤造"
+- 绝对禁止使用"作为男性..."或"作为女性..."这类表述
+- 绝对禁止使用"男命"、"女命"、"乾造"、"坤造"等传统性别术语
+- 使用"这位客户"、"命主"等中性称谓
 
 ### 婚恋分析 - 双重解读模式：
-**视角A - 从财星角度解读感情关系**
-**视角B - 从官杀角度解读感情关系**
-呈现两种视角后，让客户自行选择更契合的解读。
-使用"伴侣"、"另一半"、"爱人" - 绝不使用"丈夫"、"妻子"、"男友"、"女友"
-"""
+传统八字根据出生性别分配不同的感情含义。由于客户希望性别中立的解读，
+您必须同时提供两种视角，让客户自行选择更契合的解读：
+
+**视角A - 从财星角度解读感情关系：**
+- 正财：可能代表稳定、体贴、支持型的伴侣
+- 偏财：可能代表活泼、多变、外向型的伴侣
+- 分析：财星在哪里？强还是弱？暗示什么样的伴侣特质？
+
+**视角B - 从官杀角度解读感情关系：**
+- 正官：可能代表有责任感、稳重、有担当的伴侣
+- 七杀：可能代表热情、强势、有魄力的伴侣
+- 分析：官杀在哪里？强还是弱？暗示什么样的伴侣特质？
+
+**呈现两种视角后：**
+- 指出哪种解读在命盘结构上更为突出
+- 用完全中性的语言描述理想伴侣特质
+- 使用"伴侣"、"另一半"、"爱人" - 绝不使用"丈夫"、"妻子"、"男友"、"女友"
+- 聚焦于：性格特点、价值观、情感需求、相处模式
+
+### 配偶宫（日支）分析：
+- 分析日支的伴侣特质时不要带入性别
+- 描述理想伴侣可能具有的「能量」或「特质」
+- 聚焦于：性情、沟通方式、共同价值观、情感契合度
+
+### 事业和财运分析：
+- 完全基于命盘结构分析
+- 不带任何性别刻板印象的职业假设
+- 完全聚焦于个人才能、优势和机遇
+
+### 整体写作风格：
+- 全文保持温暖、尊重、肯定的语气
+- 不带任何性别假设地解读命盘
+- 聚焦于普世的人生主题：成长、爱情、成功、挑战、自我发现
+- 让解读感觉个人化且具有认同感"""
         }
     }
 }
@@ -224,6 +262,11 @@ MODE_CONFIGS = {
 - Frame challenges as "growth opportunities"
 - Use softer language for difficult aspects
 
+**Be Balanced 平衡性**:
+- Present both positive and challenging aspects
+- Always provide hope and solutions
+- Emphasize free will and personal agency
+
 **Word Choice 用词选择**:
 - Use: "tendency," "potential," "may experience," "opportunity for growth"
 - Avoid: "definitely will," "doomed to," "cannot escape," "destined to fail"
@@ -237,6 +280,8 @@ MODE_CONFIGS = {
 
 - This reading uses TRADITIONAL interpretation methods without modern softening.
 - The language is direct, as traditional masters would speak.
+- Challenging aspects are stated clearly - not to discourage, but to prepare.
+- Every challenge mentioned comes with traditional remedies or timing guidance.
 """,
         "interpretation_style": """
 ## INTERPRETATION STYLE - AUTHENTIC MODE (传统直言版)
@@ -245,71 +290,46 @@ MODE_CONFIGS = {
 - 像传统命理师一样说话，不要绕弯子
 - 该说"破财"就说"破财"，该说"婚姻有波折"就直说
 - 用传统术语：犯太岁、刑冲破害、比劫夺财、伤官见官、财库被冲
+- 不要用"可能有挑战"，要说"今年子午相冲，6月财运受阻，不宜大额投资"
 
 **Be Specific 具体明确**:
-- 给出具体时间、具体事项、具体建议
-"""
-    },
-    # ================= 新增：未成年模式 =================
-    "minor": {
-        "name": "Minor Mode (Child/Teen)",
-        "name_zh": "未成年版",
-        "ethics": """
-## CHILD SAFETY & ETHICS - MANDATORY RULES
+- 给出具体时间："2026年午月（6月）"
+- 给出具体事项："不宜签合同"、"防小人"、"注意肠胃"
+- 给出具体建议："佩戴属虎的生肖吉祥物可化解"
 
-This report is about a MINOR (under 18 years old) and is written FOR THE PARENTS.
+**Use Traditional Terms 使用传统术语**:
+正确用法:
+- "命中比劫重，合伙做生意容易被拖累，建议独资或控股"
+- "日支空亡，晚婚对你更有利，30岁后遇到的对象更稳定"
+- "今年犯太岁，诸事不顺，宜守不宜攻"
+- "七杀无制，性格刚烈，事业上易与上司冲突"
+- "财星入墓，中年后财运才能真正起来"
+- "伤官见官，婚姻宫有刑，第一段感情难以长久"
 
-### ABSOLUTELY FORBIDDEN - NEVER DISCUSS:
-- Romantic relationships, dating, marriage, sexuality, or "future spouse" in romantic terms
-- Adult career decisions, investments, business ventures, or financial speculation
-- Fertility, reproduction, or family planning
-- Harsh predictions like "marriage will fail," "財運平平," "命中無子"
-- Any language suggesting fixed negative outcomes for the child's life
-- Adult-themed traditional fortune-telling warnings
+避免用法:
+- "You might experience some challenges..." 
+- "There could potentially be..."
+- "This suggests a tendency toward..."
+- "能量比较复杂" (这是废话)
 
-### REQUIRED APPROACH:
-- Frame everything as POTENTIAL, TENDENCIES, and DEVELOPMENTAL PATTERNS
-- Focus on: personality traits, learning style, talents, health, family relationships, emotional patterns
-- Write FOR THE PARENTS to better understand and nurture their child
-- Use warm, encouraging, developmentally-appropriate language
-- Provide PRACTICAL PARENTING ADVICE, not fortune-telling predictions
-- Empower parents with insights to support their child's natural gifts
-""",
-        "interpretation_style": """
-## INTERPRETATION STYLE - MINOR MODE (儿童/青少年版)
+**Provide Remedies 给出化解方案**:
+- 每个问题都要给出传统的化解方法
+- 可以是：风水摆设、佩戴饰品、择日行事、方位选择、贵人方向
+- 不是空泛的"保持积极心态"，而是具体的操作建议
 
-**Tone 语气**:
-- Warm, nurturing, and encouraging throughout
-- Like a wise grandparent or experienced teacher speaking to loving parents
-- Never alarming, pathologizing, or doom-predicting
+**Timing is Key 时机很重要**:
+- 明确说出哪些年份/月份有利、哪些需要避开
+- "2026年上半年适合谈恋爱，下半年不宜做重大决定"
+- "35-45岁这步大运是事业上升期，抓紧这十年"
 
-**Reframing Traditional Concepts 传统概念的重构**:
-- 配偶宫 (Spouse Palace) → Interpret ONLY as "how this child relates to close family and future close relationships in abstract" - NO romantic analysis
-- 财星 (Wealth Stars) → Interpret as "learning motivation, resource awareness, practical intelligence" - NOT adult wealth
-- 官杀 (Officer Stars) → Interpret as "response to authority, discipline patterns, leadership tendencies" - NOT adult career
-- 食伤 (Output Stars) → Interpret as "creative expression, self-expression, communication style"
-- 印星 (Resource Stars) → Interpret as "learning style, need for nurturing, academic inclinations"
-- 比劫 (Peer Stars) → Interpret as "sibling relationships, peer interaction, friendship patterns"
-
-**Focus Areas for a Child**:
-- Innate personality and temperament
-- Learning style and academic potential areas
-- Emotional needs and how to meet them
-- Parent-child dynamics and how to nurture
-- Health constitution and care tips
-- Friendship and social development
-- Childhood milestones and growth phases
-
-**Language Examples**:
-- Use: "您的孩子天生...", "This child may thrive when...", "Parents can support by..."
-- Avoid: "将来婚姻...", "adult career path...", "财运...", "命中注定..."
+**Balance Yin-Yang 阴阳平衡**:
+- 好的直接说好，不好的也直接指出
+- 但每个挑战都必须配一个化解方法或最佳应对时机
+- 这不是恐吓，是让人提前知道如何趋吉避凶
 """
     }
 }
-
-# ================= 未成年报告章节定义 =================
-MINOR_SECTION_TYPES = ['minor_nature', 'minor_learning', 'minor_family', 'minor_forecast']
-ADULT_SECTION_TYPES = ['core', 'wealth', 'love', '2026_forecast']
+# ===========================================
 
 
 def get_gender_instruction(gender, lang_code):
@@ -336,8 +356,6 @@ def format_bazi_context(data):
     try:
         gender = data.get('gender', 'unknown')
         name = data.get('name', 'Client')
-        age = data.get('age', None)
-        is_minor = data.get('is_minor', False)
         birth_info = data.get('birthInfo', {})
         day_master = data.get('dayMaster', 'N/A')
         day_master_element = data.get('dayMasterElement', 'N/A')
@@ -358,15 +376,9 @@ def format_bazi_context(data):
         elif gender == 'female':
             gender_display = "Female (女命/坤造)"
         elif gender == 'non-binary':
-            gender_display = "Non-binary / Gender-neutral"
+            gender_display = "Non-binary / Gender-neutral (性别中立解读)"
         else:
-            gender_display = "Not specified"
-        
-        age_display = ""
-        if age is not None:
-            age_display = f"\n- Age: {age} years old"
-            if is_minor:
-                age_display += f" ⚠️ **MINOR - Report written for PARENTS**"
+            gender_display = "Not specified (未指定)"
         
         def format_pillar(name_cn, name_en, p):
             if not p:
@@ -397,7 +409,7 @@ def format_bazi_context(data):
         
         if current_dayun:
             if current_dayun.get('notStarted'):
-                current_dayun_status = f"Not started yet (will start in {current_dayun.get('startYear', '')}, at age {current_dayun.get('startAge', '')})"
+                current_dayun_status = f"Not started yet (will start in {current_dayun.get('startYear', '')})"
             else:
                 current_dayun_status = (
                     f"{current_dayun.get('ganZhi', 'N/A')} "
@@ -417,7 +429,7 @@ def format_bazi_context(data):
 
 ### Client Information
 - Name: {name}
-- Gender: {gender_display}{age_display}
+- Gender: {gender_display}
 - Birthplace: {birth_info.get('location', 'Unknown')}
 - Longitude: {birth_info.get('longitude', 'N/A')}
 - Timezone: UTC{'+' if birth_info.get('timezone', 0) >= 0 else ''}{birth_info.get('timezone', 'N/A')}
@@ -488,6 +500,7 @@ All 10 Major Luck Cycles:
 def format_bazi_summary(data):
     """生成八字摘要"""
     pillars = data.get('pillars', {})
+    
     bazi_str = f"{pillars.get('year', {}).get('ganZhi', '?')} {pillars.get('month', {}).get('ganZhi', '?')} {pillars.get('day', {}).get('ganZhi', '?')} {pillars.get('hour', {}).get('ganZhi', '?')}"
     
     gender = data.get('gender', 'Unknown')
@@ -496,14 +509,10 @@ def format_bazi_summary(data):
     else:
         gender_display = gender.capitalize()
     
-    age = data.get('age', None)
-    is_minor = data.get('is_minor', False)
-    age_str = f"\nAge: {age} ({'Minor' if is_minor else 'Adult'})" if age is not None else ""
-    
     summary = f"""
 Four Pillars (四柱): {bazi_str}
 Day Master (日主): {data.get('dayMasterFull', data.get('dayMaster', 'N/A'))}
-Gender (性别): {gender_display}{age_str}
+Gender (性别): {gender_display}
 Birthplace: {data.get('birthInfo', {}).get('location', 'Unknown')}
 True Solar Time: {data.get('birthInfo', {}).get('solarTime', 'N/A')}
 """
@@ -517,11 +526,9 @@ def get_language_config(lang_code, custom_lang=None):
             "name": custom_lang,
             "instruction": f"Write your response in fluent, natural {custom_lang}.",
             "pronoun_rule": "Address the user in a formal and respectful manner consistent with this language.",
-            "pronoun_rule_nonbinary": "Use gender-neutral language consistently.",
-            "pronoun_rule_minor": f"This report is written FOR PARENTS about their child. Use warm, supportive language in {custom_lang}.",
-            "style_gentle": "Use a warm, insightful tone like a wise mentor.",
+            "pronoun_rule_nonbinary": "Use gender-neutral language consistently. Avoid gendered pronouns.",
+            "style_gentle": "Use a warm, insightful tone like a wise mentor sharing ancient wisdom with a modern friend.",
             "style_authentic": "Use a direct, authoritative tone like a traditional fortune-telling master.",
-            "style_minor": "Use a warm, nurturing tone for parents about their child.",
             "opening": f"Analysis for you in {custom_lang}...",
             "closing": "End of chapter."
         }
@@ -561,67 +568,62 @@ def ask_ai(system_prompt, user_prompt, max_tokens=16000):
         print(f"Gemini API Error: {str(e)}")
         return {"error": str(e)}
 
-
 # ================= AI 自检功能 =================
 def validate_report(full_report, bazi_data, language):
     """让 AI 检查报告是否有错误"""
     
     gender = bazi_data.get('gender', 'unknown')
-    is_minor = bazi_data.get('is_minor', False)
-    age = bazi_data.get('age', 'unknown')
-    
-    special_check_note = ""
-    
-    if is_minor:
-        special_check_note = f"""
-⚠️ CRITICAL: This report is for a MINOR (age {age}). Verify STRICTLY:
-- Report does NOT discuss romantic/marriage/sexual topics
-- Report does NOT analyze adult career, investments, or wealth speculation
-- Report does NOT use harsh predictions like "婚姻失败" or "命中无子"
-- Report IS written for parents, not for the child
-- Tone is warm, nurturing, and developmentally appropriate
-- Spouse Palace is NOT interpreted romantically
-- Wealth/Officer stars are reinterpreted for child development (learning, talents, etc.)
-
-If ANY of these rules are violated, this is a HIGH SEVERITY issue.
-"""
-    elif gender == "non-binary":
-        special_check_note = """
+    gender_note = ""
+    if gender == "non-binary":
+        gender_note = """
 IMPORTANT: This client selected NON-BINARY gender. Check that:
 - Report uses 'they/them' pronouns (English) or 'Ta' (Chinese)
 - Report does NOT use 'he/she', '他/她', '男命/女命'
-- Relationship analysis provides DUAL interpretation
+- Relationship analysis provides DUAL interpretation (both Wealth and Officer star perspectives)
 - Language is gender-neutral throughout
 """
     
     validation_prompt = f"""
-You are a senior BaZi expert reviewer.
+You are a senior BaZi (Chinese Four Pillars of Destiny) expert reviewer. 
+Your task is to review a generated BaZi report for accuracy and quality.
 
-## BAZI DATA:
+## BAZI DATA PROVIDED TO THE REPORT GENERATOR:
 - Client Name: {bazi_data.get('name', 'Unknown')}
 - Gender: {bazi_data.get('gender', 'Unknown')}
-- Age: {age}
-- Is Minor: {is_minor}
 - Day Master: {bazi_data.get('dayMaster', 'Unknown')} ({bazi_data.get('dayMasterElement', '')})
 - Four Pillars: 
   - Year: {bazi_data.get('pillars', {}).get('year', {}).get('ganZhi', 'N/A')}
   - Month: {bazi_data.get('pillars', {}).get('month', {}).get('ganZhi', 'N/A')}
   - Day: {bazi_data.get('pillars', {}).get('day', {}).get('ganZhi', 'N/A')}
   - Hour: {bazi_data.get('pillars', {}).get('hour', {}).get('ganZhi', 'N/A')}
+- Five Elements Count: {json.dumps(bazi_data.get('fiveElements', {}), ensure_ascii=False)}
+{gender_note}
 
-{special_check_note}
+## GENERATED REPORT TO REVIEW:
+{full_report[:8000]}  
+(Report truncated for review - first 8000 characters shown)
 
-## REPORT TO REVIEW:
-{full_report[:8000]}
+## YOUR TASK:
+1. Check if the Day Master analysis is consistent with the provided data
+2. Check if Ten Gods interpretations are correct for the given gender
+3. Check if element analysis matches the five elements count
+4. Check if there are any obvious factual errors or contradictions
+5. Check if the language and tone are appropriate
+6. If gender is non-binary, verify gender-neutral language is used consistently
 
-## RESPONSE FORMAT (JSON ONLY):
+## RESPONSE FORMAT:
+Respond in JSON format ONLY:
 {{
     "status": "PASS" or "NEEDS_REVIEW",
     "confidence_score": 0-100,
-    "summary": "Brief summary",
-    "issues_found": [{{"severity": "high/medium/low", "description": "..."}}],
-    "recommendation": "..."
+    "summary": "Brief summary of review findings",
+    "issues_found": [
+        {{"severity": "high/medium/low", "description": "Issue description"}}
+    ],
+    "recommendation": "Your recommendation"
 }}
+
+If everything looks good, return status "PASS" with an empty issues_found array.
 """
 
     result = ask_ai(
@@ -631,14 +633,17 @@ You are a senior BaZi expert reviewer.
     
     if result and 'choices' in result:
         try:
-            content = result['choices'][0]['message']['content'].strip()
+            content = result['choices'][0]['message']['content']
+            content = content.strip()
             if content.startswith('```json'):
                 content = content[7:]
             if content.startswith('```'):
                 content = content[3:]
             if content.endswith('```'):
                 content = content[:-3]
-            return json.loads(content.strip())
+            
+            validation_result = json.loads(content.strip())
+            return validation_result
         except json.JSONDecodeError as e:
             print(f"Failed to parse validation JSON: {e}")
             return {
@@ -646,73 +651,26 @@ You are a senior BaZi expert reviewer.
                 "confidence_score": 85,
                 "summary": "Validation completed (JSON parse fallback)",
                 "issues_found": [],
-                "recommendation": "Report appears acceptable."
+                "recommendation": "Report appears acceptable based on structure review."
             }
     
     return {
         "status": "UNKNOWN",
         "confidence_score": 0,
-        "summary": "Validation failed",
+        "summary": "Validation failed to complete",
         "issues_found": [{"severity": "high", "description": "Could not complete validation"}],
         "recommendation": "Manual review recommended"
     }
 
 
-# ================= 生成客户消息 =================
-def generate_customer_message_simple(client_name, bazi_summary, full_report, language, is_minor=False):
-    """生成客户消息"""
+# ================= 生成客户消息（简化版，无 Google Doc） =================
+def generate_customer_message_simple(client_name, bazi_summary, full_report, language):
+    """生成客户消息（不包含 Google Doc 链接）"""
     
     report_preview = full_report[:3000] if len(full_report) > 3000 else full_report
     
-    if is_minor:
-        if language == "zh":
-            message_prompt = f"""
-请为 {client_name}（一位孩子）的父母生成一段专业、温暖的消息，告知他们孩子的八字分析报告已完成。
-
-摘要：
-{bazi_summary}
-
-报告预览：
-{report_preview}
-
-要求：
-1. 用中文撰写
-2. 这是写给父母的消息，不是给孩子
-3. 语气温暖，像一位智慧长辈对父母说话
-4. 简要概括报告中关于孩子的3-5个关键发现（性格、天赋、教养方向）
-5. 给父母一些鼓励的话
-6. 告知如有育儿问题可以随时咨询
-7. 长度200-400字
-8. 不要提及任何链接
-
-直接输出消息内容。
-"""
-        else:
-            lang_name = LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS['en'])['name']
-            message_prompt = f"""
-Generate a warm, professional message for the PARENTS of {client_name} (a child), informing them that their child's BaZi analysis report is complete.
-
-Summary:
-{bazi_summary}
-
-Report Preview:
-{report_preview}
-
-Requirements:
-1. Write in {lang_name}
-2. This message is for the PARENTS, not the child
-3. Warm tone, like a wise elder speaking to loving parents
-4. Summarize 3-5 key findings about the CHILD (personality, talents, parenting direction)
-5. Offer encouragement to the parents
-6. Let them know they can reach out with parenting questions
-7. 150-300 words
-8. Do NOT mention any links
-
-Output the message directly.
-"""
-    else:
-        if language == "zh":
-            message_prompt = f"""
+    if language == "zh":
+        message_prompt = f"""
 请为客户 {client_name} 生成一段专业、温暖的消息，告知他们的八字命理报告已完成。
 
 八字摘要：
@@ -723,18 +681,18 @@ Output the message directly.
 
 要求：
 1. 用中文撰写
-2. 语气专业但温暖
-3. 简要概括报告中的3-5个关键发现
-4. 给出积极的建议或祝福
-5. 告知如有问题可以随时咨询
-6. 长度200-400字
-7. 不要提及任何链接
+2. 语气专业但温暖，像一位资深命理师在与客户交流
+3. 简要概括报告中的3-5个关键发现或亮点（从报告内容中提取）
+4. 给出一些积极的建议或祝福
+5. 告知客户如有问题可以随时咨询
+6. 整体长度适中（200-400字）
+7. 不要提及任何链接或文档
 
-直接输出消息内容。
+直接输出消息内容，不要加任何说明或标题。
 """
-        else:
-            lang_name = LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS['en'])['name']
-            message_prompt = f"""
+    else:
+        lang_name = LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS['en'])['name']
+        message_prompt = f"""
 Generate a professional, warm message for client {client_name} informing them that their BaZi destiny reading is complete.
 
 BaZi Summary:
@@ -745,60 +703,69 @@ Report Preview:
 
 Requirements:
 1. Write in {lang_name}
-2. Professional but warm tone
-3. Briefly summarize 3-5 key findings
-4. Provide positive advice or blessings
+2. Professional but warm tone, like an experienced destiny reader communicating with a client
+3. Briefly summarize 3-5 key findings or highlights from the report (extract from report content)
+4. Provide some positive advice or blessings
 5. Let them know they can reach out with questions
-6. 150-300 words
-7. Do NOT mention any links
+6. Medium length (150-300 words)
+7. Do NOT mention any links or documents
 
-Output the message directly.
+Output the message content directly without any additional explanation or title.
 """
 
     result = ask_ai(
-        "You are a professional feng shui and destiny reading consultant.",
+        "You are a professional feng shui and destiny reading consultant communicating with a valued client.",
         message_prompt
     )
     
     if result and 'choices' in result:
         return result['choices'][0]['message']['content']
     
-    # Fallback
-    if is_minor:
-        if language == "zh":
-            return f"尊敬的家长，{client_name}的八字命理分析报告已完成。祝愿孩子健康快乐成长！"
-        else:
-            return f"Dear Parents, the BaZi analysis report for {client_name} is now ready. Wishing your child a healthy and happy childhood!"
+    if language == "zh":
+        return f"""亲爱的 {client_name}，
+
+您的八字命理分析报告已经完成！
+
+{bazi_summary}
+
+感谢您的耐心等待。如果您对报告内容有任何疑问，欢迎随时与我们联系。
+
+祝您一切顺利！
+
+The Qi Flow 团队
+"""
     else:
-        if language == "zh":
-            return f"亲爱的 {client_name}，您的八字命理分析报告已经完成！"
-        else:
-            return f"Dear {client_name}, your personal BaZi Destiny Blueprint is now ready!"
+        return f"""Dear {client_name},
+
+Your personal BaZi Destiny Blueprint report is now ready!
+
+{bazi_summary}
+
+Thank you for your patience. If you have any questions about your reading, please don't hesitate to reach out.
+
+Warm regards,
+The Qi Flow Team
+"""
 
 
 @app.route('/', methods=['GET'])
 def health_check():
     return jsonify({
-        "status": "running",
-        "version": "6.0-minor-support",
+        "status": "running", 
+        "version": "5.3-dual-year-forecast", 
         "api_key_set": bool(GOOGLE_GEMINI_API_KEY),
-        "features": {
-            "adult_reports": True,
-            "minor_reports": True,
-            "marriage_reports": True,
-            "age_threshold": 18
+        "endpoints": {
+            "personal_report": "/api/generate-section",
+            "marriage_report": "/api/generate-marriage-section"
         },
-        "section_types": {
-            "adult": ADULT_SECTION_TYPES,
-            "minor": MINOR_SECTION_TYPES
-        }
+        "supported_genders": ["male", "female", "non-binary"],
+        "forecast_years": ["2026", "2027"]
     }), 200
 
 
 @app.route('/api/generate-section', methods=['OPTIONS'])
 def options_handler():
     return '', 204
-
 
 @app.route('/api/generate-section', methods=['POST'])
 def generate_section():
@@ -807,7 +774,10 @@ def generate_section():
 
         req_data = request.json
         if not req_data:
+            print("ERROR: No JSON received")
             return jsonify({"error": "No JSON received"}), 400
+
+        print(f"Request data keys: {req_data.keys()}")
 
         bazi_json = req_data.get('bazi_data', {})
         section_type = req_data.get('section_type', 'core')
@@ -816,43 +786,25 @@ def generate_section():
         custom_lang = req_data.get('custom_language', None)
         lang_config = get_language_config(lang_code, custom_lang)
 
-        # ============ 未成年强制温和版 ============
-        is_minor = bazi_json.get('is_minor', False)
-        requested_mode = req_data.get('mode', 'gentle')
-        
-        if is_minor:
-            # 未成年强制使用 gentle 基础 + minor 专用规则
-            reading_mode = 'gentle'
-            print(f"⚠️ MINOR detected (age {bazi_json.get('age', 'unknown')}). Forcing gentle mode + minor rules.")
-        else:
-            reading_mode = requested_mode
-        
+        reading_mode = req_data.get('mode', 'gentle')
         mode_config = get_mode_config(reading_mode)
-        minor_mode_config = get_mode_config('minor') if is_minor else None
-        print(f"Reading Mode: {reading_mode}, Is Minor: {is_minor}")
+        print(f"Reading Mode: {reading_mode} ({mode_config['name']})")
 
         gender = bazi_json.get('gender', 'unknown')
         client_name = bazi_json.get('name', 'Client')
-        age = bazi_json.get('age', 'unknown')
-        print(f"Client: {client_name}, Gender: {gender}, Age: {age}, Section: {section_type}")
+        print(f"Client: {client_name}, Gender: {gender}, Section: {section_type}, Mode: {reading_mode}")
 
         gender_info = get_gender_instruction(gender, lang_code)
 
         current_opening = lang_config.get('opening', "In this chapter...")
         current_closing = lang_config.get('closing', "End of chapter.")
         
-        # 代词规则
-        if is_minor:
-            current_pronoun_rule = lang_config.get('pronoun_rule_minor', lang_config.get('pronoun_rule'))
-        elif gender == "non-binary":
-            current_pronoun_rule = lang_config.get('pronoun_rule_nonbinary', lang_config.get('pronoun_rule'))
+        if gender == "non-binary":
+            current_pronoun_rule = lang_config.get('pronoun_rule_nonbinary', lang_config.get('pronoun_rule', "Address the user formally."))
         else:
             current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
         
-        # 写作风格
-        if is_minor:
-            current_style = lang_config.get('style_minor', lang_config.get('style_gentle'))
-        elif reading_mode == "authentic":
+        if reading_mode == "authentic":
             current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
         else:
             current_style = lang_config.get('style_gentle')
@@ -863,503 +815,158 @@ def generate_section():
         day_master = bazi_json.get('dayMaster', '')
         day_master_element = bazi_json.get('dayMasterElement', '')
         current_dayun = bazi_json.get('currentDayun', {})
+        current_liunian = bazi_json.get('currentLiuNian', {})
+        special_palaces = bazi_json.get('specialPalaces', {})
+        five_elements = bazi_json.get('fiveElements', {})
+        yun_info = bazi_json.get('yunInfo', {})
 
-        # ============ 未成年章节路由 ============
-        if is_minor and section_type not in MINOR_SECTION_TYPES:
-            # 如果前端传来成人章节类型，自动映射到对应的未成年章节
-            section_map = {
-                'core': 'minor_nature',
-                'wealth': 'minor_learning',
-                'love': 'minor_family',
-                '2026_forecast': 'minor_forecast'
-            }
-            section_type = section_map.get(section_type, section_type)
-            print(f"Mapped section to minor version: {section_type}")
+        # ================= 非二元性别额外指令 =================
+        nonbinary_extra_instruction = ""
+        if gender == "non-binary":
+            nonbinary_extra_instruction = """
+## ⚠️ CRITICAL: GENDER-NEUTRAL LANGUAGE REQUIREMENT ⚠️
 
-        # ============ 未成年专用安全规则 ============
-        minor_safety_block = ""
-        if is_minor:
-            minor_safety_block = f"""
-## ⚠️ CRITICAL: MINOR CLIENT - AGE {age} ⚠️
+This client has selected NON-BINARY gender. You MUST follow these rules STRICTLY:
 
-This report is for a CHILD/MINOR and is written FOR THE PARENTS to read.
+**ABSOLUTELY FORBIDDEN - DO NOT USE:**
+- English: "he", "him", "his", "she", "her", "hers", "himself", "herself"
+- Chinese: "他", "她", "男命", "女命", "乾造", "坤造", "丈夫", "妻子", "男友", "女友"
+- Any gendered relationship terms
 
-### ABSOLUTELY FORBIDDEN - NEVER INCLUDE:
-- Romantic relationships, dating, marriage, sexuality
-- "Ideal partner" or "future spouse" in romantic terms
-- Adult career predictions, business decisions, investment advice
-- Fertility, reproduction, having children
-- Harsh predictions ("marriage will fail", "命中財運平平", "命中無子")
-- Any fatalistic language about the child's life outcomes
-- Traditional 真实版/authentic mode harsh language is STRICTLY PROHIBITED
+**REQUIRED - USE THESE INSTEAD:**
+- English: "they", "them", "their", "themselves", "this person", "the client", or use client's actual name
+- Chinese: "Ta", "TA", "这位客户", "命主", "伴侣", "另一半", "爱人"
 
-### REQUIRED APPROACH:
-- Frame ALL analysis as POTENTIAL and DEVELOPMENTAL TENDENCIES
-- Reinterpret traditional concepts for child development:
-  * 配偶宫 (Spouse Palace) → "How this child relates to close family members and forms attachments" (NO romantic interpretation)
-  * 财星 (Wealth Stars) → "Learning motivation, practical intelligence, resource awareness"
-  * 官杀 (Officer Stars) → "Response to authority, discipline patterns, leadership emergence"
-  * 食伤 (Output Stars) → "Creative expression, communication style, self-expression"
-  * 印星 (Resource Stars) → "Learning style, need for nurturing, academic inclinations"
-  * 比劫 (Peer Stars) → "Sibling bonds, peer dynamics, friendship patterns"
+**FOR RELATIONSHIP ANALYSIS:**
+- MUST provide DUAL interpretation (both Wealth Star AND Officer Star perspectives)
+- Let the client choose which resonates more
+- Use "partner", "significant other", "spouse" - NEVER gendered terms
 
-### WRITE FOR PARENTS:
-- Address the PARENTS, not the child
-- Use phrases like "Your child tends to...", "Parents can nurture this by...", "您的孩子..."
-- Provide actionable PARENTING ADVICE
-- Be warm, encouraging, never alarming
-
-{minor_mode_config['ethics'] if minor_mode_config else ''}
-
-{minor_mode_config['interpretation_style'] if minor_mode_config else ''}
+This is NON-NEGOTIABLE. Violations will make the report inappropriate for this client.
 """
 
         # ================= 核心 System Prompt =================
         base_system_prompt = f"""
-You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts.
+You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会), "Yuan Hai Zi Ping" (渊海子平), and "Di Tian Sui" (滴天髓).
 
 ## CRITICAL FORMATTING RULES - MUST FOLLOW
 
-**ABSOLUTELY FORBIDDEN:**
+**ABSOLUTELY FORBIDDEN in your response 绝对禁止使用:**
 - Horizontal divider lines: --- or ___ or *** or ===
 - Setext-style headers (text with === or --- underneath)
 - Triple or more consecutive blank lines
+- Any decorative separators or dividers
 
-**MANDATORY formatting:**
+**MANDATORY formatting 必须使用的格式:**
 - Use ATX-style headers ONLY: # H1, ## H2, ### H3, #### H4
+- Use single blank lines between sections
 - Use **bold** for emphasis
 - Use bullet lists: - or * or 1. 2. 3.
 
-This rule is NON-NEGOTIABLE.
-
-{minor_safety_block}
+This rule is NON-NEGOTIABLE. Violations will break the PDF rendering.
 
 ## READING MODE: {mode_config['name'].upper()} / {mode_config['name_zh']}
 
-{mode_config['interpretation_style'] if not is_minor else ''}
+{mode_config['interpretation_style']}
 
-{mode_config['ethics'] if not is_minor else ''}
+{mode_config['ethics']}
 
-## CLIENT INFORMATION
+{nonbinary_extra_instruction}
 
-**Name**: {client_name}
-**Gender**: {gender.upper() if gender != 'unknown' else 'UNKNOWN'}
-**Age**: {age}
-**Is Minor**: {is_minor}
-**Pronouns**: {gender_info['pronoun']}
+## CLIENT INFORMATION - CRITICAL
 
-**Gender-Specific BaZi Rules**:
+**Gender 性别**: {gender.upper() if gender != 'unknown' else 'UNKNOWN'}
+**Name 姓名**: {client_name}
+**Pronouns 代词**: {gender_info['pronoun']}
+
+**Gender-Specific BaZi Rules 性别专属解读规则**:
 {gender_info['bazi_rules']}
 
-{'⚠️ Note: Since this is a MINOR, apply the child-development reframing above INSTEAD of adult interpretations.' if is_minor else ''}
+CRITICAL: You MUST apply these gender-specific interpretation rules throughout your analysis!
 
 ## LANGUAGE & STYLE REQUIREMENTS
 
-**Language**: {lang_config['instruction']}
-**Pronoun Rules**: {current_pronoun_rule}
+**Language 语言**: {lang_config['instruction']}
+**Pronoun Rules 称谓规则**: {current_pronoun_rule}
+**Third Person Reference 第三人称**: Use {gender_info['pronoun']} when referring to the client
 
-**Writing Style**:
+**Writing Style 写作风格**:
 {current_style}
+
+## AVAILABLE DATA - USE ALL OF IT
+
+You have access to COMPLETE chart data including:
+
+1. **Four Pillars (四柱)** with FULL details for each pillar:
+   - GanZhi (干支) - Heavenly Stem and Earthly Branch
+   - WuXing (五行) - The element of each character
+   - NaYin (纳音) - Sound element (e.g., "海中金", "炉中火")
+   - Ten Gods (十神) - ShiShenGan/ShiShenZhi relationship to Day Master
+   - Twelve Stages (十二长生) - DiShi indicating element's life stage
+   - Void (空亡) - XunKong indicating which branches are "empty"
+   - Hidden Stems (藏干) - Internal elements within each branch
+
+2. **Day Master Analysis (日主分析)**:
+   - The Day Master element and Yin/Yang nature
+   - Use this as the reference point for all Ten Gods calculations
+
+3. **Special Palaces (特殊宫位)**:
+   - 胎元 Tai Yuan: Pre-birth foundation, inherited traits from parents
+   - 命宫 Ming Gong: Core destiny direction, life's central theme
+   - 身宫 Shen Gong: Physical body, material fortune, self-cultivation
+
+4. **Five Elements Count (五行统计)**:
+   - Exact count of each element in the chart
+   - Identify what is excessive, balanced, or missing
+
+5. **Complete Luck Cycles (完整大运)**:
+   - Start age and year of first luck cycle
+   - Direction (forward/backward)
+   - All 10 major luck periods with exact age/year ranges
+   - Current luck cycle clearly marked
+   - Current annual luck (流年)
+
+6. **Special Stars (神煞)**:
+   - Auspicious stars (吉神)
+   - Challenging stars (凶煞)
+
+## ANALYSIS REQUIREMENTS
+
+**Be Specific 具体化**:
+- Reference ACTUAL data from the chart (e.g., "Your Day Branch 午 shows 帝旺 stage...")
+- Quote the exact GanZhi, Ten Gods, and Stages from the data
+- Connect observations to specific pillars and their relationships
+
+**Be Authentic 专业化**:
+- Use proper BaZi terminology with translations
+- Explain WHY certain combinations matter
+- Reference classical interpretations when relevant
+
+**Be Personal 个人化**:
+- This is THEIR unique chart - avoid generic statements
+- Connect analysis to real-life implications
+- Acknowledge both strengths and growth areas
+
+**Be Practical 实用化**:
+- Provide actionable insights
+- Suggest specific remedies or enhancements
+- Give timing guidance based on luck cycles
 
 ## MANDATORY STRUCTURE
 
 - START your response EXACTLY with: "{current_opening}"
 - END your response EXACTLY with: "{current_closing}"
-- Do NOT add greetings like "Welcome", "Hello"
-- Treat this as a STANDALONE chapter
-- Write 2500+ words with proper Markdown formatting
-- Include Chinese terms with translations
-- Do NOT use any horizontal lines
+- Do NOT add greetings like "Welcome", "Hello", or "As we discussed"
+- Treat this as a STANDALONE chapter - do not reference other chapters
+- Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
+- Include Chinese terms with translations for authenticity
+- Do NOT use any horizontal lines (---, ***, ===, ___) anywhere in your response
 """
 
+        # ================= 各章节详细指令 =================
         specific_prompt = ""
 
-        # ================================================================
-        # ============== 未成年专用章节 Prompts ==============
-        # ================================================================
-
-        if section_type == 'minor_nature':
-            specific_prompt = f"""
-## TASK: Write Chapter 1 - Innate Nature & Personality Blueprint (先天禀赋与性格蓝图)
-## For: {client_name} (age {age}, a CHILD) — Report written FOR THE PARENTS
-
-### COMPLETE CHART DATA:
-{context_str}
-
-### REQUIRED ANALYSIS (Written for PARENTS about their CHILD):
-
-## 1. Your Child's Core Nature (孩子的核心天性)
-- Day Master [{day_master}] - what element is the child's essence?
-- Yin/Yang nature: introverted/quiet vs. outgoing/expressive
-- What is this child's NATURAL TEMPERAMENT from birth?
-- How does this show up in a child's daily behavior?
-- What "makes them tick" at their age?
-
-## 2. Personality Seeds Already Showing (已经显现的性格种子)
-- Based on Ten Gods pattern, what personality traits are forming?
-- Are they sensitive, bold, curious, cautious, social, reflective?
-- What might parents ALREADY be noticing in their behavior?
-- Give CONCRETE examples of how a child with this chart tends to behave
-
-## 3. Emotional Landscape (情感世界)
-- How does this child process emotions?
-- Do they wear feelings openly or keep them inside?
-- What triggers overwhelm? What soothes them?
-- Attachment style tendencies (secure, sensitive, independent)
-
-## 4. Five Elements Balance & What It Means for a Child
-- Strongest element: what does excess of this element look like in a child?
-- Weakest/missing element: what might the child need more of?
-- Practical tips for parents to help balance their child's energy through:
-  * Environment (colors, space, nature exposure)
-  * Activities (sports, arts, quiet time)
-  * Diet adjustments (if relevant to the element balance)
-
-## 5. Sensory & Energetic Preferences (感官与能量偏好)
-- Does this child need more stimulation or more calm?
-- Morning person vs. evening person tendencies
-- Crowd tolerance (thrives in groups vs. needs solitude)
-- Sensory sensitivities to watch for
-
-## 6. Hidden Potentials (潜藏的天赋)
-- Look at hidden stems and special palaces
-- What unique gifts might unfold as they grow?
-- What should parents watch for and nurture?
-
-## 7. Parenting Insights (给父母的洞察)
-Provide 5-7 specific, practical insights:
-- "Your child may respond best to..."
-- "Avoid... as it may overwhelm them"
-- "Nurture their natural gift of... by..."
-- "Watch for signs of... and respond with..."
-
-End with a warm affirmation that this child's unique nature is a gift, and parents are well-equipped to nurture them.
-"""
-
-        elif section_type == 'minor_learning':
-            specific_prompt = f"""
-## TASK: Write Chapter 2 - Learning Talents & Potential Directions (学业天赋与潜能方向)
-## For: {client_name} (age {age}, a CHILD) — Report written FOR THE PARENTS
-
-### COMPLETE CHART DATA:
-{context_str}
-
-### REQUIRED ANALYSIS (Reframe ALL wealth/career stars for CHILD DEVELOPMENT):
-
-## 1. Natural Learning Style (天然的学习风格)
-- Based on Day Master and Ten Gods, how does this child learn best?
-- Visual, auditory, kinesthetic, or reading/writing learner tendencies?
-- Do they learn through:
-  * Logic and structure (印星 strong)
-  * Hands-on experience (财星 strong — REINTERPRETED as practical intelligence)
-  * Creative exploration (食伤 strong)
-  * Rules and discipline (官杀 strong — REINTERPRETED as response to structure)
-  * Competition and play with peers (比劫 strong)
-
-## 2. Academic Strengths (学业优势领域)
-Based on the chart's element balance, which subject areas naturally align?
-- Strong Wood: Languages, literature, biology, growth-oriented subjects
-- Strong Fire: Performance, arts, public speaking, social sciences
-- Strong Earth: Practical skills, geography, home economics, stability-oriented learning
-- Strong Metal: Math, logic, analytical reasoning, structure-based subjects
-- Strong Water: Research, deep thinking, philosophy, fluid creative work
-
-Analyze their actual chart and give specific insights.
-
-## 3. Potential Talents to Nurture (值得培养的潜力)
-IMPORTANT: Frame these as POTENTIALS for the child's future, NOT as adult career predictions.
-
-Based on:
-- Dominant Ten Gods patterns
-- Five Element strengths
-- Special talent indicators (食伤, 印星, 偏财 as creativity/curiosity markers)
-
-Suggest 3-5 AREAS OF INTEREST to expose the child to, such as:
-- Creative arts (music, visual arts, drama, writing)
-- Physical activities (sports, martial arts, dance)
-- Intellectual pursuits (reading, puzzles, science experiments)
-- Social/leadership activities (team projects, debate)
-- Nature and hands-on learning (gardening, building, cooking)
-
-Emphasize: EXPOSURE and EXPLORATION over specialization at young age.
-
-## 4. Learning Challenges to Support (学习中需要支持的地方)
-- What subject or skill areas might require more support?
-- Is the child likely to struggle with:
-  * Sitting still (weak Earth)
-  * Focus/attention (scattered elements)
-  * Rote memorization (weak 印星)
-  * Self-expression (weak 食伤)
-  * Following rules (weak 官杀 or strong 比劫)
-- Frame these as "growth areas" with practical strategies for parents
-
-## 5. Motivation & Encouragement Style (激励方式)
-Different children respond to different motivation:
-- Does this child need gentle encouragement or clear structure?
-- Do they thrive on praise, autonomy, or challenges?
-- What RUINS their motivation? (e.g., harsh criticism, comparison)
-- Specific phrases and approaches that work for this temperament
-
-## 6. Study Environment Recommendations (学习环境建议)
-Practical feng shui for children:
-- Ideal study location (direction, colors)
-- Elements to incorporate in their study space
-- Timing considerations (best study times of day)
-- Noise vs. quiet preferences
-
-## 7. Long-term Perspective (长远视角)
-- This is NOT a career prediction. Instead:
-- Share the CHILD'S unique "learning superpower"
-- Remind parents that talents unfold gradually
-- Encourage patience, exploration, and trust in the child's natural pace
-- A warm note: every child's path is their own
-
-End with: specific, actionable next steps parents can take THIS MONTH to support their child's learning.
-"""
-
-        elif section_type == 'minor_family':
-            specific_prompt = f"""
-## TASK: Write Chapter 3 - Parent-Child Dynamics & Family Harmony (亲子关系与教养建议)
-## For: {client_name} (age {age}, a CHILD) — Report written FOR THE PARENTS
-
-### COMPLETE CHART DATA:
-{context_str}
-
-### ⚠️ CRITICAL REMINDER ⚠️
-The Day Branch is traditionally called "Spouse Palace" — but for a CHILD, you MUST reinterpret this as:
-"How this child forms close bonds and attachments with family members"
-ABSOLUTELY DO NOT discuss future romantic partners, marriage, or spouse qualities.
-This entire chapter is about PARENT-CHILD RELATIONSHIP and FAMILY DYNAMICS.
-
-### REQUIRED ANALYSIS:
-
-## 1. How Your Child Relates to Close People (与亲密之人的连结方式)
-- Day Branch [{pillars.get('day', {}).get('zhi', 'N/A')}] reinterpreted for a child:
-  * What's the child's attachment style within the family?
-  * Do they show affection openly or quietly?
-  * How do they seek comfort when upset?
-  * How do they show love to parents and siblings?
-- Are they physically affectionate or more verbal/observational?
-
-## 2. Relationship with Parents (与父母的关系)
-
-### Year Pillar - Grandparents & Heritage Energy
-The Year Pillar represents ancestry and early life. What does it suggest about:
-- The child's connection to older generations
-- Family traditions the child may naturally embrace or resist
-- Inherited traits or sensitivities
-
-### Month Pillar - Parents' Influence
-The Month Pillar strongly relates to parent-child dynamics:
-- How does the child perceive parental authority?
-- What parenting style does this child respond BEST to?
-  * Warm and structured
-  * Gentle and autonomous
-  * Engaging and playful
-  * Calm and consistent
-- How to AVOID power struggles with this child
-
-## 3. Sibling & Peer Relationships (兄弟姐妹与同伴关系)
-- 比劫 (Peer Stars) analysis reframed for children:
-  * Does this child naturally cooperate or compete with siblings/peers?
-  * Do they take on leadership or prefer to follow?
-  * How do they handle sharing, fairness, and conflict?
-- If only child: how they relate to cousins, friends, classmates
-- Friendship patterns: few close friends vs. many acquaintances
-
-## 4. What Your Child Needs Emotionally (情感需求)
-Every child has specific emotional needs based on their chart:
-- What makes this child feel SEEN?
-- What makes them feel SAFE?
-- What makes them feel VALUED?
-- What are their love languages (quality time, words, touch, etc.)?
-
-Give parents SPECIFIC actions they can take daily/weekly.
-
-## 5. Common Parent-Child Challenges (亲子关系中的常见挑战)
-Based on the chart, anticipate typical friction points:
-- Are they strong-willed? How to guide without breaking spirit
-- Are they sensitive? How to set boundaries without overwhelming
-- Are they dreamy/scattered? How to provide structure lovingly
-- Are they intense? How to help them regulate
-
-For each challenge, provide:
-- What you might observe
-- Why it happens (based on chart)
-- How to respond effectively
-
-## 6. Communication With Your Child (与孩子的沟通)
-- Best approaches to have meaningful conversations
-- How to listen so your child will talk
-- Words and tones that work vs. backfire
-- How to handle emotional outbursts based on their element balance
-
-## 7. Building a Strong Bond (建立深厚的亲子关系)
-Practical weekly rituals based on this child's chart:
-- Daily 1-on-1 time recommendations
-- Weekly family activities that suit their nature
-- Seasonal adjustments (what energizes vs. drains them)
-- How to celebrate their uniqueness
-
-## 8. Family Energy & Harmony (家庭能量与和谐)
-- Overall family dynamics based on chart
-- How parents' own energy affects this child (parents may want separate readings)
-- Creating a home environment this child thrives in
-- Colors, spaces, routines that support family harmony
-
-End with: An affirming message about the bond between this child and their parents, and 3 specific things parents can do THIS WEEK to strengthen connection.
-"""
-
-        elif section_type == 'minor_forecast':
-            specific_prompt = f"""
-## TASK: Write Chapter 4 - 2026-2027 Childhood Forecast (童年流年指南)
-## For: {client_name} (age {age}, a CHILD) — Report written FOR THE PARENTS
-
-### COMPLETE CHART DATA:
-{context_str}
-
-### ⚠️ CRITICAL REMINDER ⚠️
-This is a CHILD. Forecasts must focus on:
-- Health, growth, and developmental phases
-- Learning journey and school transitions
-- Emotional wellbeing
-- Family dynamics
-- Friendships and social development
-
-ABSOLUTELY DO NOT predict:
-- Adult events, career, investments
-- Romantic relationships
-- Specific fatalistic events
-
-Frame everything as "areas to nurture" and "themes to be aware of" for parents.
-
-### REQUIRED ANALYSIS:
-
-# ========== PART ONE: 2026 丙午年 (Fire Horse Year) FOR YOUR CHILD ==========
-
-## 1. 2026 Overall Energy for {client_name} (2026年整体能量)
-- How does 2026 丙午 interact with {client_name}'s Day Master [{day_master}]?
-- Any meaningful 冲合 with the child's branches?
-- What THEMES will dominate this year for the child?
-- Is this a year of:
-  * Growth and expansion
-  * Consolidation and learning
-  * Emotional sensitivity
-  * Social blossoming
-  * Health awareness needed
-
-## 2. Health & Physical Growth (健康与身体成长)
-This is ESPECIALLY important for children:
-- Which body systems may need extra attention in 2026?
-- Based on the interaction of 丙午 with the chart's five elements
-- Seasonal health considerations for a child
-- Nutrition and lifestyle tips for parents
-- When to be extra attentive to wellness
-
-## 3. Emotional & Mental Wellbeing (情绪与心理健康)
-- How may the child feel emotionally this year?
-- Phases of high energy vs. need for calm
-- Signs of stress or overwhelm to watch for
-- How parents can provide support
-
-## 4. Learning & School (学习与校园生活)
-- Academic themes for 2026
-- Is it a year for breakthrough learning or steady growth?
-- Subject areas that may light them up
-- Learning challenges to anticipate and support
-- Transition support if changing schools/grades
-
-## 5. Friendships & Social Life (友谊与社交)
-- How will social connections evolve this year?
-- Friend group dynamics to watch
-- Social confidence building opportunities
-- When they may need help navigating peer conflict
-
-## 6. Family Life (家庭生活)
-- Parent-child bond in 2026
-- Sibling dynamics (if applicable)
-- Family events or transitions that may affect the child
-- Opportunities for deepening family connection
-
-## 7. 2026 Month-by-Month Guide for Parents (2026逐月育儿要点)
-
-Provide BRIEF guidance for each lunar month from a parenting perspective:
-
-- **寅月 (Feb 4 - Mar 5)**: Growth energy, themes, parenting tip
-- **卯月 (Mar 6 - Apr 4)**:
-- **辰月 (Apr 5 - May 5)**:
-- **巳月 (May 6 - Jun 5)**:
-- **午月 (Jun 6 - Jul 6)**: [Double 午 — possible intensity, tips for calming]
-- **未月 (Jul 7 - Aug 7)**:
-- **申月 (Aug 8 - Sep 7)**: [Back-to-school timing]
-- **酉月 (Sep 8 - Oct 7)**:
-- **戌月 (Oct 8 - Nov 7)**:
-- **亥月 (Nov 8 - Dec 6)**:
-- **子月 (Dec 7 - Jan 5)**: [Watch for any 子午冲 impact on child's mood/health]
-- **丑月 (Jan 6 - Feb 3 2027)**:
-
-For each month, focus on:
-- Energy/mood tendencies
-- Health awareness
-- Learning opportunities
-- Parenting reminders
-
-# ========== PART TWO: 2027 丁未年 (Fire Goat Year) FOR YOUR CHILD ==========
-
-## 8. 2027 Overall Energy for {client_name} (2027年整体能量)
-- How does 丁未 interact with the child's chart?
-- How does 2027 differ in energy from 2026?
-- Energy shift from Yang Fire (丙) to Yin Fire (丁)
-- Energy shift from Horse (午) to Goat (未)
-
-## 9. 2027 Focus Areas
-- Health and growth themes
-- Learning and development
-- Emotional landscape
-- Social evolution
-- Family dynamics
-
-## 10. 2027 Month-by-Month Guide for Parents
-(Brief version, similar structure to 2026)
-
-# ========== PART THREE: TWO-YEAR PARENTING COMPASS ==========
-
-## 11. 2026 vs 2027 Side-by-Side for Parents
-
-| Area 领域 | 2026 Theme | 2027 Theme | Best Focus |
-|-----------|-----------|-----------|------------|
-| Health 健康 | | | |
-| Learning 学业 | | | |
-| Emotions 情绪 | | | |
-| Friendships 友谊 | | | |
-| Family 家庭 | | | |
-
-## 12. Two-Year Developmental Plan (双年成长计划)
-- Best timing for: starting new activities, travel, major learning experiences
-- Periods to be extra supportive
-- How to use both years to nurture your child's unfolding nature
-
-## 13. Parenting Reminders Across Both Years
-- Top 5 things to focus on
-- Top 5 things to watch for (gently)
-- Lucky colors, elements, and directions for the child's wellbeing
-- Simple daily practices that support the child's energy
-
-## 14. A Note of Encouragement for Parents (给父母的鼓励)
-End with:
-- Affirmation of the parents' love and effort
-- Reminder that the child is unfolding as they should
-- Encouragement to trust the process
-- A warm wish for the family's journey ahead
-
-Keep the overall tone: WARM, EMPOWERING, PRACTICAL. This is a parenting guide, not a fortune reading.
-"""
-
-        # ================================================================
-        # ============== 成人版章节 Prompts（原有逻辑保留）==============
-        # ================================================================
-
-        elif section_type == 'core':
+        if section_type == 'core':
             specific_prompt = f"""
 ## TASK: Write Chapter 1 - Soul Blueprint & Destiny Overview (命局灵魂)
 
@@ -1372,41 +979,92 @@ Keep the overall tone: WARM, EMPOWERING, PRACTICAL. This is a parenting guide, n
 - Analyze Day Master [{day_master}] - is it {day_master_element}
 - What is the Yin/Yang nature? What personality traits does this indicate?
 - Check the Month Branch to determine seasonal strength (得令/失令)
-- Reference the 十二长生 stage of the Day Pillar
-- Overall assessment: Is Day Master strong (身强) or weak (身弱)?
+- Reference the 十二长生 stage of the Day Pillar: is Day Master in 长生, 帝旺, 墓, or other stage?
+- Overall assessment: Is Day Master strong (身强) or weak (身弱)? Cite evidence from the chart.
 
 ## 2. Ten Gods Pattern Analysis (十神格局分析)
-- List ALL Ten Gods appearing in the four pillars
+- List ALL Ten Gods appearing in the four pillars (from shiShenGan and shiShenZhi data)
+- Create a summary: Which Ten Gods appear most? Which are missing?
 - What does this pattern reveal about personality and life themes?
+- Example: "比肩 appears in Year Pillar, suggesting..."
 
 ## 3. Hidden Stems Secrets (藏干秘密)
 - Analyze the hidden stems (hideGan) in each of the four branches
+- Are there any conflicts between the visible stems and hidden stems?
+- What inner qualities or hidden potentials do they reveal?
 - Any special combinations (暗合) or clashes (暗冲)?
 
 ## 4. Five Elements Balance (五行平衡)
-- Reference the exact five elements count
+- Reference the exact five elements count from the data
 - What element is strongest? What is weakest or missing?
-- What is the likely "Useful God" (用神)?
+- How does this imbalance manifest in personality and life?
+- What is the likely "Useful God" (用神) to bring balance?
 
 ## 5. Special Palaces Interpretation (特殊宫位解读)
-- 胎元, 命宫, 身宫 analysis
+- 胎元 [{special_palaces.get('taiYuan', 'N/A')}]: What does this reveal about prenatal foundation and inherited traits?
+- 命宫 [{special_palaces.get('mingGong', 'N/A')}]: What is their core life direction?
+- 身宫 [{special_palaces.get('shenGong', 'N/A')}]: What does this say about physical constitution and material life?
 
 ## 6. Void Analysis (空亡分析)
-- Which branches fall into void in each pillar
+- Check which branches fall into void (xunKong) in each pillar
+- What life areas might feel "empty" or require extra effort?
+- How can they work with this energy?
 
 ## 7. Core Destiny Theme (命运核心主题)
 - Synthesize all the above into a coherent life narrative
+- What is their unique gift or superpower based on this chart?
+- What is the central lesson or growth area of this lifetime?
+- What unique contribution can they make to the world?
 
-{"Make this feel like a profound self-discovery journey." if reading_mode == "gentle" else "直言命局优劣，好的明说，问题也要指出。"}
+{"Make this feel like a profound self-discovery journey. The reader should feel truly SEEN and understood." if reading_mode == "gentle" else "直言命局优劣，好的明说，问题也要指出，但每个问题都给出具体的化解方向。让读者真正了解自己的命局特点。"}
 """
 
         elif section_type == 'wealth':
             if gender == "female":
-                wealth_gender_note = "For women, Wealth Stars primarily represent financial ability and relationship with father (NOT husband)."
+                wealth_gender_note = """
+### GENDER-SPECIFIC NOTE FOR FEMALE CHART 女命特别说明
+For women, Wealth Stars (财星) primarily represent:
+- Financial ability and money-making potential
+- Relationship with father
+- (NOT husband - that's Officer Stars for women)
+
+Focus this chapter on her CAREER and FINANCIAL potential.
+Officer Stars analysis for relationships belongs in the Love chapter.
+"""
             elif gender == "non-binary":
-                wealth_gender_note = "Focus purely on CAREER and FINANCIAL aspects with gender-neutral language."
+                wealth_gender_note = """
+### GENDER-NEUTRAL NOTE 性别中立说明
+For this client who prefers gender-neutral reading:
+- Focus purely on CAREER and FINANCIAL aspects
+- Analyze Wealth Stars for money-making ability and financial patterns
+- Do NOT connect Wealth Stars to romantic relationships in this chapter
+- Use gender-neutral language throughout: "they/them/their" or "Ta"
+- Romantic analysis with dual interpretation will be in the Love chapter
+"""
             else:
-                wealth_gender_note = "For men, Wealth Stars represent both financial ability and wife/female relationships."
+                wealth_gender_note = """
+### GENDER-SPECIFIC NOTE FOR MALE CHART 男命特别说明
+For men, Wealth Stars (财星) represent both:
+- Financial ability and money-making potential
+- Wife and female relationships
+
+You may briefly mention how wealth stars affect his relationships with women,
+but detailed romance analysis belongs in the Love chapter.
+"""
+
+            if reading_mode == "authentic":
+                wealth_closing_guidance = """
+### AUTHENTIC MODE 真实版要求:
+- 如果财星弱，直接说"命中财运平平，需要格外努力"
+- 如果有比劫夺财，直接说"不适合合伙，容易被人分走利益"
+- 如果财库被冲，直接说"存不住钱，要特别注意理财"
+- 每个问题都给出具体建议：什么行业适合、什么年份发财、要避开什么
+- 不要用"可能"、"或许"、"有机会"这类模糊词汇
+"""
+            else:
+                wealth_closing_guidance = """
+Make them feel excited about their potential while being realistic about challenges.
+"""
 
             specific_prompt = f"""
 ## TASK: Write Chapter 2 - Career Empire & Wealth Potential (事业财运)
@@ -1417,98 +1075,509 @@ Keep the overall tone: WARM, EMPOWERING, PRACTICAL. This is a parenting guide, n
 {context_str}
 
 ### REQUIRED ANALYSIS:
-## 1. Wealth Star Analysis 财星分析
-## 2. Career DNA Based on Ten Gods 十神职业分析
-## 3. Useful God for Wealth 用神与财运
-## 4. Work Style Analysis 工作风格
-## 5. Wealth-Building Strategy 财富策略
-## 6. Career Timeline from Luck Cycles 大运事业时机
-## 7. Practical Recommendations 实用建议
 
-{"Make them feel excited about their potential while being realistic." if reading_mode == "gentle" else "直接说明财运真实情况，给出具体建议。"}
+## 1. Wealth Star Analysis (财星分析)
+- Identify where 正财 and 偏财 appear in the chart (check shiShenGan/shiShenZhi for each pillar)
+- Are wealth stars strong or weak? In what stage (十二长生)?
+- Is there 财库 (wealth storage) in any branch?
+- Natural relationship with money - easy accumulation or challenging?
+
+## 2. Career DNA Based on Ten Gods (十神职业分析)
+- What Ten Gods dominate the chart? Map to career archetypes:
+  - 正官/七杀 dominant: Management, government, authority roles
+  - 财星 dominant: Business, finance, sales
+  - 食神/伤官 dominant: Creative fields, teaching, expression
+  - 印星 dominant: Academic, research, advisory roles
+  - 比劫 dominant: Competitive fields, sports, entrepreneurship
+
+## 3. Useful God for Wealth (用神与财运)
+- Based on Day Master strength, what element helps wealth?
+- Which industries align with their Useful God element?
+- What environments support their success?
+
+## 4. Work Style Analysis (工作风格)
+- Leadership style: Boss, partner, or specialist?
+- Best work environment: Corporate, startup, freelance, government?
+- Team dynamics: Leader, collaborator, or independent contributor?
+
+## 5. Wealth-Building Strategy (财富策略)
+- Their natural path to prosperity
+- Should they focus on salary, business ownership, or investments?
+- Risk tolerance based on chart structure
+- Any warnings about financial pitfalls or 破财 patterns?
+
+## 6. Career Timeline from Luck Cycles (大运事业时机)
+- Analyze the complete luck cycles provided
+- Which luck cycles (大运) activate career and wealth?
+- Current luck cycle [{current_dayun.get('ganZhi', 'N/A')}] - how does it affect career?
+- Best years for career moves, promotions, or business launches
+- Periods requiring caution or consolidation
+
+## 7. Practical Recommendations (实用建议)
+- Top 3-5 specific industries to consider
+- Skills to develop based on chart strengths
+- Networking and partnership advice
+- Feng shui elements to enhance wealth luck
+
+{wealth_closing_guidance}
 """
 
         elif section_type == 'love':
             day_branch = pillars.get('day', {}).get('zhi', 'N/A')
             
             if gender == "non-binary":
-                love_instruction = f"""
-Provide DUAL INTERPRETATION (both Wealth Star AND Officer Star perspectives).
-Use "they/them" or "Ta" throughout. Day Branch: {day_branch}
+                love_specific_instruction = f"""
+### CRITICAL: GENDER-INCLUSIVE RELATIONSHIP ANALYSIS 性别包容婚恋分析
+
+This client has chosen a GENDER-NEUTRAL reading. You MUST provide DUAL INTERPRETATION.
+
+**STRICT LANGUAGE RULES - VIOLATIONS ARE NOT ACCEPTABLE:**
+- Use "they/them/their" pronouns in English
+- Use "Ta" or client's name in Chinese  
+- NEVER use: he, she, him, her, his, hers, 他, 她, husband, wife, boyfriend, girlfriend, 丈夫, 妻子, 男友, 女友
+- Use: partner, significant other, spouse, loved one, 伴侣, 另一半, 爱人
+
+**Day Branch (Spouse Palace): {day_branch}**
+
+You MUST analyze relationships from BOTH perspectives:
+
+---
+
+## INTERPRETATION A - Wealth Stars (財星) as Relationship Indicators
+
+Analyze as if Wealth Stars represent romantic attraction:
+
+### Where are the Wealth Stars?
+- Locate 正財 (Direct Wealth) and 偏財 (Indirect Wealth) in the four pillars
+- Check shiShenGan and shiShenZhi for each pillar
+
+### What Partner Qualities Do They Suggest?
+- 正財 partner energy: Stable, practical, nurturing, financially responsible, loyal
+- 偏財 partner energy: Outgoing, social, dynamic, generous, enjoys variety
+
+### Wealth Star Strength Assessment
+- Are Wealth Stars strong or weak in this chart?
+- What does this suggest about relationship patterns?
+
+### Timing Based on Wealth Star Cycles
+- Which luck cycles activate Wealth Stars?
+- When are favorable periods for meeting partners or deepening relationships?
+
+---
+
+## INTERPRETATION B - Officer Stars (官殺) as Relationship Indicators
+
+Analyze as if Officer Stars represent romantic attraction:
+
+### Where are the Officer Stars?
+- Locate 正官 (Direct Officer) and 七殺 (Seven Killings) in the four pillars
+- Check shiShenGan and shiShenZhi for each pillar
+
+### What Partner Qualities Do They Suggest?
+- 正官 partner energy: Responsible, structured, traditional, protective, career-oriented
+- 七殺 partner energy: Passionate, powerful, intense, ambitious, transformative
+
+### Officer Star Strength Assessment
+- Are Officer Stars strong or weak in this chart?
+- What does this suggest about relationship patterns?
+
+### Timing Based on Officer Star Cycles
+- Which luck cycles activate Officer Stars?
+- When are favorable periods for meeting partners or deepening relationships?
+
+---
+
+## SYNTHESIS - Bringing Both Perspectives Together
+
+After presenting both interpretations:
+
+### Which Interpretation Appears Stronger?
+Based on the chart structure (which stars are more prominent, better positioned, or in better stages), indicate which interpretation may be more relevant - but emphasize the client should trust their own resonance.
+
+### Spouse Palace Analysis (Day Branch: {day_branch})
+- Analyze the Day Branch for partnership QUALITIES without gendering
+- What ENERGY does the ideal partner bring?
+- Focus on: temperament, values, communication style, emotional needs
+
+### Universal Relationship Themes
+- Attachment style based on chart structure
+- What they need emotionally in a relationship
+- Potential relationship challenges and growth areas
+- How they express and receive love
+
+### Relationship Timing
+- Combine insights from both Wealth and Officer star cycles
+- Best periods for relationship milestones
+- Periods requiring extra attention to relationship harmony
 """
+                love_closing_guidance = f"""
+### GENDER-INCLUSIVE CLOSING GUIDANCE:
+
+Present both interpretations with equal respect and depth. 
+
+End with an affirming message:
+- Acknowledge the validity of their identity
+- Emphasize that authentic love transcends traditional categories
+- Encourage them to trust which interpretation resonates with their lived experience
+- Provide hope and practical wisdom for finding genuine connection
+
+REMEMBER: Use "they/them/their" or "Ta" throughout. NEVER use gendered pronouns or relationship terms.
+"""
+
             elif gender == "female":
-                love_instruction = f"""
-For FEMALE: Officer Stars = husband/boyfriends. Day Branch [{day_branch}] is spouse palace.
+                love_specific_instruction = f"""
+### CRITICAL: FEMALE CHART RELATIONSHIP ANALYSIS 女命婚恋分析 - 关键
+
+For this FEMALE client, you MUST analyze relationships using these rules:
+
+**Officer Stars = Husband/Boyfriends for Women:**
+- 正官 (Direct Officer) = Represents her HUSBAND, the "right" man, legitimate relationship
+- 七殺 (Seven Killings) = Represents boyfriends, lovers, passionate but potentially unstable relationships
+
+**Key Patterns to Check:**
+- If both 正官 and 七殺 appear: 官杀混杂 - complexity in love life, possibly multiple significant relationships
+- If 正官 is absent but 七殺 is strong: May attract intense but non-traditional relationships
+- If 傷官 (Hurting Officer) clashes with 正官: Classic 傷官見官 - challenges in marriage for women
+
+**Day Branch (Spouse Palace) Analysis:**
+- The Day Branch [{day_branch}] represents her SPOUSE PALACE (配偶宫)
+- What is the Ten God of the Day Branch? (check shiShenZhi of day pillar)
+- What is the Twelve Stage (diShi) of the Day Branch?
+- Is the Day Branch in 空亡 (void)?
+
+**Questions to Answer:**
+1. Where are her Officer Stars in the chart? Which pillars? Strong or weak?
+2. Is there 傷官見官 pattern? What does this mean for her marriage?
+3. What type of man is she attracted to based on Officer Star characteristics?
+4. What does her spouse palace [{day_branch}] reveal about her ideal husband's personality?
+5. What luck cycles activate romance (Officer Star luck cycles)?
 """
+                if reading_mode == "authentic":
+                    love_closing_guidance = f"""
+### AUTHENTIC MODE 真实版婚恋分析要求:
+- 如果婚姻宫有刑冲，直接说"第一段感情不稳定，容易有波折"
+- 如果伤官见官（女命），直接说"对婚姻有挑战，可能经历分手或离婚"
+- 如果日支空亡，直接说"配偶宫空亡，晚婚更稳定，或婚后聚少离多"
+- 给出具体的结婚年龄建议："28-32岁结婚最合适"
+- 给出配偶的具体画像："对方可能从事金融/教育行业，性格偏内向/外向"
+
+Use correct pronouns: {gender_info['pronoun']}
+"""
+                else:
+                    love_closing_guidance = f"""
+Be warm and hopeful while being honest about challenges.
+Use correct pronouns: {gender_info['pronoun']}
+"""
+
             else:
-                love_instruction = f"""
-For MALE: Wealth Stars = wife/girlfriends. Day Branch [{day_branch}] is spouse palace.
+                love_specific_instruction = f"""
+### CRITICAL: MALE CHART RELATIONSHIP ANALYSIS 男命婚恋分析 - 关键
+
+For this MALE client, you MUST analyze relationships using these rules:
+
+**Wealth Stars = Wife/Girlfriends for Men:**
+- 正財 (Direct Wealth) = Represents his WIFE, stable and legitimate relationship
+- 偏財 (Indirect Wealth) = Represents girlfriends, lovers, romantic but potentially less stable
+
+**Key Patterns to Check:**
+- If both 正財 and 偏財 appear: He may have multiple romantic interests or marry more than once
+- If 偏財 is stronger than 正財: May prefer casual relationships or marry later
+- If 比劫 (Rob Wealth) is strong: 比劫奪財 - competition for partners or financial drain through relationships
+
+**Day Branch (Spouse Palace) Analysis:**
+- The Day Branch [{day_branch}] represents his SPOUSE PALACE (配偶宫)
+- What is the Ten God of the Day Branch? (check shiShenZhi of day pillar)
+- What is the Twelve Stage (diShi) of the Day Branch?
+- Is the Day Branch in 空亡 (void)?
+
+**Questions to Answer:**
+1. Where are his Wealth Stars in the chart? Which pillars? Strong or weak?
+2. Is there 比劫奪財 pattern? What does this mean for relationships?
+3. What type of woman is he attracted to based on Wealth Star characteristics?
+4. What does his spouse palace [{day_branch}] reveal about his ideal wife's personality?
+5. What luck cycles activate romance (Wealth Star luck cycles)?
+"""
+                if reading_mode == "authentic":
+                    love_closing_guidance = f"""
+### AUTHENTIC MODE 真实版婚恋分析要求:
+- 如果婚姻宫有刑冲，直接说"第一段感情不稳定，容易有波折"
+- 如果比劫夺财（男命），直接说"容易遇到竞争者，或因女人破财"
+- 如果日支空亡，直接说"配偶宫空亡，晚婚更稳定，或婚后聚少离多"
+- 给出具体的结婚年龄建议："28-32岁结婚最合适"
+- 给出配偶的具体画像："对方可能从事金融/教育行业，性格偏内向/外向"
+
+Use correct pronouns: {gender_info['pronoun']}
+"""
+                else:
+                    love_closing_guidance = f"""
+Be warm and hopeful while being honest about challenges.
+Use correct pronouns: {gender_info['pronoun']}
 """
 
             specific_prompt = f"""
 ## TASK: Write Chapter 3 - Love, Relationships & Soulmate Profile (婚恋情感)
 
-{love_instruction}
+{love_specific_instruction}
 
 ### COMPLETE CHART DATA:
 {context_str}
 
 ### REQUIRED ANALYSIS:
-## 1. Relationship Stars Analysis 婚恋星分析
-## 2. Spouse Palace Deep Dive 配偶宫深度分析
-## 3. Ideal Partner Profile 理想伴侣画像
-## 4. Love Patterns & Attachment Style 恋爱模式
-## 5. Marriage Timing from Luck Cycles 婚姻时机
-## 6. Relationship Advice 婚恋建议
+
+## 1. Relationship Stars Analysis (婚恋星分析)
+- Apply the gender-specific rules above
+- Locate and analyze all relevant relationship stars
+- Assess their strength, stage, and position in the chart
+
+## 2. Spouse Palace Deep Dive (配偶宫深度分析)
+- Day Branch [{day_branch}] analysis:
+  - What element is this branch? What does it represent?
+  - What is the Ten God (shiShenZhi) of the day pillar?
+  - What is the Twelve Stage (diShi)? 帝旺 = strong spouse, 墓 = introverted spouse, etc.
+  - Is it in 空亡? What does this mean for marriage timing or spouse presence?
+- Any clashes (冲), combinations (合), or harms (害) with other branches?
+
+## 3. Ideal Partner Profile (理想伴侣画像)
+- Personality traits that complement this chart
+- Physical characteristics tendencies (based on elements)
+- Career or background of ideal match
+- Which geographic direction might they come from? (based on elements)
+
+## 4. Love Patterns & Attachment Style (恋爱模式)
+- How do they behave in relationships based on Ten Gods pattern?
+- Common relationship challenges they may face
+- Their attachment style (secure, anxious, avoidant) based on chart structure
+- What triggers them emotionally?
+
+## 5. Marriage Timing from Luck Cycles (婚姻时机)
+- Analyze the complete luck cycles for romance timing
+- Which luck cycles activate relationship stars?
+- Current luck cycle [{current_dayun.get('ganZhi', 'N/A')}] - impact on love life?
+- Favorable years for meeting someone significant or marriage
+- Years requiring relationship caution
+
+## 6. Relationship Advice (婚恋建议)
+- How to attract the right partner based on their chart
+- How to maintain a healthy long-term relationship
+- Red flags to watch for based on chart patterns
+- How to work with challenging aspects
+
+{love_closing_guidance}
 """
 
         elif section_type == '2026_forecast':
+            # ================= 2026-2027 双年流年预测 =================
+            if gender == "non-binary":
+                forecast_gender_note = """
+### GENDER-NEUTRAL FORECAST NOTE:
+- Use "they/them/their" pronouns throughout
+- For relationship predictions, mention BOTH Wealth Star and Officer Star activations
+- Let the client determine which resonates with their experience
+- Avoid any gendered language or assumptions
+"""
+            else:
+                forecast_gender_note = f"""
+### GENDER REMINDER:
+Client is {gender.upper()}. Apply correct gender-based star interpretations for all predictions.
+"""
+
+            if reading_mode == "authentic":
+                forecast_mode_instruction = """
+### AUTHENTIC MODE 真实版流年预测要求:
+- 直接说哪几个月好、哪几个月差
+- 如果有冲克，直接说"这个月犯太岁/逢冲，不宜做重大决定"
+- 具体到事项："6月不宜投资"、"9月防小人"、"12月注意身体"
+- 如果整年运势不好，直接说"宜守不宜攻，稳扎稳打为主"
+- 每个问题都要给出化解方法：佩戴什么、摆放什么、去什么方位
+- 2026和2027两年要做对比分析，让读者清楚哪一年更有利
+"""
+            else:
+                forecast_mode_instruction = """
+Make this feel like a practical roadmap they can actually use throughout 2026 and 2027.
+Compare the two years so they know which year favors which activities.
+"""
+
             specific_prompt = f"""
-## TASK: Write Chapter 4 - 2026-2027 Two-Year Forecast
+## TASK: Write Chapter 4 - 2026-2027 Two-Year Forecast (2026-2027双年流年预测)
+## 2026 Year of the Fire Horse (丙午) & 2027 Year of the Fire Goat (丁未)
 
 ### COMPLETE CHART DATA:
 {context_str}
 
-# PART ONE: 2026 丙午年 (FIRE HORSE)
-## 1. 2026 Overview
-## 2. Impact on Current Luck Cycle
-## 3. Key Opportunities in 2026
-## 4. Challenges to Navigate in 2026
-## 5. 2026 Month-by-Month Breakdown (all 12 lunar months)
-## 6. 2026 Action Plan
+{forecast_gender_note}
 
-# PART TWO: 2027 丁未年 (FIRE GOAT)
-## 7. 2027 Overview
-## 8. Impact on Luck Cycle
-## 9. Key Opportunities in 2027
-## 10. Challenges in 2027
-## 11. 2027 Month-by-Month Breakdown
-## 12. 2027 Action Plan
+{forecast_mode_instruction}
 
-# PART THREE: COMPARISON & STRATEGY
-## 13. 2026 vs 2027 Comparison Table
-## 14. Two-Year Strategic Plan
-## 15. Looking Ahead
+### REQUIRED ANALYSIS:
+
+# ========== PART ONE: 2026 丙午年 (FIRE HORSE) ==========
+
+## 1. 2026 Fire Horse (丙午) Overview (2026火马年总览)
+- 2026 is 丙午 year - Fire Horse (Yang Fire + Horse)
+- How does 丙午 interact with their Day Master [{day_master}]?
+- How does 午 (Horse) interact with their four branches?
+- CHECK SPECIFICALLY: Is there 子午冲 (Rat-Horse clash) with any branch? This is major!
+- Any combinations (合) or harms (害) with 午?
+- Overall energy theme of 2026 for this person
+
+## 2. Impact on Current Luck Cycle (与当前大运的交互 - 2026)
+- Current luck cycle: [{current_dayun.get('ganZhi', 'N/A')}]
+- How does 2026 丙午 interact with their current 大运?
+- Is this a supportive or challenging combination?
+- What themes are amplified by this interaction?
+
+## 3. Key Opportunities in 2026 (2026机遇)
+- Which life areas get activated positively?
+- Career opportunities based on element interactions
+- Relationship opportunities (apply gender-specific rules)
+- Wealth opportunities
+- Best timing for major decisions
+
+## 4. Challenges to Navigate in 2026 (2026挑战)
+- Potential obstacles or difficult periods
+- Health areas to watch (which organs relate to stressed elements?)
+- Relationship cautions
+- Career or financial cautions
+- How to mitigate challenges
+
+## 5. 2026 Month-by-Month Breakdown (2026逐月分析)
+Provide specific guidance for each Chinese lunar month:
+
+- **Month 1 (寅月 - Feb 4 to Mar 5)**: Tiger month...
+- **Month 2 (卯月 - Mar 6 to Apr 4)**: Rabbit month...
+- **Month 3 (辰月 - Apr 5 to May 5)**: Dragon month...
+- **Month 4 (巳月 - May 6 to Jun 5)**: Snake month...
+- **Month 5 (午月 - Jun 6 to Jul 6)**: Horse month (double 午!)...
+- **Month 6 (未月 - Jul 7 to Aug 7)**: Goat month...
+- **Month 7 (申月 - Aug 8 to Sep 7)**: Monkey month...
+- **Month 8 (酉月 - Sep 8 to Oct 7)**: Rooster month...
+- **Month 9 (戌月 - Oct 8 to Nov 7)**: Dog month...
+- **Month 10 (亥月 - Nov 8 to Dec 6)**: Pig month...
+- **Month 11 (子月 - Dec 7 to Jan 5)**: Rat month (子午冲 if applicable!)...
+- **Month 12 (丑月 - Jan 6 to Feb 3 2027)**: Ox month...
+
+For each month, briefly note:
+- Key theme or energy
+- Opportunities
+- Cautions
+- Lucky days or activities
+
+## 6. 2026 Action Plan (2026行动计划)
+- Top 3 things to focus on in 2026
+- Top 3 things to avoid or be cautious about
+- Lucky elements, colors, and directions for 2026
+- Feng shui recommendations
+- Any specific remedies if challenges are significant
+
+# ========== PART TWO: 2027 丁未年 (FIRE GOAT) ==========
+
+## 7. 2027 Fire Goat (丁未) Overview (2027火羊年总览)
+- 2027 is 丁未 year - Fire Goat (Yin Fire + Goat/Sheep)
+- How does 丁未 interact with their Day Master [{day_master}]?
+- How does 丁 (Yin Fire) differ from 2026's 丙 (Yang Fire)? What shift does this bring?
+- How does 未 (Goat) interact with their four branches?
+- CHECK SPECIFICALLY:
+  - Is there 丑未冲 (Ox-Goat clash) with any branch?
+  - Is there 未午合 or 未戌合 (combinations) with any branch?
+  - Any 三刑 (Three Penalties) involving 未?
+- Overall energy theme of 2027 for this person
+
+## 8. Impact on Luck Cycle (与大运的交互 - 2027)
+- Is the client still in the same 大运 in 2027, or transitioning to a new one?
+- How does 2027 丁未 interact with their 大运?
+- What themes carry over from 2026 and what shifts?
+
+## 9. Key Opportunities in 2027 (2027机遇)
+- Which life areas get activated positively?
+- Career opportunities - how do they differ from 2026?
+- Relationship opportunities (apply gender-specific rules)
+- Wealth opportunities
+- Best timing for major decisions in 2027
+
+## 10. Challenges to Navigate in 2027 (2027挑战)
+- Potential obstacles or difficult periods
+- Health areas to watch (未属土，注意脾胃/消化系统)
+- Relationship cautions
+- Career or financial cautions
+- How to mitigate challenges
+
+## 11. 2027 Month-by-Month Breakdown (2027逐月分析)
+Provide specific guidance for each Chinese lunar month:
+
+- **Month 1 (寅月 - Feb 4 to Mar 5)**: Tiger month...
+- **Month 2 (卯月 - Mar 6 to Apr 4)**: Rabbit month (卯未半合木局?)...
+- **Month 3 (辰月 - Apr 5 to May 5)**: Dragon month...
+- **Month 4 (巳月 - May 6 to Jun 5)**: Snake month...
+- **Month 5 (午月 - Jun 6 to Jul 6)**: Horse month (午未合!)...
+- **Month 6 (未月 - Jul 7 to Aug 7)**: Goat month (double 未! 本命年效应?)...
+- **Month 7 (申月 - Aug 8 to Sep 7)**: Monkey month...
+- **Month 8 (酉月 - Sep 8 to Oct 7)**: Rooster month...
+- **Month 9 (戌月 - Oct 8 to Nov 7)**: Dog month (未戌刑?)...
+- **Month 10 (亥月 - Nov 8 to Dec 6)**: Pig month (亥未半合木局?)...
+- **Month 11 (子月 - Dec 7 to Jan 5)**: Rat month...
+- **Month 12 (丑月 - Jan 6 to Feb 3 2028)**: Ox month (丑未冲!)...
+
+For each month, briefly note:
+- Key theme or energy
+- Opportunities
+- Cautions
+
+## 12. 2027 Action Plan (2027行动计划)
+- Top 3 things to focus on in 2027
+- Top 3 things to avoid or be cautious about
+- Lucky elements, colors, and directions for 2027
+- Feng shui recommendations
+
+# ========== PART THREE: TWO-YEAR COMPARISON & STRATEGY ==========
+
+## 13. 2026 vs 2027 Comparison (双年对比分析)
+Create a clear comparison:
+
+| Dimension 维度 | 2026 丙午 | 2027 丁未 | Which Year is Better 哪年更优 |
+|---------------|-----------|-----------|------------------------------|
+| Career 事业    |           |           |                              |
+| Wealth 财运    |           |           |                              |
+| Love 感情      |           |           |                              |
+| Health 健康    |           |           |                              |
+| Study 学业     |           |           |                              |
+| Overall 综合   |           |           |                              |
+
+## 14. Two-Year Strategic Plan (双年战略规划)
+- What should be done in 2026 vs. deferred to 2027?
+- Key transitions between the two years
+- How the energy shifts from Yang Fire (丙) to Yin Fire (丁)
+- How the energy shifts from Horse (午) to Goat (未)
+- Specific advice: "Do X in 2026, wait until 2027 for Y"
+
+## 15. Looking Ahead (展望未来)
+- How does 2026-2027 set up 2028 (戊申)?
+- Any long-term themes emerging across these years?
+- Final empowering message for the two years ahead
 """
 
         else:
             return jsonify({"error": f"Unknown section type: {section_type}"}), 400
 
-        print(f"Calling AI for section: {section_type}, minor: {is_minor}, lang: {lang_config['name']}")
+        print(f"Calling AI for section: {section_type} in language: {lang_config['name']} with mode: {reading_mode}")
         
-        if section_type in ('2026_forecast', 'minor_forecast'):
+        # 2026_forecast 章节内容量大，使用更大的 max_tokens
+        if section_type == '2026_forecast':
             ai_result = ask_ai(base_system_prompt, specific_prompt, max_tokens=24000)
         else:
             ai_result = ask_ai(base_system_prompt, specific_prompt)
+        
+        print(f"AI result keys: {ai_result.keys() if isinstance(ai_result, dict) else 'not a dict'}")
 
         if ai_result and 'choices' in ai_result:
             content = ai_result['choices'][0]['message']['content']
             print(f"Success! Content length: {len(content)}")
             return jsonify({"content": content})
         elif ai_result and 'error' in ai_result:
+            print(f"AI Error: {ai_result}")
             return jsonify(ai_result), 500
         else:
-            return jsonify({"error": "AI response format invalid"}), 500
+            print(f"Unknown AI response: {ai_result}")
+            return jsonify({"error": "AI response format invalid", "raw": str(ai_result)}), 500
 
     except Exception as e:
         error_msg = traceback.format_exc()
@@ -1523,9 +1592,11 @@ def finalize_options_handler():
 
 @app.route('/api/finalize-report', methods=['POST'])
 def finalize_report():
-    """简化版：只做 AI 自检 + 生成客户消息"""
+    """
+    简化版：只做 AI 自检 + 生成客户消息（不创建 Google Doc）
+    """
     try:
-        print("=== Finalize Report Request ===")
+        print("=== Finalize Report Request (No Google Doc) ===")
         
         req_data = request.json
         if not req_data:
@@ -1536,18 +1607,17 @@ def finalize_report():
         language = req_data.get('language', 'en')
         
         client_name = bazi_data.get('name', 'Client')
-        is_minor = bazi_data.get('is_minor', False)
         
         if not full_report:
             return jsonify({"error": "No report content provided"}), 400
         
-        print(f"Processing report for: {client_name}, Minor: {is_minor}")
+        print(f"Processing report for: {client_name}")
+        print(f"Report length: {len(full_report)} characters")
         
         bazi_summary = format_bazi_summary(bazi_data)
         
         result = {
             "client_name": client_name,
-            "is_minor": is_minor,
             "validation": None,
             "customer_message": None
         }
@@ -1557,6 +1627,7 @@ def finalize_report():
         try:
             validation_result = validate_report(full_report, bazi_data, language)
             result["validation"] = validation_result
+            print(f"Validation result: {validation_result.get('status', 'Unknown')}")
         except Exception as e:
             print(f"Validation error: {e}")
             result["validation"] = {
@@ -1572,10 +1643,10 @@ def finalize_report():
                 client_name, 
                 bazi_summary,
                 full_report,
-                language,
-                is_minor=is_minor
+                language
             )
             result["customer_message"] = customer_message
+            print("Customer message generated successfully")
         except Exception as e:
             print(f"Customer message error: {e}")
             result["customer_message"] = f"[Error generating message: {str(e)}]"
@@ -1590,34 +1661,1099 @@ def finalize_report():
 
 
 # =====================================================================
-# ================= 合婚报告功能 - 保持原样，未成年不可合婚 =================
+# ================= 合婚报告功能 - MARRIAGE COMPATIBILITY =================
 # =====================================================================
-# (省略合婚代码，保持原样 - 合婚报告仅限成人)
+
+MARRIAGE_SECTIONS = [
+    {'type': 'overview', 'title': 'Chapter 1: Both Partners Overview', 'zh': '第一章：双方命局概览'},
+    {'type': 'compatibility', 'title': 'Chapter 2: Core Compatibility Analysis', 'zh': '第二章：核心配对分析'},
+    {'type': 'communication', 'title': 'Chapter 3: Communication & Conflict Patterns', 'zh': '第三章：相处与沟通模式'},
+    {'type': 'wealth_career', 'title': 'Chapter 4: Wealth & Career Together', 'zh': '第四章：财运与事业配合'},
+    {'type': 'love_marriage', 'title': 'Chapter 5: Love & Marriage Stability', 'zh': '第五章：感情与婚姻稳定性'},
+    {'type': 'forecast_2026', 'title': 'Chapter 6: 2026-2027 Forecast & Harmony Tips', 'zh': '第六章：2026-2027双年流年预测与和谐建议'},
+]
+
+
+def format_marriage_bazi_context(bazi_a, bazi_b):
+    """格式化双人八字数据给 AI"""
+    
+    def format_single_person(data, label):
+        name = data.get('name', label)
+        gender = data.get('gender', 'unknown')
+        birth_info = data.get('birthInfo', {})
+        pillars = data.get('pillars', {})
+        five_elements = data.get('fiveElements', {})
+        
+        if gender == 'male':
+            gender_display = "Male (男命)"
+        elif gender == 'female':
+            gender_display = "Female (女命)"
+        elif gender == 'non-binary':
+            gender_display = "Non-binary (性别中立)"
+        else:
+            gender_display = "Unknown"
+        
+        bazi_str = f"{pillars.get('year', {}).get('ganZhi', '?')} {pillars.get('month', {}).get('ganZhi', '?')} {pillars.get('day', {}).get('ganZhi', '?')} {pillars.get('hour', {}).get('ganZhi', '?')}"
+        
+        return f"""
+### {name} ({label})
+- Gender: {gender_display}
+- Birthplace: {birth_info.get('location', 'Unknown')}
+- True Solar Time: {birth_info.get('solarTime', 'N/A')}
+- Four Pillars: {bazi_str}
+- Day Master: {data.get('dayMaster', 'N/A')} ({data.get('dayMasterElement', '')})
+- Day Master Strength: {data.get('dayMasterStrength', 'N/A')}
+- Zodiac: {data.get('zodiac', 'N/A')}
+- Na Yin: {data.get('naYin', 'N/A')}
+
+**Year Pillar 年柱**: {pillars.get('year', {}).get('ganZhi', 'N/A')}
+  - Hidden Stems: {pillars.get('year', {}).get('hideGan', 'N/A')}
+  - Ten Gods: {pillars.get('year', {}).get('shiShenGan', '')} / {pillars.get('year', {}).get('shiShenZhi', '')}
+
+**Month Pillar 月柱**: {pillars.get('month', {}).get('ganZhi', 'N/A')}
+  - Hidden Stems: {pillars.get('month', {}).get('hideGan', 'N/A')}
+  - Ten Gods: {pillars.get('month', {}).get('shiShenGan', '')} / {pillars.get('month', {}).get('shiShenZhi', '')}
+
+**Day Pillar 日柱**: {pillars.get('day', {}).get('ganZhi', 'N/A')}
+  - Hidden Stems: {pillars.get('day', {}).get('hideGan', 'N/A')}
+  - Spouse Palace (配偶宫): {pillars.get('day', {}).get('zhi', 'N/A')}
+
+**Hour Pillar 时柱**: {pillars.get('hour', {}).get('ganZhi', 'N/A')}
+  - Hidden Stems: {pillars.get('hour', {}).get('hideGan', 'N/A')}
+  - Ten Gods: {pillars.get('hour', {}).get('shiShenGan', '')} / {pillars.get('hour', {}).get('shiShenZhi', '')}
+
+**Five Elements Count 五行统计**:
+  - Metal 金: {five_elements.get('metal', 0)}
+  - Wood 木: {five_elements.get('wood', 0)}
+  - Water 水: {five_elements.get('water', 0)}
+  - Fire 火: {five_elements.get('fire', 0)}
+  - Earth 土: {five_elements.get('earth', 0)}
+
+**Favorable Elements 喜用神**: {', '.join(data.get('favorableElements', [])) or 'N/A'}
+**Unfavorable Elements 忌神**: {', '.join(data.get('unfavorableElements', [])) or 'N/A'}
+
+**Current Luck Cycle 当前大运**: {data.get('currentDayun', {}).get('ganZhi', 'N/A')} ({data.get('currentDayun', {}).get('startYear', '')}-{data.get('currentDayun', {}).get('endYear', '')})
+"""
+    
+    context_a = format_single_person(bazi_a, "Partner A")
+    context_b = format_single_person(bazi_b, "Partner B")
+    
+    return f"""
+## COMPLETE MARRIAGE COMPATIBILITY DATA
+
+{context_a}
+
+{context_b}
+"""
+
+
+def format_compatibility_scores(scores):
+    """格式化合婚评分数据"""
+    breakdown = scores.get('breakdown', {})
+    
+    return f"""
+## COMPATIBILITY SCORES (已计算)
+
+**Total Score 总分**: {scores.get('total', 0)} / 100
+**Level 等级**: {scores.get('level', {}).get('name', 'N/A')}
+
+### Score Breakdown 评分详解:
+
+1. **Day Master Match 日主相合**: {breakdown.get('dayMaster', {}).get('score', 0)}/{breakdown.get('dayMaster', {}).get('maxScore', 25)}
+   - {breakdown.get('dayMaster', {}).get('description', '')}
+
+2. **Zodiac Connection 生肖配对**: {breakdown.get('zodiac', {}).get('score', 0)}/{breakdown.get('zodiac', {}).get('maxScore', 20)}
+   - {breakdown.get('zodiac', {}).get('description', '')}
+
+3. **Elements Balance 五行互补**: {breakdown.get('elements', {}).get('score', 0)}/{breakdown.get('elements', {}).get('maxScore', 20)}
+   - {breakdown.get('elements', {}).get('description', '')}
+
+4. **Na Yin Harmony 纳音合婚**: {breakdown.get('naYin', {}).get('score', 0)}/{breakdown.get('naYin', {}).get('maxScore', 15)}
+   - {breakdown.get('naYin', {}).get('description', '')}
+
+5. **Gan Zhi Synergy 干支配合**: {breakdown.get('ganZhi', {}).get('score', 0)}/{breakdown.get('ganZhi', {}).get('maxScore', 10)}
+   - {breakdown.get('ganZhi', {}).get('description', '')}
+
+6. **Spouse Palace 婚姻宫位**: {breakdown.get('spousePalace', {}).get('score', 0)}/{breakdown.get('spousePalace', {}).get('maxScore', 10)}
+   - {breakdown.get('spousePalace', {}).get('description', '')}
+"""
+
+
+def get_marriage_gender_instruction(gender_a, gender_b, lang_code):
+    """获取合婚报告的性别相关指令"""
+    rule_lang = "zh" if lang_code == "zh" else "en"
+    
+    has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
+    
+    if has_nonbinary:
+        if rule_lang == "zh":
+            return """
+## 性别包容合婚指南
+
+这对伴侣中至少有一方选择了性别中立的解读方式。请遵循以下规则：
+
+### 语言规则：
+- 使用"伴侣"、"另一半"、"爱人"等中性称谓
+- 避免使用"丈夫"、"妻子"、"男方"、"女方"
+- 第三人称使用"Ta"或直接用名字
+- 避免"男命"、"女命"等术语
+
+### 分析方式：
+- 不按传统性别角色分配十神含义
+- 重点分析两人五行互补、日主配合、生肖关系
+- 配偶宫分析聚焦于伴侣特质而非性别特征
+- 尊重每段关系的独特性
+"""
+        else:
+            return """
+## GENDER-INCLUSIVE MARRIAGE ANALYSIS GUIDELINES
+
+At least one partner in this couple has selected a gender-neutral reading. Follow these rules:
+
+### Language Rules:
+- Use "partner," "significant other," "spouse" - avoid "husband," "wife"
+- Use "they/them" for any partner who selected non-binary
+- Use their actual names instead of gendered terms
+- Avoid traditional terms like "male chart," "female chart"
+
+### Analysis Approach:
+- Do not assign Ten Gods meanings based on traditional gender roles
+- Focus on Five Elements complementarity, Day Master harmony, Zodiac relationships
+- Spouse Palace analysis should focus on partner qualities, not gendered traits
+- Respect the unique nature of every relationship
+"""
+    else:
+        gender_info_a = get_gender_instruction(gender_a, lang_code)
+        gender_info_b = get_gender_instruction(gender_b, lang_code)
+        
+        return f"""
+## GENDER-SPECIFIC INTERPRETATION RULES
+
+For Partner A ({gender_a}):
+{gender_info_a['bazi_rules']}
+
+For Partner B ({gender_b}):
+{gender_info_b['bazi_rules']}
+"""
+
+
+@app.route('/api/generate-marriage-section', methods=['OPTIONS'])
+def marriage_options_handler():
+    return '', 204
+
 
 @app.route('/api/generate-marriage-section', methods=['POST'])
 def generate_marriage_section():
-    """合婚报告 - 仅限成人。如果任一方是未成年，拒绝生成。"""
+    """生成合婚报告的单个章节"""
     try:
+        print("=== Marriage Section Request ===")
+        
         req_data = request.json
         if not req_data:
             return jsonify({"error": "No JSON received"}), 400
         
         bazi_a = req_data.get('bazi_a', {})
         bazi_b = req_data.get('bazi_b', {})
+        scores = req_data.get('scores', {})
+        section_type = req_data.get('section_type', 'overview')
         
-        # 安全检查：合婚报告禁止涉及未成年
-        if bazi_a.get('is_minor', False) or bazi_b.get('is_minor', False):
-            return jsonify({
-                "error": "Marriage compatibility reports are not available for minors. Both partners must be 18 years or older."
-            }), 400
+        lang_code = req_data.get('language', 'en')
+        custom_lang = req_data.get('custom_language', None)
+        lang_config = get_language_config(lang_code, custom_lang)
         
-        # ... 其余合婚逻辑保持原样（此处省略以节省篇幅，实际部署时保留原有完整代码）
-        return jsonify({"error": "Marriage logic preserved from original - paste your original marriage code here"}), 501
+        reading_mode = req_data.get('mode', 'gentle')
+        mode_config = get_mode_config(reading_mode)
+        
+        name_a = bazi_a.get('name', 'Partner A')
+        name_b = bazi_b.get('name', 'Partner B')
+        gender_a = bazi_a.get('gender', 'unknown')
+        gender_b = bazi_b.get('gender', 'unknown')
+        
+        print(f"Marriage Section: {section_type}, Mode: {reading_mode}, Lang: {lang_code}")
+        print(f"Partner A: {name_a} ({gender_a}), Partner B: {name_b} ({gender_b})")
+        
+        current_opening = lang_config.get('opening', "In this chapter...")
+        current_closing = lang_config.get('closing', "End of chapter.")
+        
+        if reading_mode == "authentic":
+            current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
+        else:
+            current_style = lang_config.get('style_gentle')
+        
+        context_str = format_marriage_bazi_context(bazi_a, bazi_b)
+        scores_str = format_compatibility_scores(scores)
+        
+        gender_instruction = get_marriage_gender_instruction(gender_a, gender_b, lang_code)
+        
+        has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
+        nonbinary_reminder = ""
+        if has_nonbinary:
+            nonbinary_reminder = """
+## ⚠️ GENDER-NEUTRAL LANGUAGE REQUIRED ⚠️
+
+At least one partner selected non-binary gender. You MUST:
+- Use "they/them" or "Ta" for any non-binary partner
+- Use "partner," "spouse," not "husband/wife"
+- Avoid traditional gendered analysis terms
+- Respect both partners' identities throughout
+"""
+        
+        # ================= 合婚专用 System Prompt =================
+        base_system_prompt = f"""
+You are a master of BaZi (Chinese Four Pillars of Destiny) marriage compatibility analysis, with deep knowledge of classical texts and traditional 合婚 (marriage matching) techniques.
+
+## CRITICAL FORMATTING RULES - MUST FOLLOW
+
+**ABSOLUTELY FORBIDDEN 绝对禁止:**
+- Horizontal divider lines: --- or ___ or *** or ===
+- Setext-style headers
+- Triple or more consecutive blank lines
+
+**MANDATORY formatting 必须使用:**
+- Use ATX-style headers: # H1, ## H2, ### H3, #### H4
+- Use **bold** for emphasis
+- Use bullet lists: - or * or 1. 2. 3.
+
+## READING MODE: {mode_config['name'].upper()} / {mode_config['name_zh']}
+
+{mode_config['interpretation_style']}
+
+{mode_config['ethics']}
+
+{nonbinary_reminder}
+
+## COUPLE INFORMATION - USE THEIR ACTUAL NAMES
+
+**Partner A**: {name_a} ({gender_a})
+**Partner B**: {name_b} ({gender_b})
+
+CRITICAL: Always use their actual names "{name_a}" and "{name_b}" throughout the analysis. 
+NEVER use generic terms like "Partner A", "Partner B", "the man", "the woman".
+
+## LANGUAGE REQUIREMENTS
+
+**Language**: {lang_config['instruction']}
+**Pronoun Rules**: {lang_config.get('pronoun_rule', '')}
+
+**Writing Style**:
+{current_style}
+
+{gender_instruction}
+
+## MANDATORY STRUCTURE
+
+- START your response EXACTLY with: "{current_opening}"
+- END your response EXACTLY with: "{current_closing}"
+- Do NOT add greetings or preambles
+- Write 2500+ words with proper Markdown formatting
+- Include Chinese terms with translations
+- Do NOT use any horizontal lines
+"""
+
+        # ================= 各章节详细指令 =================
+        specific_prompt = ""
+        
+        if section_type == 'overview':
+            specific_prompt = f"""
+## TASK: Write Chapter 1 - Both Partners Overview (双方命局概览)
+
+{context_str}
+
+### REQUIRED ANALYSIS:
+
+## 1. {name_a}'s BaZi Profile ({name_a}的命局分析)
+
+Provide a comprehensive analysis of {name_a}'s chart:
+
+### Day Master Analysis 日主分析
+- Day Master element and Yin/Yang nature
+- Is Day Master strong (身强) or weak (身弱)?
+- Personality traits based on Day Master
+- Natural strengths and challenges
+
+### Ten Gods Pattern 十神格局
+- Which Ten Gods dominate the chart?
+- What does this reveal about personality?
+- Key psychological traits and tendencies
+
+### Five Elements Balance 五行平衡
+- What elements are strong/weak/missing?
+- How does this affect personality and needs?
+- What does {name_a} need from a partner?
+
+### Relationship Tendencies 感情倾向
+- Based on gender-specific rules, what are the relationship stars?
+- Natural approach to love and commitment
+- What {name_a} needs emotionally
+
+## 2. {name_b}'s BaZi Profile ({name_b}的命局分析)
+
+Provide the same comprehensive analysis for {name_b}:
+
+### Day Master Analysis 日主分析
+### Ten Gods Pattern 十神格局
+### Five Elements Balance 五行平衡
+### Relationship Tendencies 感情倾向
+
+## 3. First Impressions & Natural Attraction (初见与天然吸引力)
+
+Based on both charts:
+- What would attract them to each other initially?
+- What energy does each bring to the relationship?
+- Natural chemistry and magnetic pull
+- Potential first impression issues
+
+{"深入分析每个人的命局特点，让双方都能更好地理解自己和对方。" if reading_mode == "gentle" else "直言每个人的命局优缺点，不要回避问题，让双方清楚自己和对方的真实情况。"}
+"""
+
+        elif section_type == 'compatibility':
+            specific_prompt = f"""
+## TASK: Write Chapter 2 - Core Compatibility Analysis (核心配对分析)
+
+{context_str}
+
+{scores_str}
+
+### REQUIRED ANALYSIS:
+
+You have been provided with pre-calculated compatibility scores. Your task is to EXPLAIN these scores in depth, not recalculate them.
+
+## 1. Day Master Compatibility 日主相合 (Score: {scores.get('breakdown', {}).get('dayMaster', {}).get('score', 0)}/25)
+
+Analyze how {name_a}'s and {name_b}'s Day Masters interact:
+- What is the relationship between their Day Master elements?
+- Is there 天干五合 (Heavenly Stem combination)?
+- How do their energies complement or clash?
+- What does this mean for daily life compatibility?
+
+## 2. Zodiac Connection 生肖配对 (Score: {scores.get('breakdown', {}).get('zodiac', {}).get('score', 0)}/20)
+
+Analyze their Chinese zodiac relationship:
+- Are they in 六合 (Six Harmony), 三合 (Three Harmony), 六冲 (Six Clash), or 六害 (Six Harm)?
+- What does this mean for intuitive understanding?
+- How naturally do they "get" each other?
+
+## 3. Five Elements Balance 五行互补 (Score: {scores.get('breakdown', {}).get('elements', {}).get('score', 0)}/20)
+
+Analyze elemental complementarity:
+- What elements does {name_a} need that {name_b} has?
+- What elements does {name_b} need that {name_a} has?
+- Do they fill each other's gaps like puzzle pieces?
+- Any elemental clashes to be aware of?
+
+## 4. Na Yin Harmony 纳音合婚 (Score: {scores.get('breakdown', {}).get('naYin', {}).get('score', 0)}/15)
+
+Analyze their Na Yin (year pillar sound element) relationship:
+- What are their Na Yin elements?
+- Do they support, clash, or remain neutral?
+- What does this mean for their life philosophies and values?
+
+## 5. Gan Zhi Synergy 干支配合 (Score: {scores.get('breakdown', {}).get('ganZhi', {}).get('score', 0)}/10)
+
+Analyze deeper stem-branch connections:
+- Any 天干合 between their pillars?
+- Any 地支合 between their pillars?
+- Count of harmonious connections across all four pillars
+
+## 6. Spouse Palace Analysis 婚姻宫位 (Score: {scores.get('breakdown', {}).get('spousePalace', {}).get('score', 0)}/10)
+
+Analyze their Day Branches (Spouse Palaces):
+- How do their spouse palaces interact?
+- Any 合 (combination), 冲 (clash), or 害 (harm)?
+- What does this mean for their approach to marriage?
+
+## 7. Overall Compatibility Summary 总体评估
+
+Based on all six dimensions:
+- Total Score: {scores.get('total', 0)}/100 ({scores.get('level', {}).get('name', 'N/A')})
+- Key strengths of this pairing
+- Main challenges to work on
+- Overall assessment of marriage potential
+
+{"用积极的视角解读每个维度，即使分数不高也要找到正面意义。" if reading_mode == "gentle" else "直接说明每个维度的真实情况，分数高的要说好在哪里，分数低的要指出问题所在。"}
+"""
+
+        elif section_type == 'communication':
+            specific_prompt = f"""
+## TASK: Write Chapter 3 - Communication & Conflict Patterns (相处与沟通模式)
+
+{context_str}
+
+### REQUIRED ANALYSIS:
+
+## 1. Communication Styles 沟通方式
+
+### {name_a}'s Communication Style
+Based on Ten Gods pattern and Day Master:
+- How does {name_a} express thoughts and feelings?
+- What is their natural communication tempo?
+- How do they handle emotional discussions?
+- What triggers them to shut down or open up?
+
+### {name_b}'s Communication Style
+- How does {name_b} express thoughts and feelings?
+- What is their natural communication tempo?
+- How do they handle emotional discussions?
+- What triggers them to shut down or open up?
+
+### Communication Compatibility
+- Do their styles complement or clash?
+- Potential misunderstandings to watch for
+- How can they bridge communication gaps?
+
+## 2. Conflict Patterns 冲突模式
+
+### How They Fight 他们如何吵架
+
+Based on their charts, predict their typical conflict pattern:
+
+**Conflict Trigger 导火索**
+- What topics are likely to cause friction?
+- Which element imbalances create tension?
+
+**{name_a}'s Conflict Style**
+Based on Ten Gods and elements:
+- Do they explode, withdraw, or become passive-aggressive?
+- How do they express anger or frustration?
+- What do they need during conflict?
+
+**{name_b}'s Conflict Style**
+- Do they explode, withdraw, or become passive-aggressive?
+- How do they express anger or frustration?
+- What do they need during conflict?
+
+**A Typical Argument Scenario 典型吵架场景**
+Write a vivid hypothetical scenario of how a disagreement might unfold between them, based on their charts.
+
+## 3. Resolution Patterns 和解模式
+
+### Who Apologizes First? 谁先道歉？
+Based on Day Master strength and Ten Gods, analyze:
+- Who is more likely to break the silence?
+- Who holds grudges longer?
+- What does each person need to hear to feel resolved?
+
+### How They Make Up 如何和好
+- Their natural reconciliation style
+- What works and what doesn't
+- How to repair after major conflicts
+
+## 4. Daily Life Compatibility 日常相处
+
+### Living Together 一起生活
+- How do their rhythms align?
+- Decision-making dynamics
+- Household responsibility distribution tendencies
+
+### Supporting Each Other 相互支持
+- How can {name_a} best support {name_b}?
+- How can {name_b} best support {name_a}?
+- What each person needs but might not ask for
+
+## 5. Communication Advice 沟通建议
+
+Provide specific, actionable advice for:
+- How to improve daily communication
+- How to prevent conflicts from escalating
+- How to create a safe space for difficult conversations
+- Key phrases or approaches that work for this pairing
+
+{"让他们看到沟通的希望和改善的可能性，强调每对情侣都可以学习更好的沟通方式。" if reading_mode == "gentle" else "直接指出他们沟通中可能存在的问题，比如'你们可能经常因为钱吵架'或'一方太强势导致另一方压抑'。"}
+"""
+
+        elif section_type == 'wealth_career':
+            specific_prompt = f"""
+## TASK: Write Chapter 4 - Wealth & Career Together (财运与事业配合)
+
+{context_str}
+
+### REQUIRED ANALYSIS:
+
+## 1. Individual Financial Profiles 各自的财运特点
+
+### {name_a}'s Wealth Profile
+- Wealth stars in the chart (正财/偏财 position and strength)
+- Natural relationship with money
+- Earning style: steady income vs. windfall opportunities
+- Spending and saving tendencies
+- Financial strengths and weaknesses
+
+### {name_b}'s Wealth Profile
+- Same analysis for {name_b}
+- Wealth stars position and strength
+- Earning, spending, and saving patterns
+
+## 2. Combined Financial Energy 共同财运
+
+### Wealth Synergy 财运协同
+- Do their wealth stars support each other?
+- Combined five elements effect on family wealth
+- Who is better at earning? Who is better at managing?
+- Potential financial blind spots as a couple
+
+### Financial Roles 财务角色分配
+Based on their charts:
+- Who should handle investments?
+- Who should manage daily expenses?
+- Who is the risk-taker vs. the conservative one?
+- How to balance different money attitudes?
+
+## 3. Career Compatibility 事业配合
+
+### Working Together 一起工作
+If they were to work together or run a business:
+- Would they complement each other?
+- What roles would suit each person?
+- Potential power struggles or collaboration issues
+
+### Supporting Each Other's Careers 支持对方的事业
+- How can {name_a} support {name_b}'s career?
+- How can {name_b} support {name_a}'s career?
+- Timing considerations for major career moves
+
+## 4. Major Financial Decisions 重大财务决策
+
+### Property and Investments 房产与投资
+- Best timing for major purchases based on luck cycles
+- What types of investments suit this couple?
+- Real estate considerations
+
+### Business Ventures 创业合作
+- Should they start a business together?
+- What industries would suit them as a couple?
+- Partnership dynamics and potential issues
+
+## 5. Wealth-Building Strategy as a Couple 夫妻财富策略
+
+### Short-term (1-3 years) 短期策略
+- Immediate financial focus areas
+- Quick wins for this pairing
+
+### Medium-term (3-10 years) 中期策略
+- Major milestones to aim for
+- Investment directions
+
+### Long-term (10+ years) 长期策略
+- Retirement planning considerations
+- Wealth preservation for this combination
+
+## 6. Financial Advice 财务建议
+
+Specific recommendations for:
+- How to handle money disagreements
+- Joint vs. separate accounts considerations
+- Key financial habits to develop together
+- Warning signs to watch for
+
+{"强调他们共同创造财富的潜力，用积极的视角看待财务配合。" if reading_mode == "gentle" else "直接指出财务上可能的问题，比如'一方可能大手大脚'、'容易因为钱吵架'、'某些年份要特别注意破财'。"}
+"""
+
+        elif section_type == 'love_marriage':
+            specific_prompt = f"""
+## TASK: Write Chapter 5 - Love & Marriage Stability (感情与婚姻稳定性)
+
+{context_str}
+
+### GENDER-SPECIFIC REMINDER:
+- For {name_a} ({bazi_a.get('gender', 'unknown')}): Apply correct relationship star rules
+- For {name_b} ({bazi_b.get('gender', 'unknown')}): Apply correct relationship star rules
+
+### REQUIRED ANALYSIS:
+
+## 1. Spouse Palace Analysis 配偶宫详解
+
+### {name_a}'s Spouse Palace (Day Branch: {bazi_a.get('pillars', {}).get('day', {}).get('zhi', 'N/A')})
+- What does this reveal about their ideal partner?
+- How do they naturally behave in marriage?
+- Any 空亡 (void), 刑冲 (clash/punishment) to note?
+- What kind of spouse energy do they attract?
+
+### {name_b}'s Spouse Palace (Day Branch: {bazi_b.get('pillars', {}).get('day', {}).get('zhi', 'N/A')})
+- Same analysis for {name_b}
+
+### Spouse Palace Interaction 配偶宫互动
+- How do their spouse palaces interact with each other?
+- Any 合 (combination) or 冲 (clash)?
+- What does this mean for marital harmony?
+
+## 2. Relationship Stars Analysis 婚恋星分析
+
+### {name_a}'s Relationship Stars
+Based on gender:
+- Where are the key relationship stars?
+- Are they strong or weak?
+- What type of partner do they attract?
+
+### {name_b}'s Relationship Stars
+- Same analysis for {name_b}
+
+### Cross-Analysis 交叉分析
+- Does {name_a} fit what {name_b}'s chart indicates they need?
+- Does {name_b} fit what {name_a}'s chart indicates they need?
+- Are they each other's "type" according to BaZi?
+
+## 3. Romantic Patterns 感情模式
+
+### Attraction Dynamics 吸引力动态
+- What keeps the spark alive?
+- Physical and emotional chemistry indicators
+- Long-term attraction sustainability
+
+### Emotional Needs 情感需求
+- What does {name_a} need emotionally?
+- What does {name_b} need emotionally?
+- Can they meet each other's needs?
+
+### Intimacy Compatibility 亲密关系
+- Energy alignment in intimate matters
+- Potential mismatches and solutions
+- How to maintain connection over time
+
+## 4. Marriage Stability Indicators 婚姻稳定性指标
+
+### Positive Indicators 有利因素
+List all factors supporting marriage stability:
+- Harmonious combinations
+- Complementary elements
+- Supportive luck cycles
+
+### Challenge Indicators 挑战因素
+List factors that may challenge the marriage:
+- Any 刑冲破害 between charts
+- Problematic Ten Gods patterns
+- Timing challenges
+
+### Stability Assessment 稳定性评估
+Overall assessment of marriage longevity:
+- First marriage success probability
+- Key years that may be challenging
+- How to strengthen the foundation
+
+## 5. Children & Family 子女与家庭
+
+### Children Indicators 子女缘分
+Based on both charts:
+- Overall fertility indicators
+- Best timing for children
+- What kind of parents would they be?
+
+### Family Dynamics 家庭关系
+- In-law relationships potential
+- Extended family harmony
+- Creating their own family culture
+
+## 6. Marriage Advice 婚姻建议
+
+### Before Marriage 婚前建议
+- What to discuss before committing
+- Potential deal-breakers to address
+- How to prepare for marriage
+
+### During Marriage 婚后建议
+- How to maintain love and respect
+- Key habits for a happy marriage
+- How to navigate difficult periods
+
+### Preventing Problems 预防问题
+- Red flags to watch for
+- When to seek help
+- How to keep the marriage strong
+
+{"强调他们感情的美好之处，给他们对婚姻的信心和希望。" if reading_mode == "gentle" else "直接指出可能影响婚姻稳定的因素，比如'某方可能有外遇倾向'、'第一段婚姻可能不稳定'、'某些年份是婚姻危险期'。"}
+"""
+
+        elif section_type == 'forecast_2026':
+            # ================= 合婚 2026-2027 双年预测 =================
+            specific_prompt = f"""
+## TASK: Write Chapter 6 - 2026-2027 Two-Year Forecast & Harmony Tips
+## (2026-2027双年流年预测与和谐建议)
+
+{context_str}
+
+### REQUIRED ANALYSIS:
+
+# ========== PART ONE: 2026 丙午年 (FIRE HORSE) ==========
+
+## 1. 2026 丙午年 (Fire Horse Year) Overview
+
+### How 2026 Affects {name_a}
+- How does 丙午 interact with {name_a}'s Day Master?
+- Any 冲合 with {name_a}'s branches?
+- Key themes for {name_a} in 2026
+- Opportunities and challenges
+
+### How 2026 Affects {name_b}
+- How does 丙午 interact with {name_b}'s Day Master?
+- Any 冲合 with {name_b}'s branches?
+- Key themes for {name_b} in 2026
+- Opportunities and challenges
+
+## 2. 2026 as a Couple 作为伴侣的2026年
+
+### Relationship Energy in 2026 感情运势
+- How does 2026 affect their relationship?
+- Is it a year to deepen commitment or navigate challenges?
+- Key relationship themes for this year
+
+### Combined Luck Assessment 综合运势
+- Areas where both benefit
+- Areas requiring joint attention
+- Overall year rating for this couple
+
+## 3. 2026 Month-by-Month Guidance (2026逐月指导)
+
+Provide brief guidance for key months:
+
+**寅月 (Feb 4 - Mar 5)**: 
+- Relationship energy & key advice
+
+**卯月 (Mar 6 - Apr 4)**:
+**辰月 (Apr 5 - May 5)**:
+**巳月 (May 6 - Jun 5)**:
+**午月 (Jun 6 - Jul 6)**: [Double Fire - important month!]
+**未月 (Jul 7 - Aug 7)**:
+**申月 (Aug 8 - Sep 7)**:
+**酉月 (Sep 8 - Oct 7)**:
+**戌月 (Oct 8 - Nov 7)**:
+**亥月 (Nov 8 - Dec 6)**:
+**子月 (Dec 7 - Jan 5)**: [子午冲 if applicable!]
+**丑月 (Jan 6 - Feb 3 2027)**:
+
+# ========== PART TWO: 2027 丁未年 (FIRE GOAT) ==========
+
+## 4. 2027 丁未年 (Fire Goat Year) Overview
+
+### How 2027 Affects {name_a}
+- How does 丁未 interact with {name_a}'s Day Master?
+- Any 冲合 with {name_a}'s branches?
+- Key themes for {name_a} in 2027
+- How does 2027 differ from 2026 for {name_a}?
+
+### How 2027 Affects {name_b}
+- How does 丁未 interact with {name_b}'s Day Master?
+- Any 冲合 with {name_b}'s branches?
+- Key themes for {name_b} in 2027
+- How does 2027 differ from 2026 for {name_b}?
+
+## 5. 2027 as a Couple 作为伴侣的2027年
+
+### Relationship Energy in 2027 感情运势
+- How does 2027 affect their relationship compared to 2026?
+- Energy shift from Yang Fire (丙) to Yin Fire (丁)
+- Energy shift from Horse (午) to Goat (未)
+- Key relationship themes for 2027
+
+### Combined Luck Assessment 综合运势
+- Areas where both benefit in 2027
+- Areas requiring joint attention
+- Overall year rating for this couple in 2027
+
+## 6. 2027 Month-by-Month Guidance (2027逐月指导)
+
+**寅月 (Feb 4 - Mar 5)**:
+**卯月 (Mar 6 - Apr 4)**: [卯未半合木局?]
+**辰月 (Apr 5 - May 5)**:
+**巳月 (May 6 - Jun 5)**:
+**午月 (Jun 6 - Jul 6)**: [午未合! Important for couple energy]
+**未月 (Jul 7 - Aug 7)**: [Double 未! Intensified energy]
+**申月 (Aug 8 - Sep 7)**:
+**酉月 (Sep 8 - Oct 7)**:
+**戌月 (Oct 8 - Nov 7)**: [未戌刑 if applicable]
+**亥月 (Nov 8 - Dec 6)**:
+**子月 (Dec 7 - Jan 5)**:
+**丑月 (Jan 6 - Feb 3 2028)**: [丑未冲!]
+
+# ========== PART THREE: TWO-YEAR COMPARISON & HARMONY ==========
+
+## 7. 2026 vs 2027 Comparison for This Couple (双年对比)
+
+Create a clear comparison:
+
+| Dimension 维度 | 2026 丙午 | 2027 丁未 | Better Year 哪年更优 |
+|---------------|-----------|-----------|---------------------|
+| Romance 感情   |           |           |                     |
+| Finances 财务  |           |           |                     |
+| Harmony 和谐   |           |           |                     |
+| Growth 成长    |           |           |                     |
+| Overall 综合   |           |           |                     |
+
+## 8. Two-Year Harmony Plan (双年和谐计划)
+- What to focus on in 2026 vs 2027
+- Best timing across BOTH years for major couple milestones:
+  - Wedding/engagement best months
+  - Moving in together
+  - Having children
+  - Major purchases
+  - Travel together
+- How to navigate the energy shift between years
+
+## 9. Important Dates & Decisions (重要日期与决策)
+
+### Best Timing Across Both Years 两年最佳时机
+- Months to avoid major decisions in each year
+- Times when conflict is more likely in each year
+- How to navigate difficult periods
+
+## 10. Harmony Enhancement Tips (和谐增进建议)
+
+### Five Elements Adjustments 五行调整
+Based on their combined chart:
+- What elements benefit their relationship in 2026?
+- What elements benefit their relationship in 2027?
+- Colors to incorporate for each year
+- Directions that support harmony
+
+### Practical Harmony Tips 实用和谐建议
+- Daily habits to strengthen bond
+- Weekly/monthly rituals
+- Communication focus areas for each year
+
+## 11. Long-term Outlook (长期展望)
+
+### Beyond 2027 展望未来
+- How does 2026-2027 set up 2028 (戊申)?
+- Long-term relationship trajectory
+- Major milestone years to anticipate
+
+### Final Blessing 最终祝福
+End with:
+- Affirmation of their connection
+- Key strengths to remember
+- Encouragement for the journey ahead
+
+{"以温暖积极的祝福结束，让他们对未来两年充满期待。" if reading_mode == "gentle" else "实事求是地告诉他们两年内可能面临的挑战，以及具体的化解方法。对比哪一年更适合做什么。"}
+"""
+
+        else:
+            return jsonify({"error": f"Unknown marriage section type: {section_type}"}), 400
+
+        # 调用 AI
+        print(f"Calling AI for marriage section: {section_type}")
+        
+        # forecast_2026 章节内容量大，使用更大的 max_tokens
+        if section_type == 'forecast_2026':
+            ai_result = ask_ai(base_system_prompt, specific_prompt, max_tokens=24000)
+        else:
+            ai_result = ask_ai(base_system_prompt, specific_prompt)
+        
+        if ai_result and 'choices' in ai_result:
+            content = ai_result['choices'][0]['message']['content']
+            print(f"Success! Marriage section content length: {len(content)}")
+            return jsonify({"content": content})
+        elif ai_result and 'error' in ai_result:
+            print(f"AI Error: {ai_result}")
+            return jsonify(ai_result), 500
+        else:
+            print(f"Unknown AI response: {ai_result}")
+            return jsonify({"error": "AI response format invalid"}), 500
 
     except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in generate_marriage_section: {error_msg}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+
+@app.route('/api/finalize-marriage-report', methods=['OPTIONS'])
+def finalize_marriage_options_handler():
+    return '', 204
+
+
+@app.route('/api/finalize-marriage-report', methods=['POST'])
+def finalize_marriage_report():
+    """合婚报告完成处理：AI自检 + 客户消息生成"""
+    try:
+        print("=== Finalize Marriage Report Request ===")
+        
+        req_data = request.json
+        if not req_data:
+            return jsonify({"error": "No JSON received"}), 400
+        
+        full_report = req_data.get('full_report', '')
+        bazi_a = req_data.get('bazi_a', {})
+        bazi_b = req_data.get('bazi_b', {})
+        scores = req_data.get('scores', {})
+        language = req_data.get('language', 'en')
+        
+        name_a = bazi_a.get('name', 'Partner A')
+        name_b = bazi_b.get('name', 'Partner B')
+        gender_a = bazi_a.get('gender', 'unknown')
+        gender_b = bazi_b.get('gender', 'unknown')
+        
+        if not full_report:
+            return jsonify({"error": "No report content provided"}), 400
+        
+        print(f"Processing marriage report for: {name_a} & {name_b}")
+        print(f"Report length: {len(full_report)} characters")
+        
+        result = {
+            "couple_names": f"{name_a} & {name_b}",
+            "validation": None,
+            "customer_message": None
+        }
+        
+        has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
+        gender_check_note = ""
+        if has_nonbinary:
+            gender_check_note = """
+IMPORTANT: At least one partner selected NON-BINARY gender. Verify that:
+- Report uses gender-neutral language appropriately
+- Uses "they/them" or "Ta" for non-binary partner(s)
+- Uses "partner/spouse" instead of "husband/wife"
+- Avoids traditional gendered BaZi terms for non-binary partner(s)
+"""
+        
+        # 1. AI 自检
+        print("Step 1: Validating marriage report...")
+        try:
+            validation_prompt = f"""
+You are a senior BaZi marriage compatibility expert reviewer.
+Review this marriage compatibility report for accuracy.
+
+## COUPLE DATA:
+- Partner A: {name_a} ({gender_a})
+  - Day Master: {bazi_a.get('dayMaster', 'N/A')} ({bazi_a.get('dayMasterElement', '')})
+  - Four Pillars: {bazi_a.get('pillars', {}).get('year', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('month', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('day', {}).get('ganZhi', '?')} {bazi_a.get('pillars', {}).get('hour', {}).get('ganZhi', '?')}
+
+- Partner B: {name_b} ({gender_b})
+  - Day Master: {bazi_b.get('dayMaster', 'N/A')} ({bazi_b.get('dayMasterElement', '')})
+  - Four Pillars: {bazi_b.get('pillars', {}).get('year', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('month', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('day', {}).get('ganZhi', '?')} {bazi_b.get('pillars', {}).get('hour', {}).get('ganZhi', '?')}
+
+- Compatibility Score: {scores.get('total', 'N/A')}/100
+{gender_check_note}
+
+## REPORT TO REVIEW (first 6000 chars):
+{full_report[:6000]}
+
+## TASK:
+Check for:
+1. Correct gender-based interpretations (or gender-neutral if applicable)
+2. Accurate Day Master analysis for both
+3. Logical compatibility assessments
+4. Consistent use of names (not "Partner A/B")
+5. Any factual errors
+
+Respond in JSON:
+{{
+    "status": "PASS" or "NEEDS_REVIEW",
+    "confidence_score": 0-100,
+    "summary": "Brief summary",
+    "issues_found": [{{"severity": "high/medium/low", "description": "..."}}],
+    "recommendation": "..."
+}}
+"""
+            validation_result = ask_ai(
+                "You are a BaZi marriage expert reviewer. Respond ONLY in valid JSON.",
+                validation_prompt
+            )
+            
+            if validation_result and 'choices' in validation_result:
+                content = validation_result['choices'][0]['message']['content']
+                content = content.strip()
+                if content.startswith('```json'):
+                    content = content[7:]
+                if content.startswith('```'):
+                    content = content[3:]
+                if content.endswith('```'):
+                    content = content[:-3]
+                result["validation"] = json.loads(content.strip())
+            else:
+                result["validation"] = {"status": "SKIPPED", "summary": "Validation skipped"}
+                
+        except Exception as e:
+            print(f"Validation error: {e}")
+            result["validation"] = {"status": "SKIPPED", "summary": f"Error: {str(e)}"}
+        
+        # 2. 生成客户消息
+        print("Step 2: Generating customer message...")
+        try:
+            pillars_a = bazi_a.get('pillars', {})
+            pillars_b = bazi_b.get('pillars', {})
+            
+            bazi_str_a = f"{pillars_a.get('year', {}).get('ganZhi', '?')} {pillars_a.get('month', {}).get('ganZhi', '?')} {pillars_a.get('day', {}).get('ganZhi', '?')} {pillars_a.get('hour', {}).get('ganZhi', '?')}"
+            bazi_str_b = f"{pillars_b.get('year', {}).get('ganZhi', '?')} {pillars_b.get('month', {}).get('ganZhi', '?')} {pillars_b.get('day', {}).get('ganZhi', '?')} {pillars_b.get('hour', {}).get('ganZhi', '?')}"
+            
+            marriage_summary = f"""
+Couple: {name_a} & {name_b}
+Compatibility Score: {scores.get('total', 'N/A')}/100 ({scores.get('level', {}).get('name', 'N/A')})
+
+{name_a}'s Four Pillars: {bazi_str_a}
+{name_a}'s Day Master: {bazi_a.get('dayMasterFull', bazi_a.get('dayMaster', 'N/A'))}
+
+{name_b}'s Four Pillars: {bazi_str_b}
+{name_b}'s Day Master: {bazi_b.get('dayMasterFull', bazi_b.get('dayMaster', 'N/A'))}
+"""
+            
+            report_preview = full_report[:3000] if len(full_report) > 3000 else full_report
+            
+            if language == "zh":
+                message_prompt = f"""
+请为这对情侣生成一段专业、温暖的消息，告知他们的合婚分析报告已完成。
+
+合婚摘要：
+{marriage_summary}
+
+报告内容预览：
+{report_preview}
+
+要求：
+1. 用中文撰写
+2. 语气专业但温暖
+3. 简要概括报告中的3-5个关键发现（从报告内容中提取）
+4. 给出积极的祝福
+5. 告知如有问题可以随时咨询
+6. 长度200-400字
+7. 不要提及任何链接
+
+直接输出消息内容。
+"""
+            else:
+                lang_name = LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS['en'])['name']
+                message_prompt = f"""
+Generate a professional, warm message for this couple informing them their marriage compatibility reading is complete.
+
+Summary:
+{marriage_summary}
+
+Report Preview:
+{report_preview}
+
+Requirements:
+1. Write in {lang_name}
+2. Professional but warm tone
+3. Summarize 3-5 key findings from the report
+4. Provide positive blessings for their relationship
+5. Let them know they can reach out with questions
+6. 150-300 words
+7. Do NOT mention any links
+
+Output the message directly.
+"""
+
+            msg_result = ask_ai(
+                "You are a professional destiny reading consultant communicating with a valued couple.",
+                message_prompt
+            )
+            
+            if msg_result and 'choices' in msg_result:
+                result["customer_message"] = msg_result['choices'][0]['message']['content']
+            else:
+                result["customer_message"] = f"Your marriage compatibility report for {name_a} & {name_b} is ready!"
+                
+        except Exception as e:
+            print(f"Customer message error: {e}")
+            result["customer_message"] = f"Your marriage compatibility report for {name_a} & {name_b} is ready!"
+        
+        print("=== Finalize Marriage Report Complete ===")
+        return jsonify(result)
+        
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in finalize_marriage_report: {error_msg}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
+
