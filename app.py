@@ -1,10 +1,18 @@
+# ================= 八字命理报告生成服务 =================
+# v6.0 - 动态24个月流年预测
+# 修改要点:
+#   1. 流年预测改为从"今天"起算未来24个月（agnostic of year）
+#   2. 将当前日期、干支时间线、相冲/相合月份预先计算后注入prompt
+#   3. 旧的 2026_forecast / forecast_2026 自动映射到 forecast
+# ========================================================
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import os
 import json
 import traceback
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 app = Flask(__name__)
 
@@ -26,8 +34,7 @@ GOOGLE_GEMINI_API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
 SITE_URL = os.getenv("SITE_URL", "https://theqiflow.com")
 APP_NAME = "Bazi Pro Calculator"
 MODEL_ID = "gemini-3.1-pro-preview"
-
-# ===========================================
+FORECAST_MONTHS = 24  # 流年预测窗口（农历月数）
 
 # ================= 多语言配置 =================
 LANGUAGE_PROMPTS = {
@@ -51,7 +58,7 @@ LANGUAGE_PROMPTS = {
         "opening": "本章为您分析...",
         "closing": "此章节完"
     },
-     "zh-tw": {
+    "zh-tw": {
         "name": "繁體中文",
         "instruction": "請用流暢自然的繁體中文撰寫。",
         "pronoun_rule": "必須統一使用'您'（尊稱）來稱呼用戶，切勿使用'你'。保持語氣的一致性。",
@@ -319,7 +326,7 @@ MODE_CONFIGS = {
 
 **Timing is Key 时机很重要**:
 - 明确说出哪些年份/月份有利、哪些需要避开
-- "2026年上半年适合谈恋爱，下半年不宜做重大决定"
+- "上半年适合谈恋爱，下半年不宜做重大决定"
 - "35-45岁这步大运是事业上升期，抓紧这十年"
 
 **Balance Yin-Yang 阴阳平衡**:
@@ -329,8 +336,205 @@ MODE_CONFIGS = {
 """
     }
 }
-# ===========================================
 
+# ================= 干支与流年时间线工具 =================
+
+TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
+DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
+LUNAR_MONTH_ZHI = ['寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑']
+
+# 五虎遁元: 年干 -> 正月（寅月）月干
+WU_HU_DUN = {
+    '甲': '丙', '己': '丙',
+    '乙': '戊', '庚': '戊',
+    '丙': '庚', '辛': '庚',
+    '丁': '壬', '壬': '壬',
+    '戊': '甲', '癸': '甲',
+}
+
+# 地支六冲
+CHONG_PAIRS = {
+    '子': '午', '午': '子', '丑': '未', '未': '丑',
+    '寅': '申', '申': '寅', '卯': '酉', '酉': '卯',
+    '辰': '戌', '戌': '辰', '巳': '亥', '亥': '巳',
+}
+
+# 地支六合
+LIU_HE = {
+    '子': '丑', '丑': '子', '寅': '亥', '亥': '寅',
+    '卯': '戌', '戌': '卯', '辰': '酉', '酉': '辰',
+    '巳': '申', '申': '巳', '午': '未', '未': '午',
+}
+
+# 节气近似日（实际每年浮动 ±1 天，生产环境建议接节气库）
+# 顺序: 寅月->丑月
+SOLAR_TERMS = [
+    (2, 4, '立春'), (3, 6, '惊蛰'), (4, 5, '清明'), (5, 6, '立夏'),
+    (6, 6, '芒种'), (7, 7, '小暑'), (8, 8, '立秋'), (9, 8, '白露'),
+    (10, 8, '寒露'), (11, 7, '立冬'), (12, 7, '大雪'), (1, 6, '小寒'),
+]
+
+
+def ganzhi_year(lunar_year):
+    """农历年干支（已过立春）。1984=甲子年作为基准。"""
+    offset = lunar_year - 1984
+    return TIAN_GAN[offset % 10] + DI_ZHI[offset % 12]
+
+
+def ganzhi_month(lunar_year, month_idx):
+    """
+    月柱干支
+    month_idx: 0=寅月, 1=卯月, ..., 11=丑月
+    """
+    year_gan = ganzhi_year(lunar_year)[0]
+    first_gan = WU_HU_DUN[year_gan]
+    gan = TIAN_GAN[(TIAN_GAN.index(first_gan) + month_idx) % 10]
+    zhi = DI_ZHI[(2 + month_idx) % 12]  # 寅 索引=2
+    return gan + zhi
+
+
+def _term_date(lunar_year, idx):
+    """该农历月起始的公历日期"""
+    m, d, _ = SOLAR_TERMS[idx]
+    if idx == 11:  # 丑月（小寒）在公历下一年1月
+        return date(lunar_year + 1, m, d)
+    return date(lunar_year, m, d)
+
+
+def locate_lunar_month(g_date):
+    """公历日期 -> (lunar_year, month_idx)"""
+    y = g_date.year
+    # 立春前属上一年的丑月
+    if g_date < date(y, 2, 4):
+        return y - 1, 11
+    for i in range(11, -1, -1):
+        if g_date >= _term_date(y, i):
+            return y, i
+    return y, 0
+
+
+def build_forecast_timeline(start_date, num_months=24):
+    """从start_date所在农历月起，未来num_months个月的干支表"""
+    timeline = []
+    ly, mi = locate_lunar_month(start_date)
+    
+    for step in range(num_months):
+        idx = (mi + step) % 12
+        year_off = (mi + step) // 12
+        cur_ly = ly + year_off
+        
+        start = _term_date(cur_ly, idx)
+        next_idx = (idx + 1) % 12
+        next_ly = cur_ly + 1 if next_idx == 0 else cur_ly
+        end = _term_date(next_ly, next_idx) - timedelta(days=1)
+        
+        timeline.append({
+            'step': step + 1,
+            'lunar_month': LUNAR_MONTH_ZHI[idx] + '月',
+            'month_zhi': LUNAR_MONTH_ZHI[idx],
+            'month_ganzhi': ganzhi_month(cur_ly, idx),
+            'year_ganzhi': ganzhi_year(cur_ly),
+            'lunar_year': cur_ly,
+            'gregorian_start': start.isoformat(),
+            'gregorian_end': end.isoformat(),
+            'is_current': step == 0,
+        })
+    return timeline
+
+
+def format_forecast_timeline_for_prompt(timeline):
+    """生成给AI看的时间线表格"""
+    lines = ["### 预测窗口：未来24个月干支时间线\n"]
+    lines.append("| # | 公历区间 | 农历月 | 月柱 | 流年 | 标记 |")
+    lines.append("|---|---------|--------|------|------|------|")
+    
+    last_year_gz = None
+    for t in timeline:
+        markers = []
+        if t['is_current']:
+            markers.append("← 当前月")
+        if t['year_ganzhi'] != last_year_gz:
+            markers.append(f"🔸进入{t['year_ganzhi']}年")
+            last_year_gz = t['year_ganzhi']
+        marker_str = " ".join(markers)
+        
+        lines.append(
+            f"| {t['step']} | {t['gregorian_start']} ~ {t['gregorian_end']} "
+            f"| {t['lunar_month']} | {t['month_ganzhi']} | {t['year_ganzhi']} "
+            f"| {marker_str} |"
+        )
+    return "\n".join(lines)
+
+
+def get_user_branches(bazi_data):
+    """提取命主四柱地支"""
+    pillars = bazi_data.get('pillars', {})
+    return [
+        pillars.get('year', {}).get('zhi', ''),
+        pillars.get('month', {}).get('zhi', ''),
+        pillars.get('day', {}).get('zhi', ''),
+        pillars.get('hour', {}).get('zhi', ''),
+    ]
+
+
+def find_key_interactions(timeline, user_branches):
+    """找出窗口内月支与命主四柱的相冲、相合月份"""
+    user_branches = [b for b in user_branches if b]
+    chong_months = []
+    he_months = []
+    
+    for t in timeline:
+        mz = t['month_zhi']
+        # 相冲
+        for ub in user_branches:
+            if CHONG_PAIRS.get(ub) == mz:
+                chong_months.append({
+                    'step': t['step'],
+                    'date_range': f"{t['gregorian_start']} ~ {t['gregorian_end']}",
+                    'month_ganzhi': t['month_ganzhi'],
+                    'description': f"月支{mz}冲命主{ub}",
+                })
+                break
+        # 六合
+        for ub in user_branches:
+            if LIU_HE.get(ub) == mz:
+                he_months.append({
+                    'step': t['step'],
+                    'date_range': f"{t['gregorian_start']} ~ {t['gregorian_end']}",
+                    'month_ganzhi': t['month_ganzhi'],
+                    'description': f"月支{mz}与命主{ub}六合",
+                })
+                break
+    
+    return {'chong': chong_months, 'he': he_months}
+
+
+def format_key_interactions(interactions):
+    """格式化关键月份给prompt"""
+    parts = []
+    if interactions['chong']:
+        parts.append("**相冲月份（需谨慎应对）**:")
+        for c in interactions['chong'][:10]:
+            parts.append(f"- 第{c['step']}月 {c['month_ganzhi']} ({c['date_range']}): {c['description']}")
+    if interactions['he']:
+        parts.append("\n**相合月份（关系/合作较有利）**:")
+        for h in interactions['he'][:10]:
+            parts.append(f"- 第{h['step']}月 {h['month_ganzhi']} ({h['date_range']}): {h['description']}")
+    if not parts:
+        return "  本窗口内无明显与命主四柱相冲/相合的月份。"
+    return "\n".join(parts)
+
+
+def get_forecast_years_summary(timeline):
+    """返回窗口内涉及的所有流年描述"""
+    seen = []
+    for t in timeline:
+        key = (t['lunar_year'], t['year_ganzhi'])
+        if key not in seen:
+            seen.append(key)
+    return "、".join(f"{y}年（{gz}）" for y, gz in seen)
+
+# ================= 工具函数 =================
 
 def get_gender_instruction(gender, lang_code):
     """获取性别相关的解读指令"""
@@ -536,6 +740,7 @@ def get_language_config(lang_code, custom_lang=None):
 
 
 def ask_ai(system_prompt, user_prompt, max_tokens=16000):
+    """调用 Gemini API"""
     if not GOOGLE_GEMINI_API_KEY:
         print("ERROR: GOOGLE_GEMINI_API_KEY is missing!")
         return {"error": "Server Configuration Error: API Key missing"}
@@ -568,7 +773,9 @@ def ask_ai(system_prompt, user_prompt, max_tokens=16000):
         print(f"Gemini API Error: {str(e)}")
         return {"error": str(e)}
 
+
 # ================= AI 自检功能 =================
+
 def validate_report(full_report, bazi_data, language):
     """让 AI 检查报告是否有错误"""
     
@@ -663,7 +870,8 @@ If everything looks good, return status "PASS" with an empty issues_found array.
     }
 
 
-# ================= 生成客户消息（简化版，无 Google Doc） =================
+# ================= 客户消息生成 =================
+
 def generate_customer_message_simple(client_name, bazi_summary, full_report, language):
     """生成客户消息（不包含 Google Doc 链接）"""
     
@@ -748,24 +956,107 @@ The Qi Flow Team
 """
 
 
+# ================= 基础路由 =================
+
 @app.route('/', methods=['GET'])
 def health_check():
+    today = datetime.now().date()
+    sample_timeline = build_forecast_timeline(today, num_months=FORECAST_MONTHS)
     return jsonify({
-        "status": "running", 
-        "version": "5.3-dual-year-forecast", 
+        "status": "running",
+        "version": "6.0-dynamic-24-month-forecast",
         "api_key_set": bool(GOOGLE_GEMINI_API_KEY),
         "endpoints": {
             "personal_report": "/api/generate-section",
             "marriage_report": "/api/generate-marriage-section"
         },
         "supported_genders": ["male", "female", "non-binary"],
-        "forecast_years": ["2026", "2027"]
+        "today": today.isoformat(),
+        "forecast_window_months": FORECAST_MONTHS,
+        "forecast_starts": sample_timeline[0]['gregorian_start'] if sample_timeline else None,
+        "forecast_ends": sample_timeline[-1]['gregorian_end'] if sample_timeline else None,
+        "forecast_years_covered": get_forecast_years_summary(sample_timeline) if sample_timeline else None,
     }), 200
 
 
 @app.route('/api/generate-section', methods=['OPTIONS'])
 def options_handler():
     return '', 204
+
+
+@app.route('/api/finalize-report', methods=['OPTIONS'])
+def finalize_options_handler():
+    return '', 204
+
+
+@app.route('/api/finalize-report', methods=['POST'])
+def finalize_report():
+    """简化版：AI 自检 + 生成客户消息（不创建 Google Doc）"""
+    try:
+        print("=== Finalize Report Request (No Google Doc) ===")
+        
+        req_data = request.json
+        if not req_data:
+            return jsonify({"error": "No JSON received"}), 400
+        
+        full_report = req_data.get('full_report', '')
+        bazi_data = req_data.get('bazi_data', {})
+        language = req_data.get('language', 'en')
+        
+        client_name = bazi_data.get('name', 'Client')
+        
+        if not full_report:
+            return jsonify({"error": "No report content provided"}), 400
+        
+        print(f"Processing report for: {client_name}")
+        print(f"Report length: {len(full_report)} characters")
+        
+        bazi_summary = format_bazi_summary(bazi_data)
+        
+        result = {
+            "client_name": client_name,
+            "validation": None,
+            "customer_message": None
+        }
+        
+        # 1. AI 自检报告
+        print("Step 1: Validating report...")
+        try:
+            validation_result = validate_report(full_report, bazi_data, language)
+            result["validation"] = validation_result
+            print(f"Validation result: {validation_result.get('status', 'Unknown')}")
+        except Exception as e:
+            print(f"Validation error: {e}")
+            result["validation"] = {
+                "status": "SKIPPED",
+                "summary": "Validation skipped due to error",
+                "issues_found": []
+            }
+        
+        # 2. 生成客户消息
+        print("Step 2: Generating customer message...")
+        try:
+            customer_message = generate_customer_message_simple(
+                client_name,
+                bazi_summary,
+                full_report,
+                language
+            )
+            result["customer_message"] = customer_message
+            print("Customer message generated successfully")
+        except Exception as e:
+            print(f"Customer message error: {e}")
+            result["customer_message"] = f"[Error generating message: {str(e)}]"
+        
+        print("=== Finalize Report Complete ===")
+        return jsonify(result)
+        
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in finalize_report: {error_msg}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+# ================= 个人报告主端点 =================
 
 @app.route('/api/generate-section', methods=['POST'])
 def generate_section():
@@ -781,6 +1072,11 @@ def generate_section():
 
         bazi_json = req_data.get('bazi_data', {})
         section_type = req_data.get('section_type', 'core')
+
+        # 向后兼容：旧的 section_type 名字映射到新的 'forecast'
+        if section_type in ('2026_forecast', 'forecast_2026', 'annual_forecast', '2027_forecast'):
+            print(f"Mapping legacy section_type '{section_type}' -> 'forecast'")
+            section_type = 'forecast'
 
         lang_code = req_data.get('language', 'en')
         custom_lang = req_data.get('custom_language', None)
@@ -798,19 +1094,19 @@ def generate_section():
 
         current_opening = lang_config.get('opening', "In this chapter...")
         current_closing = lang_config.get('closing', "End of chapter.")
-        
+
         if gender == "non-binary":
             current_pronoun_rule = lang_config.get('pronoun_rule_nonbinary', lang_config.get('pronoun_rule', "Address the user formally."))
         else:
             current_pronoun_rule = lang_config.get('pronoun_rule', "Address the user formally.")
-        
+
         if reading_mode == "authentic":
             current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
         else:
             current_style = lang_config.get('style_gentle')
 
         context_str = format_bazi_context(bazi_json)
-        
+
         pillars = bazi_json.get('pillars', {})
         day_master = bazi_json.get('dayMaster', '')
         day_master_element = bazi_json.get('dayMasterElement', '')
@@ -1124,7 +1420,7 @@ Make them feel excited about their potential while being realistic about challen
 
         elif section_type == 'love':
             day_branch = pillars.get('day', {}).get('zhi', 'N/A')
-            
+
             if gender == "non-binary":
                 love_specific_instruction = f"""
 ### CRITICAL: GENDER-INCLUSIVE RELATIONSHIP ANALYSIS 性别包容婚恋分析
@@ -1140,8 +1436,6 @@ This client has chosen a GENDER-NEUTRAL reading. You MUST provide DUAL INTERPRET
 **Day Branch (Spouse Palace): {day_branch}**
 
 You MUST analyze relationships from BOTH perspectives:
-
----
 
 ## INTERPRETATION A - Wealth Stars (財星) as Relationship Indicators
 
@@ -1163,8 +1457,6 @@ Analyze as if Wealth Stars represent romantic attraction:
 - Which luck cycles activate Wealth Stars?
 - When are favorable periods for meeting partners or deepening relationships?
 
----
-
 ## INTERPRETATION B - Officer Stars (官殺) as Relationship Indicators
 
 Analyze as if Officer Stars represent romantic attraction:
@@ -1184,8 +1476,6 @@ Analyze as if Officer Stars represent romantic attraction:
 ### Timing Based on Officer Star Cycles
 - Which luck cycles activate Officer Stars?
 - When are favorable periods for meeting partners or deepening relationships?
-
----
 
 ## SYNTHESIS - Bringing Both Perspectives Together
 
@@ -1365,207 +1655,162 @@ Use correct pronouns: {gender_info['pronoun']}
 {love_closing_guidance}
 """
 
-        elif section_type == '2026_forecast':
-            # ================= 2026-2027 双年流年预测 =================
-            if gender == "non-binary":
-                forecast_gender_note = """
-### GENDER-NEUTRAL FORECAST NOTE:
-- Use "they/them/their" pronouns throughout
-- For relationship predictions, mention BOTH Wealth Star and Officer Star activations
-- Let the client determine which resonates with their experience
-- Avoid any gendered language or assumptions
-"""
-            else:
-                forecast_gender_note = f"""
-### GENDER REMINDER:
-Client is {gender.upper()}. Apply correct gender-based star interpretations for all predictions.
-"""
+        elif section_type == 'forecast':
+            # ================= 动态24个月流年预测 =================
+            now = datetime.now()
+            today_str = now.strftime("%Y-%m-%d")
+            timeline = build_forecast_timeline(now.date(), num_months=FORECAST_MONTHS)
+            timeline_str = format_forecast_timeline_for_prompt(timeline)
+            years_summary = get_forecast_years_summary(timeline)
+
+            current_month = timeline[0]
+            end_month = timeline[-1]
+
+            # 找出与命主四柱相冲/相合的关键月份
+            user_branches = get_user_branches(bazi_json)
+            interactions = find_key_interactions(timeline, user_branches)
+            key_interactions_str = format_key_interactions(interactions)
 
             if reading_mode == "authentic":
                 forecast_mode_instruction = """
 ### AUTHENTIC MODE 真实版流年预测要求:
 - 直接说哪几个月好、哪几个月差
 - 如果有冲克，直接说"这个月犯太岁/逢冲，不宜做重大决定"
-- 具体到事项："6月不宜投资"、"9月防小人"、"12月注意身体"
+- 具体到事项："这月不宜投资"、"这月防小人"、"这月注意身体"
 - 如果整年运势不好，直接说"宜守不宜攻，稳扎稳打为主"
 - 每个问题都要给出化解方法：佩戴什么、摆放什么、去什么方位
-- 2026和2027两年要做对比分析，让读者清楚哪一年更有利
+- 涉及多个流年时要做对比分析，让读者清楚哪一年更有利于哪类事项
 """
             else:
                 forecast_mode_instruction = """
-Make this feel like a practical roadmap they can actually use throughout 2026 and 2027.
-Compare the two years so they know which year favors which activities.
+Make this feel like a practical roadmap they can actually use month by month.
+Compare across the lunar years in the window so they know which year favors which activities.
 """
 
             specific_prompt = f"""
-## TASK: Write Chapter 4 - 2026-2027 Two-Year Forecast (2026-2027双年流年预测)
-## 2026 Year of the Fire Horse (丙午) & 2027 Year of the Fire Goat (丁未)
+## TASK: Write the Forecast Chapter — Next 24 Months Personalized Outlook
+## (未来24个月个性化流年流月预测)
+
+### ⚠️ TEMPORAL ANCHOR — READ THIS FIRST ⚠️
+
+**TODAY'S DATE 今日日期**: {today_str}
+**CURRENT LUNAR MONTH 当前农历月**: {current_month['lunar_month']} ({current_month['month_ganzhi']}月) of {current_month['year_ganzhi']}年
+**FORECAST WINDOW 预测窗口**: {current_month['gregorian_start']} → {end_month['gregorian_end']} (24 lunar months)
+**LUNAR YEARS COVERED 涉及流年**: {years_summary}
+
+### CRITICAL RULES — NON-NEGOTIABLE 关键规则
+
+1. **DO NOT predict events that have already happened.** Today is {today_str}. Anything before this date is HISTORY. Never write things like "earlier this year you may have experienced...".
+2. **The forecast STARTS from the current month** ({current_month['lunar_month']}, {current_month['gregorian_start']}) and goes 24 months forward.
+3. **Use the timeline below — these are the EXACT ganzhi months you must analyze.** Do not invent or recalculate ganzhi yourself.
+4. **When mentioning a month, ALWAYS include its gregorian date range** so the reader can locate it in their calendar.
+5. **Reference the pre-computed key interactions** (clash/harmony months) provided below — these have already been calculated against the client's chart.
+
+{forecast_mode_instruction}
+
+{timeline_str}
+
+### PRE-COMPUTED KEY INTERACTIONS (已预先计算好的关键月份)
+
+The following months have been pre-calculated as having significant interactions with the client's four pillars:
+
+{key_interactions_str}
+
+When discussing these months, reference them with their step number and gregorian dates. Do NOT invent additional clashes — only those listed above are confirmed.
 
 ### COMPLETE CHART DATA:
 {context_str}
 
-{forecast_gender_note}
+### REQUIRED STRUCTURE — Follow This Exact Outline
 
-{forecast_mode_instruction}
+# Part 1: Overview of the 24-Month Window (24个月总览)
 
-### REQUIRED ANALYSIS:
+## 1.1 Energy Theme of This Window
+- What is the dominant energy of these 24 months for the client?
+- How do {years_summary} interact with the day master [{day_master}]?
+- What life themes will likely be activated?
 
-# ========== PART ONE: 2026 丙午年 (FIRE HORSE) ==========
-
-## 1. 2026 Fire Horse (丙午) Overview (2026火马年总览)
-- 2026 is 丙午 year - Fire Horse (Yang Fire + Horse)
-- How does 丙午 interact with their Day Master [{day_master}]?
-- How does 午 (Horse) interact with their four branches?
-- CHECK SPECIFICALLY: Is there 子午冲 (Rat-Horse clash) with any branch? This is major!
-- Any combinations (合) or harms (害) with 午?
-- Overall energy theme of 2026 for this person
-
-## 2. Impact on Current Luck Cycle (与当前大运的交互 - 2026)
+## 1.2 Interaction with Current Luck Cycle (与当前大运的交互)
 - Current luck cycle: [{current_dayun.get('ganZhi', 'N/A')}]
-- How does 2026 丙午 interact with their current 大运?
-- Is this a supportive or challenging combination?
-- What themes are amplified by this interaction?
+- How does the forecast window interact with this 大运?
+- Will the client transition to a new 大运 within this window? If yes, when?
 
-## 3. Key Opportunities in 2026 (2026机遇)
-- Which life areas get activated positively?
-- Career opportunities based on element interactions
-- Relationship opportunities (apply gender-specific rules)
-- Wealth opportunities
-- Best timing for major decisions
+## 1.3 Lunar Years Comparison (流年对比)
+For each lunar year in the window, give a one-paragraph high-level read:
+- Which year is most favorable overall?
+- Which year requires the most caution?
+- The energetic shift from one year to the next
 
-## 4. Challenges to Navigate in 2026 (2026挑战)
-- Potential obstacles or difficult periods
-- Health areas to watch (which organs relate to stressed elements?)
-- Relationship cautions
-- Career or financial cautions
-- How to mitigate challenges
+# Part 2: Year-by-Year Breakdown (按流年分段)
 
-## 5. 2026 Month-by-Month Breakdown (2026逐月分析)
-Provide specific guidance for each Chinese lunar month:
+For each lunar year in {years_summary}, write a section covering:
+- Career & wealth direction for that year
+- Relationships & family
+- Health
+- Top 3 opportunities & top 3 cautions
+- Lucky/unlucky elements, colors, directions for that specific year
 
-- **Month 1 (寅月 - Feb 4 to Mar 5)**: Tiger month...
-- **Month 2 (卯月 - Mar 6 to Apr 4)**: Rabbit month...
-- **Month 3 (辰月 - Apr 5 to May 5)**: Dragon month...
-- **Month 4 (巳月 - May 6 to Jun 5)**: Snake month...
-- **Month 5 (午月 - Jun 6 to Jul 6)**: Horse month (double 午!)...
-- **Month 6 (未月 - Jul 7 to Aug 7)**: Goat month...
-- **Month 7 (申月 - Aug 8 to Sep 7)**: Monkey month...
-- **Month 8 (酉月 - Sep 8 to Oct 7)**: Rooster month...
-- **Month 9 (戌月 - Oct 8 to Nov 7)**: Dog month...
-- **Month 10 (亥月 - Nov 8 to Dec 6)**: Pig month...
-- **Month 11 (子月 - Dec 7 to Jan 5)**: Rat month (子午冲 if applicable!)...
-- **Month 12 (丑月 - Jan 6 to Feb 3 2027)**: Ox month...
+(If a lunar year only partially falls in the window, only analyze the months that are inside.)
 
-For each month, briefly note:
-- Key theme or energy
-- Opportunities
-- Cautions
-- Lucky days or activities
+# Part 3: Month-by-Month Guidance (逐月精要)
 
-## 6. 2026 Action Plan (2026行动计划)
-- Top 3 things to focus on in 2026
-- Top 3 things to avoid or be cautious about
-- Lucky elements, colors, and directions for 2026
-- Feng shui recommendations
-- Any specific remedies if challenges are significant
+For EACH of the 24 months in the timeline above, provide a concise reading.
+Format each month exactly like this:
 
-# ========== PART TWO: 2027 丁未年 (FIRE GOAT) ==========
+### Month {{step}}: {{gregorian_start}} ~ {{gregorian_end}} | {{lunar_month}} {{month_ganzhi}}
+- **Theme**: (1-2 sentence energy summary)
+- **Opportunity**: (specific opening to leverage)
+- **Caution**: (specific risk or pitfall)
+- **Best for**: (concrete activities favored this month)
+- **Avoid**: (concrete activities to defer)
 
-## 7. 2027 Fire Goat (丁未) Overview (2027火羊年总览)
-- 2027 is 丁未 year - Fire Goat (Yin Fire + Goat/Sheep)
-- How does 丁未 interact with their Day Master [{day_master}]?
-- How does 丁 (Yin Fire) differ from 2026's 丙 (Yang Fire)? What shift does this bring?
-- How does 未 (Goat) interact with their four branches?
-- CHECK SPECIFICALLY:
-  - Is there 丑未冲 (Ox-Goat clash) with any branch?
-  - Is there 未午合 or 未戌合 (combinations) with any branch?
-  - Any 三刑 (Three Penalties) involving 未?
-- Overall energy theme of 2027 for this person
+For months flagged in the key interactions above, explicitly note the clash or harmony and what it means.
 
-## 8. Impact on Luck Cycle (与大运的交互 - 2027)
-- Is the client still in the same 大运 in 2027, or transitioning to a new one?
-- How does 2027 丁未 interact with their 大运?
-- What themes carry over from 2026 and what shifts?
+# Part 4: Strategic Plan Across the Window (跨窗口战略规划)
 
-## 9. Key Opportunities in 2027 (2027机遇)
-- Which life areas get activated positively?
-- Career opportunities - how do they differ from 2026?
-- Relationship opportunities (apply gender-specific rules)
-- Wealth opportunities
-- Best timing for major decisions in 2027
+## 4.1 Best Timing for Major Life Events
+For each of the following, identify the best month(s) within the window:
+- Marriage / engagement / serious commitment
+- Job change or career move
+- Starting a business
+- Major purchase (property, car, etc.)
+- Travel or relocation
+- Investment decisions
+- Important medical procedures or health initiatives
 
-## 10. Challenges to Navigate in 2027 (2027挑战)
-- Potential obstacles or difficult periods
-- Health areas to watch (未属土，注意脾胃/消化系统)
-- Relationship cautions
-- Career or financial cautions
-- How to mitigate challenges
+## 4.2 Defensive Periods
+- Which specific months should be used for consolidation rather than expansion?
+- Which months are best to avoid major decisions entirely?
 
-## 11. 2027 Month-by-Month Breakdown (2027逐月分析)
-Provide specific guidance for each Chinese lunar month:
+## 4.3 Lucky Elements & Remedies
+- Top elements/colors/directions to incorporate during this window
+- Specific feng shui or wearable suggestions tied to the dominant flow
 
-- **Month 1 (寅月 - Feb 4 to Mar 5)**: Tiger month...
-- **Month 2 (卯月 - Mar 6 to Apr 4)**: Rabbit month (卯未半合木局?)...
-- **Month 3 (辰月 - Apr 5 to May 5)**: Dragon month...
-- **Month 4 (巳月 - May 6 to Jun 5)**: Snake month...
-- **Month 5 (午月 - Jun 6 to Jul 6)**: Horse month (午未合!)...
-- **Month 6 (未月 - Jul 7 to Aug 7)**: Goat month (double 未! 本命年效应?)...
-- **Month 7 (申月 - Aug 8 to Sep 7)**: Monkey month...
-- **Month 8 (酉月 - Sep 8 to Oct 7)**: Rooster month...
-- **Month 9 (戌月 - Oct 8 to Nov 7)**: Dog month (未戌刑?)...
-- **Month 10 (亥月 - Nov 8 to Dec 6)**: Pig month (亥未半合木局?)...
-- **Month 11 (子月 - Dec 7 to Jan 5)**: Rat month...
-- **Month 12 (丑月 - Jan 6 to Feb 3 2028)**: Ox month (丑未冲!)...
+# Part 5: Looking Beyond the Window (展望未来)
 
-For each month, briefly note:
-- Key theme or energy
-- Opportunities
-- Cautions
+- Brief note on the energetic theme that begins after {end_month['gregorian_end']}
+- One paragraph on the long-term trajectory this 24-month window is setting up
+- Final empowering message tied to the client's specific chart and these 24 months
 
-## 12. 2027 Action Plan (2027行动计划)
-- Top 3 things to focus on in 2027
-- Top 3 things to avoid or be cautious about
-- Lucky elements, colors, and directions for 2027
-- Feng shui recommendations
+### FINAL REMINDERS BEFORE YOU WRITE:
 
-# ========== PART THREE: TWO-YEAR COMPARISON & STRATEGY ==========
-
-## 13. 2026 vs 2027 Comparison (双年对比分析)
-Create a clear comparison:
-
-| Dimension 维度 | 2026 丙午 | 2027 丁未 | Which Year is Better 哪年更优 |
-|---------------|-----------|-----------|------------------------------|
-| Career 事业    |           |           |                              |
-| Wealth 财运    |           |           |                              |
-| Love 感情      |           |           |                              |
-| Health 健康    |           |           |                              |
-| Study 学业     |           |           |                              |
-| Overall 综合   |           |           |                              |
-
-## 14. Two-Year Strategic Plan (双年战略规划)
-- What should be done in 2026 vs. deferred to 2027?
-- Key transitions between the two years
-- How the energy shifts from Yang Fire (丙) to Yin Fire (丁)
-- How the energy shifts from Horse (午) to Goat (未)
-- Specific advice: "Do X in 2026, wait until 2027 for Y"
-
-## 15. Looking Ahead (展望未来)
-- How does 2026-2027 set up 2028 (戊申)?
-- Any long-term themes emerging across these years?
-- Final empowering message for the two years ahead
+- The forecast STARTS at {current_month['gregorian_start']}, not at any earlier date.
+- {years_summary} are the ONLY lunar years to discuss. Do not pull in unrelated years.
+- Every month reference must include its date range from the timeline above.
+- {"温暖鼓励的语气，给读者希望和方向感。" if reading_mode == "gentle" else "传统命理师直言风格，好坏都明说，每个挑战配化解方法和最佳时机。"}
 """
 
         else:
             return jsonify({"error": f"Unknown section type: {section_type}"}), 400
 
         print(f"Calling AI for section: {section_type} in language: {lang_config['name']} with mode: {reading_mode}")
-        
-        # 2026_forecast 章节内容量大，使用更大的 max_tokens
-        if section_type == '2026_forecast':
+
+        # forecast 章节内容量大，使用更大的 max_tokens
+        if section_type == 'forecast':
             ai_result = ask_ai(base_system_prompt, specific_prompt, max_tokens=24000)
         else:
             ai_result = ask_ai(base_system_prompt, specific_prompt)
-        
+
         print(f"AI result keys: {ai_result.keys() if isinstance(ai_result, dict) else 'not a dict'}")
 
         if ai_result and 'choices' in ai_result:
@@ -1583,83 +1828,6 @@ Create a clear comparison:
         error_msg = traceback.format_exc()
         print(f"CRITICAL SERVER ERROR: {error_msg}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
-
-
-@app.route('/api/finalize-report', methods=['OPTIONS'])
-def finalize_options_handler():
-    return '', 204
-
-
-@app.route('/api/finalize-report', methods=['POST'])
-def finalize_report():
-    """
-    简化版：只做 AI 自检 + 生成客户消息（不创建 Google Doc）
-    """
-    try:
-        print("=== Finalize Report Request (No Google Doc) ===")
-        
-        req_data = request.json
-        if not req_data:
-            return jsonify({"error": "No JSON received"}), 400
-        
-        full_report = req_data.get('full_report', '')
-        bazi_data = req_data.get('bazi_data', {})
-        language = req_data.get('language', 'en')
-        
-        client_name = bazi_data.get('name', 'Client')
-        
-        if not full_report:
-            return jsonify({"error": "No report content provided"}), 400
-        
-        print(f"Processing report for: {client_name}")
-        print(f"Report length: {len(full_report)} characters")
-        
-        bazi_summary = format_bazi_summary(bazi_data)
-        
-        result = {
-            "client_name": client_name,
-            "validation": None,
-            "customer_message": None
-        }
-        
-        # 1. AI 自检报告
-        print("Step 1: Validating report...")
-        try:
-            validation_result = validate_report(full_report, bazi_data, language)
-            result["validation"] = validation_result
-            print(f"Validation result: {validation_result.get('status', 'Unknown')}")
-        except Exception as e:
-            print(f"Validation error: {e}")
-            result["validation"] = {
-                "status": "SKIPPED",
-                "summary": "Validation skipped due to error",
-                "issues_found": []
-            }
-        
-        # 2. 生成客户消息
-        print("Step 2: Generating customer message...")
-        try:
-            customer_message = generate_customer_message_simple(
-                client_name, 
-                bazi_summary,
-                full_report,
-                language
-            )
-            result["customer_message"] = customer_message
-            print("Customer message generated successfully")
-        except Exception as e:
-            print(f"Customer message error: {e}")
-            result["customer_message"] = f"[Error generating message: {str(e)}]"
-        
-        print("=== Finalize Report Complete ===")
-        return jsonify(result)
-        
-    except Exception as e:
-        error_msg = traceback.format_exc()
-        print(f"CRITICAL ERROR in finalize_report: {error_msg}")
-        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
-
-
 # =====================================================================
 # ================= 合婚报告功能 - MARRIAGE COMPATIBILITY =================
 # =====================================================================
@@ -1670,20 +1838,20 @@ MARRIAGE_SECTIONS = [
     {'type': 'communication', 'title': 'Chapter 3: Communication & Conflict Patterns', 'zh': '第三章：相处与沟通模式'},
     {'type': 'wealth_career', 'title': 'Chapter 4: Wealth & Career Together', 'zh': '第四章：财运与事业配合'},
     {'type': 'love_marriage', 'title': 'Chapter 5: Love & Marriage Stability', 'zh': '第五章：感情与婚姻稳定性'},
-    {'type': 'forecast_2026', 'title': 'Chapter 6: 2026-2027 Forecast & Harmony Tips', 'zh': '第六章：2026-2027双年流年预测与和谐建议'},
+    {'type': 'forecast', 'title': 'Chapter 6: 24-Month Forecast & Harmony Tips', 'zh': '第六章：未来24个月流年预测与和谐建议'},
 ]
 
 
 def format_marriage_bazi_context(bazi_a, bazi_b):
     """格式化双人八字数据给 AI"""
-    
+
     def format_single_person(data, label):
         name = data.get('name', label)
         gender = data.get('gender', 'unknown')
         birth_info = data.get('birthInfo', {})
         pillars = data.get('pillars', {})
         five_elements = data.get('fiveElements', {})
-        
+
         if gender == 'male':
             gender_display = "Male (男命)"
         elif gender == 'female':
@@ -1692,9 +1860,9 @@ def format_marriage_bazi_context(bazi_a, bazi_b):
             gender_display = "Non-binary (性别中立)"
         else:
             gender_display = "Unknown"
-        
+
         bazi_str = f"{pillars.get('year', {}).get('ganZhi', '?')} {pillars.get('month', {}).get('ganZhi', '?')} {pillars.get('day', {}).get('ganZhi', '?')} {pillars.get('hour', {}).get('ganZhi', '?')}"
-        
+
         return f"""
 ### {name} ({label})
 - Gender: {gender_display}
@@ -1734,10 +1902,10 @@ def format_marriage_bazi_context(bazi_a, bazi_b):
 
 **Current Luck Cycle 当前大运**: {data.get('currentDayun', {}).get('ganZhi', 'N/A')} ({data.get('currentDayun', {}).get('startYear', '')}-{data.get('currentDayun', {}).get('endYear', '')})
 """
-    
+
     context_a = format_single_person(bazi_a, "Partner A")
     context_b = format_single_person(bazi_b, "Partner B")
-    
+
     return f"""
 ## COMPLETE MARRIAGE COMPATIBILITY DATA
 
@@ -1750,7 +1918,7 @@ def format_marriage_bazi_context(bazi_a, bazi_b):
 def format_compatibility_scores(scores):
     """格式化合婚评分数据"""
     breakdown = scores.get('breakdown', {})
-    
+
     return f"""
 ## COMPATIBILITY SCORES (已计算)
 
@@ -1781,10 +1949,10 @@ def format_compatibility_scores(scores):
 
 def get_marriage_gender_instruction(gender_a, gender_b, lang_code):
     """获取合婚报告的性别相关指令"""
-    rule_lang = "zh" if lang_code == "zh" else "en"
-    
+    rule_lang = "zh" if lang_code in ("zh", "zh-tw") else "en"
+
     has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
-    
+
     if has_nonbinary:
         if rule_lang == "zh":
             return """
@@ -1825,7 +1993,7 @@ At least one partner in this couple has selected a gender-neutral reading. Follo
     else:
         gender_info_a = get_gender_instruction(gender_a, lang_code)
         gender_info_b = get_gender_instruction(gender_b, lang_code)
-        
+
         return f"""
 ## GENDER-SPECIFIC INTERPRETATION RULES
 
@@ -1837,6 +2005,8 @@ For Partner B ({gender_b}):
 """
 
 
+# ================= 合婚路由 =================
+
 @app.route('/api/generate-marriage-section', methods=['OPTIONS'])
 def marriage_options_handler():
     return '', 204
@@ -1847,44 +2017,49 @@ def generate_marriage_section():
     """生成合婚报告的单个章节"""
     try:
         print("=== Marriage Section Request ===")
-        
+
         req_data = request.json
         if not req_data:
             return jsonify({"error": "No JSON received"}), 400
-        
+
         bazi_a = req_data.get('bazi_a', {})
         bazi_b = req_data.get('bazi_b', {})
         scores = req_data.get('scores', {})
         section_type = req_data.get('section_type', 'overview')
-        
+
+        # 向后兼容：旧的 section_type 名字映射
+        if section_type in ('forecast_2026', '2026_forecast', '2027_forecast', 'annual_forecast'):
+            print(f"Mapping legacy marriage section_type '{section_type}' -> 'forecast'")
+            section_type = 'forecast'
+
         lang_code = req_data.get('language', 'en')
         custom_lang = req_data.get('custom_language', None)
         lang_config = get_language_config(lang_code, custom_lang)
-        
+
         reading_mode = req_data.get('mode', 'gentle')
         mode_config = get_mode_config(reading_mode)
-        
+
         name_a = bazi_a.get('name', 'Partner A')
         name_b = bazi_b.get('name', 'Partner B')
         gender_a = bazi_a.get('gender', 'unknown')
         gender_b = bazi_b.get('gender', 'unknown')
-        
+
         print(f"Marriage Section: {section_type}, Mode: {reading_mode}, Lang: {lang_code}")
         print(f"Partner A: {name_a} ({gender_a}), Partner B: {name_b} ({gender_b})")
-        
+
         current_opening = lang_config.get('opening', "In this chapter...")
         current_closing = lang_config.get('closing', "End of chapter.")
-        
+
         if reading_mode == "authentic":
             current_style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
         else:
             current_style = lang_config.get('style_gentle')
-        
+
         context_str = format_marriage_bazi_context(bazi_a, bazi_b)
         scores_str = format_compatibility_scores(scores)
-        
+
         gender_instruction = get_marriage_gender_instruction(gender_a, gender_b, lang_code)
-        
+
         has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
         nonbinary_reminder = ""
         if has_nonbinary:
@@ -1897,7 +2072,7 @@ At least one partner selected non-binary gender. You MUST:
 - Avoid traditional gendered analysis terms
 - Respect both partners' identities throughout
 """
-        
+
         # ================= 合婚专用 System Prompt =================
         base_system_prompt = f"""
 You are a master of BaZi (Chinese Four Pillars of Destiny) marriage compatibility analysis, with deep knowledge of classical texts and traditional 合婚 (marriage matching) techniques.
@@ -1952,7 +2127,7 @@ NEVER use generic terms like "Partner A", "Partner B", "the man", "the woman".
 
         # ================= 各章节详细指令 =================
         specific_prompt = ""
-        
+
         if section_type == 'overview':
             specific_prompt = f"""
 ## TASK: Write Chapter 1 - Both Partners Overview (双方命局概览)
@@ -2362,166 +2537,170 @@ Based on both charts:
 {"强调他们感情的美好之处，给他们对婚姻的信心和希望。" if reading_mode == "gentle" else "直接指出可能影响婚姻稳定的因素，比如'某方可能有外遇倾向'、'第一段婚姻可能不稳定'、'某些年份是婚姻危险期'。"}
 """
 
-        elif section_type == 'forecast_2026':
-            # ================= 合婚 2026-2027 双年预测 =================
+        elif section_type == 'forecast':
+            # ================= 合婚动态24个月流年预测 =================
+            now = datetime.now()
+            today_str = now.strftime("%Y-%m-%d")
+            timeline = build_forecast_timeline(now.date(), num_months=FORECAST_MONTHS)
+            timeline_str = format_forecast_timeline_for_prompt(timeline)
+            years_summary = get_forecast_years_summary(timeline)
+
+            current_month = timeline[0]
+            end_month = timeline[-1]
+
+            # 分别计算两人与窗口月份的关键互动
+            branches_a = get_user_branches(bazi_a)
+            branches_b = get_user_branches(bazi_b)
+            interactions_a = find_key_interactions(timeline, branches_a)
+            interactions_b = find_key_interactions(timeline, branches_b)
+
+            key_a_str = format_key_interactions(interactions_a)
+            key_b_str = format_key_interactions(interactions_b)
+
+            # 找出两人都被冲/合的月份（共振月）
+            chong_steps_a = {c['step'] for c in interactions_a['chong']}
+            chong_steps_b = {c['step'] for c in interactions_b['chong']}
+            shared_chong = sorted(chong_steps_a & chong_steps_b)
+            he_steps_a = {h['step'] for h in interactions_a['he']}
+            he_steps_b = {h['step'] for h in interactions_b['he']}
+            shared_he = sorted(he_steps_a & he_steps_b)
+
+            shared_lines = []
+            if shared_chong:
+                shared_lines.append("**双方共同相冲月份（关系压力较大）**:")
+                for s in shared_chong[:8]:
+                    t = timeline[s - 1]
+                    shared_lines.append(f"- 第{s}月 {t['month_ganzhi']} ({t['gregorian_start']} ~ {t['gregorian_end']}): 两人都被冲，需共同应对")
+            if shared_he:
+                shared_lines.append("\n**双方共同相合月份（关系最和谐）**:")
+                for s in shared_he[:8]:
+                    t = timeline[s - 1]
+                    shared_lines.append(f"- 第{s}月 {t['month_ganzhi']} ({t['gregorian_start']} ~ {t['gregorian_end']}): 双方都受益，适合共同推进")
+            shared_str = "\n".join(shared_lines) if shared_lines else "  本窗口内双方无明显共同相冲/相合月份。"
+
             specific_prompt = f"""
-## TASK: Write Chapter 6 - 2026-2027 Two-Year Forecast & Harmony Tips
-## (2026-2027双年流年预测与和谐建议)
+## TASK: Write Chapter 6 - 24-Month Forecast & Harmony Tips
+## (未来24个月流年流月预测与和谐建议)
+
+### ⚠️ TEMPORAL ANCHOR — READ THIS FIRST ⚠️
+
+**TODAY'S DATE 今日日期**: {today_str}
+**CURRENT LUNAR MONTH 当前农历月**: {current_month['lunar_month']} ({current_month['month_ganzhi']}月) of {current_month['year_ganzhi']}年
+**FORECAST WINDOW 预测窗口**: {current_month['gregorian_start']} → {end_month['gregorian_end']} (24 lunar months)
+**LUNAR YEARS COVERED 涉及流年**: {years_summary}
+
+### CRITICAL RULES — NON-NEGOTIABLE 关键规则
+
+1. DO NOT predict events that have already happened. Today is {today_str}. Anything before this date is HISTORY.
+2. The forecast STARTS from the current month and goes 24 months forward.
+3. Use the timeline below — these are the EXACT ganzhi months you must analyze.
+4. When mentioning a month, ALWAYS include its gregorian date range.
+5. Reference the pre-computed key interactions for {name_a} and {name_b} below.
 
 {context_str}
 
-### REQUIRED ANALYSIS:
+{timeline_str}
 
-# ========== PART ONE: 2026 丙午年 (FIRE HORSE) ==========
+### PRE-COMPUTED KEY INTERACTIONS
 
-## 1. 2026 丙午年 (Fire Horse Year) Overview
+#### {name_a}'s Key Months ({name_a}的关键月份):
+{key_a_str}
 
-### How 2026 Affects {name_a}
-- How does 丙午 interact with {name_a}'s Day Master?
-- Any 冲合 with {name_a}'s branches?
-- Key themes for {name_a} in 2026
-- Opportunities and challenges
+#### {name_b}'s Key Months ({name_b}的关键月份):
+{key_b_str}
 
-### How 2026 Affects {name_b}
-- How does 丙午 interact with {name_b}'s Day Master?
-- Any 冲合 with {name_b}'s branches?
-- Key themes for {name_b} in 2026
-- Opportunities and challenges
+#### Couple's Shared Resonance Months (双方共振月份):
+{shared_str}
 
-## 2. 2026 as a Couple 作为伴侣的2026年
+### REQUIRED STRUCTURE
 
-### Relationship Energy in 2026 感情运势
-- How does 2026 affect their relationship?
-- Is it a year to deepen commitment or navigate challenges?
-- Key relationship themes for this year
+# Part 1: Overview of the 24-Month Window for the Couple
 
-### Combined Luck Assessment 综合运势
-- Areas where both benefit
-- Areas requiring joint attention
-- Overall year rating for this couple
+## 1.1 Energy Theme
+- What is the dominant energy of these 24 months for {name_a} and {name_b} as a couple?
+- How do {years_summary} interact with both day masters?
+- What relationship themes will be activated?
 
-## 3. 2026 Month-by-Month Guidance (2026逐月指导)
+## 1.2 Yearly Comparison
+For each lunar year in the window, give one paragraph on:
+- Overall couple energy that year
+- Best aspects (career together, romance, health, etc.)
+- Most challenging aspects
+- Which year is best for which life event
 
-Provide brief guidance for key months:
+# Part 2: Individual Year-by-Year Outlook
 
-**寅月 (Feb 4 - Mar 5)**: 
-- Relationship energy & key advice
+For each lunar year in {years_summary}:
 
-**卯月 (Mar 6 - Apr 4)**:
-**辰月 (Apr 5 - May 5)**:
-**巳月 (May 6 - Jun 5)**:
-**午月 (Jun 6 - Jul 6)**: [Double Fire - important month!]
-**未月 (Jul 7 - Aug 7)**:
-**申月 (Aug 8 - Sep 7)**:
-**酉月 (Sep 8 - Oct 7)**:
-**戌月 (Oct 8 - Nov 7)**:
-**亥月 (Nov 8 - Dec 6)**:
-**子月 (Dec 7 - Jan 5)**: [子午冲 if applicable!]
-**丑月 (Jan 6 - Feb 3 2027)**:
+## {name_a} in [year]
+- Career & wealth direction
+- Personal growth themes
+- How it affects their role in the relationship
 
-# ========== PART TWO: 2027 丁未年 (FIRE GOAT) ==========
+## {name_b} in [year]
+- Career & wealth direction
+- Personal growth themes
+- How it affects their role in the relationship
 
-## 4. 2027 丁未年 (Fire Goat Year) Overview
+## Couple Dynamic in [year]
+- How their two energies blend that year
+- Best opportunities together
+- Top cautions for the relationship
 
-### How 2027 Affects {name_a}
-- How does 丁未 interact with {name_a}'s Day Master?
-- Any 冲合 with {name_a}'s branches?
-- Key themes for {name_a} in 2027
-- How does 2027 differ from 2026 for {name_a}?
+# Part 3: Month-by-Month Couple Guidance
 
-### How 2027 Affects {name_b}
-- How does 丁未 interact with {name_b}'s Day Master?
-- Any 冲合 with {name_b}'s branches?
-- Key themes for {name_b} in 2027
-- How does 2027 differ from 2026 for {name_b}?
+For EACH of the 24 months, write a concise reading focused on the COUPLE:
 
-## 5. 2027 as a Couple 作为伴侣的2027年
+### Month {{step}}: {{gregorian_start}} ~ {{gregorian_end}} | {{lunar_month}} {{month_ganzhi}}
+- **Couple energy**: 1-2 sentence summary
+- **Opportunity for connection**: specific way to strengthen the bond
+- **Watch out for**: specific friction risk
+- **Best activity**: what's favored this month (date night, big talk, travel, etc.)
 
-### Relationship Energy in 2027 感情运势
-- How does 2027 affect their relationship compared to 2026?
-- Energy shift from Yang Fire (丙) to Yin Fire (丁)
-- Energy shift from Horse (午) to Goat (未)
-- Key relationship themes for 2027
+For months in the **Shared Resonance** list, explicitly flag that both partners are affected — these are the highest-leverage months (good or bad).
 
-### Combined Luck Assessment 综合运势
-- Areas where both benefit in 2027
-- Areas requiring joint attention
-- Overall year rating for this couple in 2027
+For months in only one partner's key list, note that one of them needs extra support that month.
 
-## 6. 2027 Month-by-Month Guidance (2027逐月指导)
+# Part 4: Best Timing for Major Couple Events
 
-**寅月 (Feb 4 - Mar 5)**:
-**卯月 (Mar 6 - Apr 4)**: [卯未半合木局?]
-**辰月 (Apr 5 - May 5)**:
-**巳月 (May 6 - Jun 5)**:
-**午月 (Jun 6 - Jul 6)**: [午未合! Important for couple energy]
-**未月 (Jul 7 - Aug 7)**: [Double 未! Intensified energy]
-**申月 (Aug 8 - Sep 7)**:
-**酉月 (Sep 8 - Oct 7)**:
-**戌月 (Oct 8 - Nov 7)**: [未戌刑 if applicable]
-**亥月 (Nov 8 - Dec 6)**:
-**子月 (Dec 7 - Jan 5)**:
-**丑月 (Jan 6 - Feb 3 2028)**: [丑未冲!]
+Within the 24-month window, identify the best month(s) for:
+- Wedding / engagement / formal commitment
+- Moving in together / buying a home
+- Trying for children
+- Major joint purchase
+- Joint travel or relocation
+- Starting a business together
 
-# ========== PART THREE: TWO-YEAR COMPARISON & HARMONY ==========
+For each, name the specific month (with gregorian dates) and explain why.
 
-## 7. 2026 vs 2027 Comparison for This Couple (双年对比)
+# Part 5: Months to Avoid Major Decisions
+- List specific months where the couple should consolidate rather than expand
+- Months where conflict risk is elevated
+- How to navigate these protectively
 
-Create a clear comparison:
+# Part 6: Harmony Enhancement Across the Window
 
-| Dimension 维度 | 2026 丙午 | 2027 丁未 | Better Year 哪年更优 |
-|---------------|-----------|-----------|---------------------|
-| Romance 感情   |           |           |                     |
-| Finances 财务  |           |           |                     |
-| Harmony 和谐   |           |           |                     |
-| Growth 成长    |           |           |                     |
-| Overall 综合   |           |           |                     |
+## 6.1 Five Elements Adjustments by Year
+For each lunar year in {years_summary}:
+- What elements benefit the relationship that year?
+- Colors and directions to incorporate
 
-## 8. Two-Year Harmony Plan (双年和谐计划)
-- What to focus on in 2026 vs 2027
-- Best timing across BOTH years for major couple milestones:
-  - Wedding/engagement best months
-  - Moving in together
-  - Having children
-  - Major purchases
-  - Travel together
-- How to navigate the energy shift between years
+## 6.2 Practical Harmony Tips
+- Daily/weekly habits to strengthen the bond
+- Communication focus areas tied to the dominant energy
+- Specific feng shui suggestions for shared spaces
 
-## 9. Important Dates & Decisions (重要日期与决策)
+# Part 7: Looking Beyond the Window
+- Brief note on what energy begins after {end_month['gregorian_end']}
+- Long-term relationship trajectory hint
+- Final blessing for the couple
 
-### Best Timing Across Both Years 两年最佳时机
-- Months to avoid major decisions in each year
-- Times when conflict is more likely in each year
-- How to navigate difficult periods
-
-## 10. Harmony Enhancement Tips (和谐增进建议)
-
-### Five Elements Adjustments 五行调整
-Based on their combined chart:
-- What elements benefit their relationship in 2026?
-- What elements benefit their relationship in 2027?
-- Colors to incorporate for each year
-- Directions that support harmony
-
-### Practical Harmony Tips 实用和谐建议
-- Daily habits to strengthen bond
-- Weekly/monthly rituals
-- Communication focus areas for each year
-
-## 11. Long-term Outlook (长期展望)
-
-### Beyond 2027 展望未来
-- How does 2026-2027 set up 2028 (戊申)?
-- Long-term relationship trajectory
-- Major milestone years to anticipate
-
-### Final Blessing 最终祝福
-End with:
-- Affirmation of their connection
-- Key strengths to remember
-- Encouragement for the journey ahead
-
-{"以温暖积极的祝福结束，让他们对未来两年充满期待。" if reading_mode == "gentle" else "实事求是地告诉他们两年内可能面临的挑战，以及具体的化解方法。对比哪一年更适合做什么。"}
+### FINAL REMINDERS:
+- The forecast STARTS at {current_month['gregorian_start']}.
+- {years_summary} are the ONLY lunar years to discuss.
+- Every month reference must include its date range.
+- Use {name_a} and {name_b} by name throughout — not "Partner A/B".
+- {"温暖鼓励的语气，让他们对未来两年充满期待。" if reading_mode == "gentle" else "实事求是地告诉他们窗口内可能面临的挑战，以及具体的化解方法和最佳时机。"}
 """
 
         else:
@@ -2529,13 +2708,13 @@ End with:
 
         # 调用 AI
         print(f"Calling AI for marriage section: {section_type}")
-        
-        # forecast_2026 章节内容量大，使用更大的 max_tokens
-        if section_type == 'forecast_2026':
+
+        # forecast 章节内容量大，使用更大的 max_tokens
+        if section_type == 'forecast':
             ai_result = ask_ai(base_system_prompt, specific_prompt, max_tokens=24000)
         else:
             ai_result = ask_ai(base_system_prompt, specific_prompt)
-        
+
         if ai_result and 'choices' in ai_result:
             content = ai_result['choices'][0]['message']['content']
             print(f"Success! Marriage section content length: {len(content)}")
@@ -2563,34 +2742,34 @@ def finalize_marriage_report():
     """合婚报告完成处理：AI自检 + 客户消息生成"""
     try:
         print("=== Finalize Marriage Report Request ===")
-        
+
         req_data = request.json
         if not req_data:
             return jsonify({"error": "No JSON received"}), 400
-        
+
         full_report = req_data.get('full_report', '')
         bazi_a = req_data.get('bazi_a', {})
         bazi_b = req_data.get('bazi_b', {})
         scores = req_data.get('scores', {})
         language = req_data.get('language', 'en')
-        
+
         name_a = bazi_a.get('name', 'Partner A')
         name_b = bazi_b.get('name', 'Partner B')
         gender_a = bazi_a.get('gender', 'unknown')
         gender_b = bazi_b.get('gender', 'unknown')
-        
+
         if not full_report:
             return jsonify({"error": "No report content provided"}), 400
-        
+
         print(f"Processing marriage report for: {name_a} & {name_b}")
         print(f"Report length: {len(full_report)} characters")
-        
+
         result = {
             "couple_names": f"{name_a} & {name_b}",
             "validation": None,
             "customer_message": None
         }
-        
+
         has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
         gender_check_note = ""
         if has_nonbinary:
@@ -2601,7 +2780,7 @@ IMPORTANT: At least one partner selected NON-BINARY gender. Verify that:
 - Uses "partner/spouse" instead of "husband/wife"
 - Avoids traditional gendered BaZi terms for non-binary partner(s)
 """
-        
+
         # 1. AI 自检
         print("Step 1: Validating marriage report...")
         try:
@@ -2645,7 +2824,7 @@ Respond in JSON:
                 "You are a BaZi marriage expert reviewer. Respond ONLY in valid JSON.",
                 validation_prompt
             )
-            
+
             if validation_result and 'choices' in validation_result:
                 content = validation_result['choices'][0]['message']['content']
                 content = content.strip()
@@ -2658,20 +2837,20 @@ Respond in JSON:
                 result["validation"] = json.loads(content.strip())
             else:
                 result["validation"] = {"status": "SKIPPED", "summary": "Validation skipped"}
-                
+
         except Exception as e:
             print(f"Validation error: {e}")
             result["validation"] = {"status": "SKIPPED", "summary": f"Error: {str(e)}"}
-        
+
         # 2. 生成客户消息
         print("Step 2: Generating customer message...")
         try:
             pillars_a = bazi_a.get('pillars', {})
             pillars_b = bazi_b.get('pillars', {})
-            
+
             bazi_str_a = f"{pillars_a.get('year', {}).get('ganZhi', '?')} {pillars_a.get('month', {}).get('ganZhi', '?')} {pillars_a.get('day', {}).get('ganZhi', '?')} {pillars_a.get('hour', {}).get('ganZhi', '?')}"
             bazi_str_b = f"{pillars_b.get('year', {}).get('ganZhi', '?')} {pillars_b.get('month', {}).get('ganZhi', '?')} {pillars_b.get('day', {}).get('ganZhi', '?')} {pillars_b.get('hour', {}).get('ganZhi', '?')}"
-            
+
             marriage_summary = f"""
 Couple: {name_a} & {name_b}
 Compatibility Score: {scores.get('total', 'N/A')}/100 ({scores.get('level', {}).get('name', 'N/A')})
@@ -2682,9 +2861,9 @@ Compatibility Score: {scores.get('total', 'N/A')}/100 ({scores.get('level', {}).
 {name_b}'s Four Pillars: {bazi_str_b}
 {name_b}'s Day Master: {bazi_b.get('dayMasterFull', bazi_b.get('dayMaster', 'N/A'))}
 """
-            
+
             report_preview = full_report[:3000] if len(full_report) > 3000 else full_report
-            
+
             if language == "zh":
                 message_prompt = f"""
 请为这对情侣生成一段专业、温暖的消息，告知他们的合婚分析报告已完成。
@@ -2733,27 +2912,27 @@ Output the message directly.
                 "You are a professional destiny reading consultant communicating with a valued couple.",
                 message_prompt
             )
-            
+
             if msg_result and 'choices' in msg_result:
                 result["customer_message"] = msg_result['choices'][0]['message']['content']
             else:
                 result["customer_message"] = f"Your marriage compatibility report for {name_a} & {name_b} is ready!"
-                
+
         except Exception as e:
             print(f"Customer message error: {e}")
             result["customer_message"] = f"Your marriage compatibility report for {name_a} & {name_b} is ready!"
-        
+
         print("=== Finalize Marriage Report Complete ===")
         return jsonify(result)
-        
+
     except Exception as e:
         error_msg = traceback.format_exc()
         print(f"CRITICAL ERROR in finalize_marriage_report: {error_msg}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
+# ================= 启动 =================
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
-
