@@ -1,9 +1,11 @@
 # ================= 八字命理报告生成服务 =================
-# v6.0 - 动态24个月流年预测
+# v6.1 - 动态24个月流年预测 + 跨章节一致性
 # 修改要点:
 #   1. 流年预测改为从"今天"起算未来24个月（agnostic of year）
 #   2. 将当前日期、干支时间线、相冲/相合月份预先计算后注入prompt
 #   3. 旧的 2026_forecast / forecast_2026 自动映射到 forecast
+#   4. 【v6.1新增】支持 previous_chapters 参数：前面章节内容会被注入到
+#      当前章节的 prompt 里，AI 会保持跨章节一致性，不再自相矛盾
 # ========================================================
 
 from flask import Flask, request, jsonify
@@ -536,6 +538,47 @@ def get_forecast_years_summary(timeline):
 
 # ================= 工具函数 =================
 
+def format_previous_chapters_context(previous_chapters):
+    """
+    v6.1 新增：把前面已经生成的章节内容格式化成 prompt 上下文，
+    用于跨章节一致性。worker 端会在调用第 N 章时把前 N-1 章传过来。
+
+    previous_chapters: list of {'type': str, 'content': str}
+    Returns: 一段可以直接拼进 system prompt 的字符串（无内容时返回空）
+    """
+    if not previous_chapters:
+        return ""
+
+    parts = [
+        "",
+        "## PREVIOUS CHAPTERS — AUTHORITATIVE CONTEXT 前面章节已确立的内容",
+        "",
+        "The following chapters have ALREADY been generated for this same client.",
+        "You MUST read them and ensure your current chapter does NOT contradict",
+        "any factual conclusions already made (e.g., Day Master strength,",
+        "favorable elements, marriage timing recommendations, lucky industries).",
+        "",
+        "If your analysis would lead to a different conclusion than what was",
+        "stated earlier, you MUST find an alternative angle that is consistent.",
+        "Build ON these chapters, do not RE-EVALUATE the basics.",
+        "",
+        "以下章节已经为同一位命主生成。您必须阅读它们，确保本章节不与",
+        "之前已经做出的任何事实性结论（如日主强弱、喜用神、婚姻时机、",
+        "适合行业）相矛盾。如果您的分析会得出不同结论，必须换角度切入",
+        "以保持一致。建立在已有章节之上，不要重新评估基础判断。",
+        "",
+    ]
+    for ch in previous_chapters:
+        parts.append(f"### Previously in chapter '{ch.get('type', '?')}':")
+        parts.append("")
+        parts.append(ch.get('content', '').strip())
+        parts.append("")
+        parts.append("---")
+        parts.append("")
+
+    return "\n".join(parts)
+
+
 def get_gender_instruction(gender, lang_code):
     """获取性别相关的解读指令"""
     rule_lang = "zh" if lang_code in ("zh", "zh-tw") else "en"
@@ -964,7 +1007,7 @@ def health_check():
     sample_timeline = build_forecast_timeline(today, num_months=FORECAST_MONTHS)
     return jsonify({
         "status": "running",
-        "version": "6.0-dynamic-24-month-forecast",
+        "version": "6.1-cross-chapter-consistency",
         "api_key_set": bool(GOOGLE_GEMINI_API_KEY),
         "endpoints": {
             "personal_report": "/api/generate-section",
@@ -1106,6 +1149,12 @@ def generate_section():
             current_style = lang_config.get('style_gentle')
 
         context_str = format_bazi_context(bazi_json)
+
+        # v6.1: 读取前面章节内容用于跨章节一致性
+        previous_chapters = req_data.get('previous_chapters', []) or []
+        previous_context = format_previous_chapters_context(previous_chapters)
+        if previous_chapters:
+            print(f"Cross-chapter consistency: {len(previous_chapters)} previous chapter(s) provided")
 
         pillars = bazi_json.get('pillars', {})
         day_master = bazi_json.get('dayMaster', '')
@@ -1253,10 +1302,12 @@ You have access to COMPLETE chart data including:
 - START your response EXACTLY with: "{current_opening}"
 - END your response EXACTLY with: "{current_closing}"
 - Do NOT add greetings like "Welcome", "Hello", or "As we discussed"
-- Treat this as a STANDALONE chapter - do not reference other chapters
+- Each chapter should read as a coherent piece. If PREVIOUS CHAPTERS context is provided below, treat their established facts as authoritative and do not contradict them. Otherwise, treat this as a standalone chapter.
 - Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
 - Include Chinese terms with translations for authenticity
 - Do NOT use any horizontal lines (---, ***, ===, ___) anywhere in your response
+
+{previous_context}
 """
 
         # ================= 各章节详细指令 =================
@@ -2058,6 +2109,12 @@ def generate_marriage_section():
         context_str = format_marriage_bazi_context(bazi_a, bazi_b)
         scores_str = format_compatibility_scores(scores)
 
+        # v6.1: 读取前面章节内容用于跨章节一致性
+        previous_chapters = req_data.get('previous_chapters', []) or []
+        previous_context = format_previous_chapters_context(previous_chapters)
+        if previous_chapters:
+            print(f"Cross-chapter consistency: {len(previous_chapters)} previous marriage chapter(s) provided")
+
         gender_instruction = get_marriage_gender_instruction(gender_a, gender_b, lang_code)
 
         has_nonbinary = gender_a == "non-binary" or gender_b == "non-binary"
@@ -2120,9 +2177,12 @@ NEVER use generic terms like "Partner A", "Partner B", "the man", "the woman".
 - START your response EXACTLY with: "{current_opening}"
 - END your response EXACTLY with: "{current_closing}"
 - Do NOT add greetings or preambles
+- Each chapter should read as a coherent piece. If PREVIOUS CHAPTERS context is provided below, treat their established facts about this couple as authoritative and do not contradict them.
 - Write 2500+ words with proper Markdown formatting
 - Include Chinese terms with translations
 - Do NOT use any horizontal lines
+
+{previous_context}
 """
 
         # ================= 各章节详细指令 =================
