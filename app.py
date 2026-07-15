@@ -3102,6 +3102,15 @@ This rule is NON-NEGOTIABLE. Violations will break the PDF rendering.
 All month boundaries, month pillars, personal auspicious days and caution days
 are PRE-COMPUTED and provided in the task prompt. Reproduce dates exactly as
 given. NEVER invent, shift, or recalculate any calendar fact.
+
+## PROSE DISCIPLINE — NON-NEGOTIABLE
+
+This report is written in the voice of a master composing a personal letter:
+connected, flowing paragraphs. Markdown bullet lists are reserved for the
+pre-computed date lists (and the Chapter 6 pocket card) ONLY. Never emit
+fragment-style labeled bullets for analysis. And never give a recommendation
+without first stating the BaZi reason (stem, branch interaction, Ten God, or
+element) it rests on — reason first, advice second, every time.
 """
 
         built = build_annual_specific_prompt(
@@ -3110,6 +3119,7 @@ given. NEVER invent, shift, or recalculate any calendar fact.
             context_str=context_str,
             previous_context=previous_context,
             mode=reading_mode,
+            lang_code=lang_code,
         )
 
         print(f"Calling AI for annual section: {section_type} "
