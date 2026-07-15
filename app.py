@@ -2991,6 +2991,149 @@ Output the message directly.
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
+# ================= 2027 流年报告 - ANNUAL 2027 YEAR-AHEAD =================
+# Prompt builders + personalized day calendar live in annual_2027.py;
+# the pre-computed almanac constant lives in almanac_2027.py.
+
+from annual_2027 import (
+    build_annual_specific_prompt,
+    ANNUAL_SECTION_TYPES,
+    ANNUAL_YEAR,
+    ANNUAL_YEAR_GANZHI,
+)
+
+
+@app.route('/api/generate-annual-section', methods=['OPTIONS'])
+def annual_options_handler():
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route('/api/generate-annual-section', methods=['POST'])
+def generate_annual_section():
+    """
+    Generate one chapter of the 2027 Year-Ahead report.
+    Body: { bazi_data, section_type, language, custom_language,
+            mode, previous_chapters }
+    Mirrors /api/generate-section scaffolding (language / gender / mode /
+    cross-chapter consistency), scoped to the DingWei year.
+    """
+    try:
+        print(f"=== Annual {ANNUAL_YEAR} section request ===")
+        req_data = request.json
+        if not req_data:
+            return jsonify({"error": "No JSON received"}), 400
+
+        bazi_json = req_data.get('bazi_data', {})
+        section_type = req_data.get('section_type', 'overview')
+        if section_type not in ANNUAL_SECTION_TYPES:
+            return jsonify({"error": f"Unknown annual section type: {section_type}"}), 400
+
+        lang_code = req_data.get('language', 'en')
+        custom_lang = req_data.get('custom_language', None)
+        lang_config = get_language_config(lang_code, custom_lang)
+
+        reading_mode = req_data.get('mode', 'gentle')
+        mode_config = get_mode_config(reading_mode)
+
+        gender = bazi_json.get('gender', 'unknown')
+        client_name = bazi_json.get('name', 'Client')
+        gender_info = get_gender_instruction(gender, lang_code)
+        print(f"Client: {client_name}, Section: {section_type}, "
+              f"Lang: {lang_code}, Mode: {reading_mode}")
+
+        if gender == "non-binary":
+            pronoun_rule = lang_config.get('pronoun_rule_nonbinary',
+                                           lang_config.get('pronoun_rule', 'Address the user formally.'))
+        else:
+            pronoun_rule = lang_config.get('pronoun_rule', 'Address the user formally.')
+
+        if reading_mode == "authentic":
+            style = lang_config.get('style_authentic', lang_config.get('style_gentle'))
+        else:
+            style = lang_config.get('style_gentle')
+
+        context_str = format_bazi_context(bazi_json)
+        previous_chapters = req_data.get('previous_chapters', []) or []
+        previous_context = format_previous_chapters_context(previous_chapters)
+
+        base_system_prompt = f"""
+You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会), "Yuan Hai Zi Ping" (渊海子平), and "Di Tian Sui" (滴天髓). You are writing one chapter of a dedicated {ANNUAL_YEAR_GANZHI} {ANNUAL_YEAR} Year-Ahead report for a paying client.
+
+## CRITICAL FORMATTING RULES - MUST FOLLOW
+
+**ABSOLUTELY FORBIDDEN in your response 绝对禁止使用:**
+- Horizontal divider lines: --- or ___ or *** or ===
+- Setext-style headers (text with === or --- underneath)
+- Triple or more consecutive blank lines
+
+**MANDATORY formatting 必须使用的格式:**
+- Use ATX-style headers ONLY: # H1, ## H2, ### H3, #### H4
+- Use single blank lines between sections
+- Use **bold** for emphasis
+- Use bullet lists: - or * or 1. 2. 3.
+
+This rule is NON-NEGOTIABLE. Violations will break the PDF rendering.
+
+## READING MODE: {mode_config['name'].upper()} / {mode_config['name_zh']}
+
+{mode_config['interpretation_style']}
+
+{mode_config['ethics']}
+
+## CLIENT INFORMATION
+
+**Gender 性别**: {gender.upper() if gender != 'unknown' else 'UNKNOWN'}
+**Name 姓名**: {client_name}
+**Pronouns 代词**: {gender_info['pronoun']}
+
+**Gender-Specific BaZi Rules 性别专属解读规则**:
+{gender_info['bazi_rules']}
+
+## LANGUAGE & STYLE REQUIREMENTS
+
+**Language 语言**: {lang_config['instruction']}
+**Pronoun Rules 称谓规则**: {pronoun_rule}
+
+**Writing Style 写作风格**:
+{style}
+
+## CALENDAR DISCIPLINE — NON-NEGOTIABLE
+
+All month boundaries, month pillars, personal auspicious days and caution days
+are PRE-COMPUTED and provided in the task prompt. Reproduce dates exactly as
+given. NEVER invent, shift, or recalculate any calendar fact.
+"""
+
+        built = build_annual_specific_prompt(
+            section_type=section_type,
+            bazi_json=bazi_json,
+            context_str=context_str,
+            previous_context=previous_context,
+            mode=reading_mode,
+        )
+
+        print(f"Calling AI for annual section: {section_type} "
+              f"(max_tokens={built['max_tokens']})")
+        ai_result = ask_ai(base_system_prompt, built['prompt'],
+                           max_tokens=built['max_tokens'])
+
+        if ai_result and 'choices' in ai_result:
+            content = ai_result['choices'][0]['message']['content']
+            print(f"Annual section success! Content length: {len(content)}")
+            return jsonify({"content": content})
+        elif ai_result and 'error' in ai_result:
+            print(f"Annual AI Error: {ai_result}")
+            return jsonify(ai_result), 500
+        else:
+            return jsonify({"error": "AI response format invalid",
+                            "raw": str(ai_result)}), 500
+
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in generate_annual_section: {error_msg}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+
 # ================= 启动 =================
 
 if __name__ == '__main__':
