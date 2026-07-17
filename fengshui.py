@@ -158,6 +158,41 @@ FENGSHUI_SECTION_TYPES = [
     'constitution', 'directions', 'rooms', 'wearable', 'annual', 'cheatsheet',
 ]
 
+# Accent colours per favoured element (two shades) — drives the report's theme
+# colour so each reading opens in the reader's own element.
+FAV_ACCENT = {
+    'water': {'main': '#2E5A88', 'dark': '#22456A'},
+    'wood':  {'main': '#3E7C6A', 'dark': '#2F6153'},
+    'fire':  {'main': '#B3451E', 'dark': '#8F3718'},
+    'earth': {'main': '#A9812E', 'dark': '#856324'},
+    'metal': {'main': '#6E7681', 'dark': '#565D66'},
+}
+
+# Eight compass cells (Later-Heaven element per direction) used for the
+# personalised direction grid. dir label -> element.
+DIR_ELEMENT = [
+    ('SE', 'wood'), ('S', 'fire'), ('SW', 'earth'),
+    ('E', 'wood'),  ('center', 'earth'), ('W', 'metal'),
+    ('NE', 'earth'), ('N', 'water'), ('NW', 'metal'),
+]
+
+
+def direction_grid(favour_set, avoid_set):
+    """Per-direction verdict from the AI's favour/avoid element sets.
+    Returns a list the template renders as ✓宜 / ✗避 / neutral."""
+    out = []
+    for d, el in DIR_ELEMENT:
+        if d == 'center':
+            v = 'mid'
+        elif el in favour_set:
+            v = 'good'
+        elif el in avoid_set:
+            v = 'avoid'
+        else:
+            v = 'neutral'
+        out.append({'dir': d, 'el': el, 'verdict': v})
+    return out
+
 
 # ---------------------------------------------------------------------------
 # Chart-derived helpers
@@ -415,6 +450,12 @@ arguing it from strength, the resource/output/wealth/officer structure, AND the
 climate (调候) note. Make the verdict unambiguous: name the 1-2 elements this
 home should be rich in, and the 1-2 to keep sparse. Everything in later chapters
 hangs on this call, so justify it like a master, not a calculator.
+
+### MACHINE TAG — REQUIRED, LAST LINE, EXACT FORMAT
+After the prose, output ONE final line, on its own, exactly like this (English
+element keys from: wood, fire, earth, metal, water), reflecting the verdict you
+just argued. It will be removed before the reader sees it:
+[[FAVOUR]] primary=<single favoured element>; favour=<comma-separated favoured elements>; avoid=<comma-separated elements to keep sparse> [[/FAVOUR]]
 
 Tone: {tone}
 """
