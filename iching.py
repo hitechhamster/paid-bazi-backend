@@ -45,44 +45,66 @@ SECTION_TITLES = {
 # needs plenty of headroom — 1,500 produced 200-character stubs. The other products
 # in this backend sit at 7,000-30,000; these are sized to match.
 SECTION_TOKENS = {
-    'standing': 9000, 'line': 10000, 'turn': 9000, 'conduct': 9000, 'oneline': 6000,
+    'standing': 14000, 'line': 16000, 'turn': 13000, 'conduct': 13000, 'oneline': 6000,
 }
 
 # What each chapter must actually do. Kept concrete so the model has no room
 # to drift into generic horoscope prose.
 SECTION_BRIEF = {
     'standing': (
-        "Describe the situation the querent is standing in, strictly in the terms of the "
-        "PRIMARY hexagram's judgment and image. Name the hexagram by number and name once, "
-        "early. Then spend the rest of the chapter on THEIR question, not on the hexagram in "
-        "the abstract: what kind of moment is this, what forces are in play, what is the "
-        "shape of the difficulty or the opening. If the querent's question names people, a "
-        "job, a decision, a place — use those words back to them."
+        "Open by reading the hexagram as what it structurally is: one trigram sitting on "
+        "another. Name them and say what that pairing pictures — Thunder over the Lake, "
+        "Fire under Heaven — and what kind of situation that arrangement describes. Then "
+        "bring in the Judgment and the Image. Only then apply all of it to the querent's "
+        "question, at length and in their own terms: what kind of moment this is, what is "
+        "moving and what is still, where the pressure is coming from, what the shape of "
+        "the difficulty or the opening actually is. Quote the Judgment in the original "
+        "Chinese once, with the English beside it. Do not summarise the hexagram in the "
+        "abstract — every classical observation must be turned back on their situation."
     ),
     'line': (
-        "This is the heart of the reading. Work from the GOVERNING TEXT(S) listed in the fact "
-        "sheet and nothing else. Quote the governing line text once, plainly. Then say what it "
-        "requires of the querent in their situation, and what it warns against. Be specific "
-        "enough that they could act on it tomorrow. If there is a secondary text, give it a "
-        "short paragraph and make clear it is secondary."
+        "This is the heart of the reading and should be the longest chapter. Work from the "
+        "GOVERNING TEXT(S) and nothing else. Quote the governing line in the original "
+        "Chinese and in English. Then read it the way the Yi is read: say where the line "
+        "sits, whether it is in its correct place, whether it is centred, whether it has "
+        "correspondence — the fact sheet gives you all of this — and explain what that "
+        "position means for someone in the querent's situation. A yin line holding a yang "
+        "place is a person in a role they do not quite fit; a centred line is someone with "
+        "ground under them. Make that concrete for them. Then say plainly what the line "
+        "requires and what it warns against, specifically enough to act on tomorrow. If "
+        "there is a secondary text, give it its own paragraph and mark it as secondary."
     ),
     'turn': (
-        "Read the TRANSFORMED hexagram as the direction the situation moves IF the querent "
-        "acts as the governing line indicates. Frame it as tendency and consequence, never as "
-        "prophecy. Name the transformed hexagram by number and name. If there is no "
-        "transformed hexagram (no moving lines), say instead that the situation is stable for "
-        "now and describe what that stability means for their question."
+        "Read the transformed hexagram as the direction the situation moves IF the querent "
+        "acts as the governing line indicates. Name its trigrams too, and say what changes "
+        "between the two pictures — which trigram was replaced, and what that replacement "
+        "means. Quote the transformed Judgment. Frame everything as tendency and "
+        "consequence, never as prophecy. If there is no transformed hexagram, say the "
+        "situation is stable for now, explain what a hexagram with no moving lines means, "
+        "and what that stability asks of them."
     ),
     'conduct': (
-        "Three to five concrete items, each one traceable to the judgment or the governing "
-        "line — no invented advice. Split them clearly into what to do and what to avoid. "
-        "Practical and specific to the querent's question. No generic self-help."
+        "Ground this chapter in the Image (大象) of the primary hexagram — the line that "
+        "says what the superior person does in such a situation. Quote it, then derive from "
+        "it. Give four to six concrete items, each traceable to the Judgment, the Image, or "
+        "the governing line; name which one each comes from. Split clearly into what to do "
+        "and what to avoid. Practical, specific to their question, no generic self-help."
     ),
     'oneline': (
         "One or two sentences. The whole reading compressed into something the querent can "
-        "carry with them and remember a week from now. No heading, no preamble, no summary "
-        "of what was already said — just the line itself."
+        "carry and still remember a week from now. If a phrase from the governing text "
+        "carries it, use that phrase. No heading, no preamble, no summary — just the line."
     ),
+}
+
+# Roughly how long each chapter should run. The Yi rewards unhurried reading; a
+# paid reading that finishes in three paragraphs feels like a horoscope.
+SECTION_LENGTH = {
+    'standing': '600-750 words (Chinese/Japanese: 1,100-1,400 characters)',
+    'line':     '750-900 words (Chinese/Japanese: 1,400-1,700 characters)',
+    'turn':     '550-700 words (Chinese/Japanese: 1,000-1,300 characters)',
+    'conduct':  '500-650 words (Chinese/Japanese: 900-1,200 characters)',
+    'oneline':  'one or two sentences only',
 }
 
 BOUNDARY_RULES = """
@@ -102,12 +124,18 @@ BOUNDARIES — these are not stylistic preferences, they define the product:
 """.strip()
 
 
-def _fmt_text_block(t: Dict[str, str]) -> str:
+def _fmt_text_block(t: Dict[str, Any]) -> str:
     bits = [f"  - {t.get('source', 'Text')} — {t.get('hexagram', '')}"]
     if t.get('line'):
         bits.append(f"    Line: {t['line']}")
     if t.get('text'):
         bits.append(f"    Text: {t['text']}")
+    if t.get('text_zh'):
+        bits.append(f"    In the original: {t['text_zh']}")
+    pos = t.get('position')
+    if pos:
+        bits.append(f"    Position: a {'yang' if pos['yang'] else 'yin'} line in place "
+                    f"{pos['place']}; {pos['note']}")
     if t.get('meaning'):
         bits.append(f"    Traditional meaning: {t['meaning']}")
     return "\n".join(bits)
@@ -127,8 +155,18 @@ def build_cast_context(cast: Dict[str, Any], question: str) -> str:
                     if cast.get('was_thrown_for_them') else "  (cast by the querent)"))
     lines.append(f"  PRIMARY HEXAGRAM: #{p.get('number')} {p.get('name','')} "
                  f"— {p.get('english_name','')}")
+    tg = p.get('trigrams') or {}
+    if tg:
+        lines.append(f"    TRIGRAMS: {tg['composition']}")
+        lines.append(f"      upper {tg['upper']['name']} {tg['upper']['symbol']} — "
+                     f"{tg['upper']['image']}, {tg['upper']['attribute']}, {tg['upper']['family']}")
+        lines.append(f"      lower {tg['lower']['name']} {tg['lower']['symbol']} — "
+                     f"{tg['lower']['image']}, {tg['lower']['attribute']}, {tg['lower']['family']}")
     if p.get('judgement'):
         lines.append(f"    Judgment: {p['judgement']}")
+    gz = ((p.get('zh') or {}).get('zh-cn') or {}).get('gua_ci')
+    if gz:
+        lines.append(f"    Judgment in the original: {gz}")
     if p.get('judgement_meaning'):
         lines.append(f"    Judgment meaning: {p['judgement_meaning']}")
     if p.get('image'):
@@ -141,6 +179,13 @@ def build_cast_context(cast: Dict[str, Any], question: str) -> str:
         lines.append(f"  MOVING LINES: {', '.join(str(x) for x in cl)}")
         for c in cast.get('changing_line_texts') or []:
             lines.append(f"    {c.get('line','')}: {c.get('text','')}")
+            zt = (c.get('zh') or {}).get('zh-cn')
+            if zt:
+                lines.append(f"      In the original: {zt}")
+            pos = c.get('position')
+            if pos:
+                lines.append(f"      Position: a {'yang' if pos['yang'] else 'yin'} line in "
+                             f"place {pos['place']}; {pos['note']}")
             if c.get('meaning'):
                 lines.append(f"      Traditional meaning: {c['meaning']}")
     else:
@@ -174,6 +219,7 @@ def build_iching_prompt(*, section_type: str, cast: Dict[str, Any], question: st
 
     title = SECTION_TITLES[section_type].get(lang_code, SECTION_TITLES[section_type]['en'])
     brief = SECTION_BRIEF[section_type]
+    length = SECTION_LENGTH[section_type]
     facts = build_cast_context(cast, question)
 
     who = f"The querent's name is {client_name.strip()}.\n" if client_name.strip() else ""
@@ -187,6 +233,8 @@ def build_iching_prompt(*, section_type: str, cast: Dict[str, Any], question: st
 {who}{prev}
 WRITE ONE CHAPTER: "{title}"
 
+Length: {length}. Reach it through depth, never through padding or restatement.
+
 {brief}
 
 {BOUNDARY_RULES}
@@ -194,7 +242,7 @@ WRITE ONE CHAPTER: "{title}"
 FORM:
 - Write in the reading's language as configured. Do not output the chapter title —
   it is added for you.
-- Prose paragraphs. {"A short list is appropriate here." if section_type == 'conduct' else "No bullet lists."}
+- Prose paragraphs. {"A clearly split list of do / avoid is right here." if section_type == 'conduct' else "No bullet lists."}
 - No preamble, no "in this chapter", no restating these instructions.
 - Output ONLY the finished chapter. Never show your planning, drafting notes, or
   scaffolding phrases such as "Drafting the text", "Here is the chapter", or
