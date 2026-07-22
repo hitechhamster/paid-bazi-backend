@@ -1,0 +1,23 @@
+# Secrets — this repo is public. Nothing below may ever be committed.
+.env
+.env.*
+!.env.example
+*.json.key
+service-account*.json
+oauth_client.json
+sa-key.json
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

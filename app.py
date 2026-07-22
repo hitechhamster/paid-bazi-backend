@@ -3289,6 +3289,131 @@ without first stating the BaZi reason it rests on.
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
+# ================= 周易解卦 - ASK SIFU XION: HEXAGRAM READING =================
+# The cast itself (hexagram numbers, moving lines, transformed hexagram, and
+# which Zhu Xi rule governs) is computed upstream in the worker and arrives
+# here as a finished fact sheet. This endpoint only renders it into prose.
+# Chapter 1 of the reading is built deterministically by the worker and never
+# passes through the model, so the numbers on the page cannot drift.
+
+from iching import (
+    build_iching_prompt,
+    ICHING_SECTION_TYPES,
+)
+
+
+@app.route('/api/generate-iching-section', methods=['OPTIONS'])
+def iching_options_handler():
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route('/api/generate-iching-section', methods=['POST'])
+def generate_iching_section():
+    """
+    Generate one chapter of a Hexagram Reading.
+    Body: { cast, question, section_type, language, custom_language,
+            client_name, previous_chapters }
+    """
+    try:
+        print("=== I Ching section request ===")
+        req_data = request.json
+        if not req_data:
+            return jsonify({"error": "No JSON received"}), 400
+
+        cast = req_data.get('cast') or {}
+        if not cast.get('primary'):
+            return jsonify({"error": "Missing or malformed cast"}), 400
+
+        question = (req_data.get('question') or '').strip()
+        if not question:
+            return jsonify({"error": "Missing question"}), 400
+
+        section_type = req_data.get('section_type', 'standing')
+        if section_type not in ICHING_SECTION_TYPES:
+            return jsonify({"error": f"Unknown iching section type: {section_type}"}), 400
+
+        lang_code = req_data.get('language', 'en')
+        custom_lang = req_data.get('custom_language', None)
+        lang_config = get_language_config(lang_code, custom_lang)
+        client_name = (req_data.get('client_name') or '').strip()
+
+        previous_chapters = req_data.get('previous_chapters', []) or []
+        previous_context = format_previous_chapters_context(previous_chapters)
+
+        p = cast.get('primary', {})
+        print(f"Cast {cast.get('cast_code')} #{p.get('number')} {p.get('english_name')} "
+              f"| section: {section_type} | lang: {lang_code}")
+
+        base_system_prompt = f"""
+You are Sifu Xion reading the Yi Jing (I Ching) in the Zhu Xi tradition (朱熹《周易本義》)
+for one paying client, on one question, from one cast.
+
+You are a reader of the classical text, not a fortune teller. Your authority comes
+entirely from the judgment, the image and the line texts you have been given, and from
+the rule that decides which of them governs. You add nothing to the canon; you apply it.
+
+## WHAT YOU ARE HANDED
+The hexagram, the moving lines, the transformed hexagram and the governing rule have
+already been determined before this request reached you. They are facts of the cast.
+You never recompute them, question them, or write around them.
+
+## CRITICAL FORMATTING RULES - MUST FOLLOW
+
+**ABSOLUTELY FORBIDDEN 绝对禁止:**
+- Horizontal divider lines: --- or ___ or *** or ===
+- Setext-style headers (text with === or --- underneath)
+- Triple or more consecutive blank lines
+- Chapter titles or headings of any kind — titles are added for you
+
+**MANDATORY:**
+- Single blank lines between paragraphs
+- **bold** for emphasis, used sparingly
+- Bullet lists only where the chapter brief calls for them
+
+This rule is NON-NEGOTIABLE. Violations will break the PDF rendering.
+
+## LANGUAGE
+{lang_config.get('instruction', 'Write in English.')}
+{lang_config.get('pronoun_rule', 'Address the reader directly and warmly.')}
+
+## VOICE
+Plain, grounded, unhurried. You are speaking to one person about one thing that is
+weighing on them. No mysticism, no cosmic language, no flattery. Short sentences carry
+more authority here than long ones. A reader who has sat with the Yi for thirty years
+does not need to perform.
+"""
+
+        built = build_iching_prompt(
+            section_type=section_type,
+            cast=cast,
+            question=question,
+            lang_code=lang_code,
+            previous_context=previous_context,
+            client_name=client_name,
+        )
+
+        print(f"Calling AI for iching section: {section_type} "
+              f"(max_tokens={built['max_tokens']})")
+        ai_result = ask_ai(base_system_prompt, built['prompt'],
+                           max_tokens=built['max_tokens'])
+
+        if ai_result and 'choices' in ai_result:
+            content = ai_result['choices'][0]['message']['content']
+            print(f"I Ching section success! Content length: {len(content)}")
+            return jsonify({"content": content})
+        elif ai_result and 'error' in ai_result:
+            print(f"I Ching AI Error: {ai_result}")
+            return jsonify(ai_result), 500
+        else:
+            return jsonify({"error": "AI response format invalid",
+                            "raw": str(ai_result)}), 500
+
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in generate_iching_section: {error_msg}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+
 # ================= 启动 =================
 
 if __name__ == '__main__':
