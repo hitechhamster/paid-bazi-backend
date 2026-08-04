@@ -805,9 +805,13 @@ def _age_year_table(bazi_json):
     try:
         birth_date = (bazi_json.get('birthInfo') or {}).get('birthDate', '')
         birth_year = int(str(birth_date)[:4])
-        now_year = datetime.now().year
-        pairs = [f"{y}={y - birth_year}岁" for y in range(now_year - 1, now_year + 15)]
-        return ("Authoritative year=age table (周岁, birth year "
+        now = datetime.now()
+        pairs = [f"{y}={y - birth_year}岁" for y in range(now.year - 1, now.year + 15)]
+        # LLM 没有时钟：不声明当前日期,它会退回训练语料的时间感,把 2024
+        # 说成 "upcoming"。当前日期和年龄表一样,只许查表不许猜。
+        return (f"TODAY is {now:%Y-%m-%d}. Any year before {now.year} is in "
+                "the PAST — never describe it as upcoming/future. "
+                "Authoritative year=age table (周岁, birth year "
                 f"{birth_year}): " + ", ".join(pairs) + ".")
     except Exception:
         return ("(Birth year unavailable — do NOT state any age-to-year "
