@@ -46,8 +46,14 @@ DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_MODEL_ID = os.getenv("DEEPSEEK_MODEL_ID", "deepseek-v4-flash")
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 DEEPSEEK_MAX_TOKENS = int(os.getenv("DEEPSEEK_MAX_TOKENS", "65536"))
-DEEPSEEK_REASONING_EFFORT = os.getenv("DEEPSEEK_REASONING_EFFORT", "low")
-DEEPSEEK_TIMEOUT = int(os.getenv("DEEPSEEK_TIMEOUT", "300"))
+# V4 Flash 只有 low/high/max 三档（无 medium，也无 budget_tokens）。
+# 实测同一章中文：low 思考 409 token / 57s；high 思考 18378 token / 245s。
+# high 多接住了引擎已算好的字段（纳音、地势）并能识别巳酉半合这类结构，值这个钱。
+DEEPSEEK_REASONING_EFFORT = os.getenv("DEEPSEEK_REASONING_EFFORT", "high")
+# high 档单章最长实测 245s（首章无前文）；末章带 3 章前文推算 ~550s，留足余量。
+DEEPSEEK_TIMEOUT = int(os.getenv("DEEPSEEK_TIMEOUT", "900"))
+# 重试总预算：必须小于 worker 侧每章 900s，否则 worker 先断。
+DEEPSEEK_BUDGET = int(os.getenv("DEEPSEEK_BUDGET", "1500"))
 
 # ================= 多语言配置 =================
 LANGUAGE_PROMPTS = {
@@ -849,9 +855,8 @@ def _ask_deepseek(system_prompt, user_prompt):
     last_err = None
     started = time.time()
     for attempt in range(1, 4):
-        # 总预算护栏：重试不能把 worker 侧 900s 超时耗穿，超 700s 直接放弃
-        # 交给 Gemini 兜底
-        if time.time() - started > 700:
+        # 总预算护栏：重试不能把 worker 侧超时耗穿，超预算直接放弃交 Gemini 兜底
+        if time.time() - started > DEEPSEEK_BUDGET:
             last_err = f"budget exhausted after {int(time.time() - started)}s ({last_err})"
             break
         try:
