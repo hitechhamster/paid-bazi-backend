@@ -13,6 +13,7 @@ from flask_cors import CORS
 import requests
 import os
 import json
+import time
 import traceback
 from datetime import datetime, date, timedelta
 
@@ -37,6 +38,19 @@ SITE_URL = os.getenv("SITE_URL", "https://theqiflow.com")
 APP_NAME = "Bazi Pro Calculator"
 MODEL_ID = "gemini-3.1-pro-preview"
 FORECAST_MONTHS = 24  # 流年预测窗口（农历月数）
+
+# ---- 报告生成 LLM 供应商切换（默认 gemini，行为与历史版本完全一致）----
+# REPORT_LLM_PROVIDER=deepseek 时走 DeepSeek，失败自动回退 Gemini。
+REPORT_LLM_PROVIDER = os.getenv("REPORT_LLM_PROVIDER", "gemini").strip().lower()
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
+DEEPSEEK_MODEL_ID = os.getenv("DEEPSEEK_MODEL_ID", "deepseek-v4-flash")
+DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+# 推理模型的思考过程占用输出预算（实测中文章节思考可达 2.8 万 token），
+# 必须给大预算并检查 finish_reason，否则长章节会被截断。
+DEEPSEEK_MAX_TOKENS = int(os.getenv("DEEPSEEK_MAX_TOKENS", "65536"))
+# 实测 DS 偶发 10 分钟+ 长尾请求（正常一章 3-6 分钟）：超时设 600s 让慢请求
+# 尽快失败去走 Gemini 兜底，别把 worker 的 900s 预算耗在干等上。
+DEEPSEEK_TIMEOUT = int(os.getenv("DEEPSEEK_TIMEOUT", "600"))
 
 # ================= 多语言配置 =================
 LANGUAGE_PROMPTS = {
@@ -782,7 +796,91 @@ def get_language_config(lang_code, custom_lang=None):
     return LANGUAGE_PROMPTS.get(lang_code, LANGUAGE_PROMPTS["en"])
 
 
+def _age_year_table(bazi_json):
+    """预计算 年份↔周岁 对照表，杜绝 LLM 心算年龄年份产生的幻觉。
+
+    出生年从 birthInfo.birthDate（YYYY-...）提取；取不到时返回提示语，
+    规则退化为"不要主动做年龄年份换算"。
+    """
+    try:
+        birth_date = (bazi_json.get('birthInfo') or {}).get('birthDate', '')
+        birth_year = int(str(birth_date)[:4])
+        now_year = datetime.now().year
+        pairs = [f"{y}={y - birth_year}岁" for y in range(now_year - 1, now_year + 15)]
+        return ("Authoritative year=age table (周岁, birth year "
+                f"{birth_year}): " + ", ".join(pairs) + ".")
+    except Exception:
+        return ("(Birth year unavailable — do NOT state any age-to-year "
+                "conversion in the report.)")
+
+
 def ask_ai(system_prompt, user_prompt, max_tokens=16000):
+    """统一 LLM 入口：按 REPORT_LLM_PROVIDER 分发，DeepSeek 失败自动回退 Gemini。"""
+    if REPORT_LLM_PROVIDER == "deepseek" and DEEPSEEK_API_KEY:
+        result = _ask_deepseek(system_prompt, user_prompt)
+        if result and "choices" in result:
+            return result
+        print("DeepSeek failed after retries -> falling back to Gemini")
+    return _ask_gemini(system_prompt, user_prompt, max_tokens)
+
+
+def _ask_deepseek(system_prompt, user_prompt):
+    """调用 DeepSeek（OpenAI 兼容格式）。
+
+    防线（推理模型专属，缺一不可）：
+    - 空 content 重试：preview 版曾有空响应问题，正式版保留兜底
+    - finish_reason=length 重试：思考过程吃掉输出预算时章节会被截断，
+      截断的报告绝不能交付
+    """
+    payload = {
+        "model": DEEPSEEK_MODEL_ID,
+        "messages": [
+            {"role": "user", "content": system_prompt + "\n\n" + user_prompt}
+        ],
+        "temperature": 0.75,
+        "max_tokens": DEEPSEEK_MAX_TOKENS,
+    }
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    last_err = None
+    started = time.time()
+    for attempt in range(1, 4):
+        # 总预算护栏：重试不能把 worker 侧 900s 超时耗穿，超 700s 直接放弃
+        # 交给 Gemini 兜底
+        if time.time() - started > 700:
+            last_err = f"budget exhausted after {int(time.time() - started)}s ({last_err})"
+            break
+        try:
+            print(f"Calling DeepSeek {DEEPSEEK_MODEL_ID} (attempt {attempt})")
+            response = requests.post(DEEPSEEK_URL, json=payload,
+                                     headers=headers, timeout=DEEPSEEK_TIMEOUT)
+            response.raise_for_status()
+            result = response.json()
+            choice = result["choices"][0]
+            content = (choice.get("message") or {}).get("content") or ""
+            finish_reason = choice.get("finish_reason", "")
+            usage = result.get("usage", {})
+            print(f"DeepSeek ok: finish={finish_reason}, "
+                  f"out={usage.get('completion_tokens')} "
+                  f"(reasoning={ (usage.get('completion_tokens_details') or {}).get('reasoning_tokens') })")
+            if not content.strip():
+                last_err = "empty content"
+                print(f"DeepSeek attempt {attempt}: empty content, retrying")
+                continue
+            if finish_reason == "length":
+                last_err = "truncated (finish_reason=length)"
+                print(f"DeepSeek attempt {attempt}: output truncated, retrying")
+                continue
+            return {"choices": [{"message": {"content": content}}]}
+        except Exception as e:
+            last_err = str(e)
+            print(f"DeepSeek attempt {attempt} error: {e}")
+    return {"error": f"DeepSeek failed: {last_err}"}
+
+
+def _ask_gemini(system_prompt, user_prompt, max_tokens=16000):
     """调用 Gemini API"""
     if not GOOGLE_GEMINI_API_KEY:
         print("ERROR: GOOGLE_GEMINI_API_KEY is missing!")
@@ -807,6 +905,11 @@ def ask_ai(system_prompt, user_prompt, max_tokens=16000):
         response.raise_for_status()
         result = response.json()
         content = result["candidates"][0]["content"]["parts"][0]["text"]
+        # 隐式缓存命中监控：cachedContentTokenCount>0 说明 90% 输入折扣在生效
+        um = result.get("usageMetadata", {})
+        print(f"Gemini usage: prompt={um.get('promptTokenCount')}, "
+              f"cached={um.get('cachedContentTokenCount', 0)}, "
+              f"out={um.get('candidatesTokenCount')}")
         return {"choices": [{"message": {"content": content}}]}
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP Error: {http_err}")
@@ -1306,6 +1409,14 @@ You have access to COMPLETE chart data including:
 - Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
 - Include Chinese terms with translations for authenticity
 - Do NOT use any horizontal lines (---, ***, ===, ___) anywhere in your response
+
+## QUALITY RULES — HIGHEST PRIORITY 最高优先级质量规则
+
+1. **Second person only 第二人称铁律**: Address the client DIRECTLY in second person throughout ("you"/"你"), like a master explaining the chart face to face. NEVER narrate the client in third person ("he", "she", "命主", or the client's name in narration). The client's name may appear ONLY in the opening greeting.
+2. **Length discipline 篇幅纪律**: Keep this chapter between 3000 and 4500 words (Chinese: 3500-5000 characters). Exceeding the ceiling is a violation. Spend the budget on the sharpest insights instead of diluting with completeness.
+3. **Day Master strength is engine-decided 日主强弱以引擎为准**: The chart engine has determined the Day Master strength = **{str(bazi_json.get('dayMasterStrength', 'unknown')).upper()}**. ALL of your conclusions (Useful God, favorable/unfavorable elements, industries, annual luck) MUST be consistent with this verdict. You may explain WHY it holds, but you may NOT overturn it.
+4. **Structural labels follow the report language 结构标签跟报告语言走**: Any structural labels shown in the task template (e.g. Month/Theme/Opportunity/Caution/Best for/Avoid, Part/Chapter headings) are format placeholders only — translate every label into the report language. Keep GanZhi (干支), solar terms and other BaZi terms in their original Chinese form with translations.
+5. **Age-year conversions: LOOK UP, never calculate 年龄年份只查表不心算**: {_age_year_table(bazi_json)} Whenever you mention an age together with a calendar year (e.g. "after age 35, i.e. after YYYY"), the pair MUST match this table exactly. Never do the arithmetic yourself.
 
 {previous_context}
 """
@@ -2716,6 +2827,8 @@ For EACH of the 24 months, write a concise reading focused on the COUPLE:
 - **Opportunity for connection**: specific way to strengthen the bond
 - **Watch out for**: specific friction risk
 - **Best activity**: what's favored this month (date night, big talk, travel, etc.)
+
+IMPORTANT: The labels above ("Month", "Couple energy", "Opportunity for connection", "Watch out for", "Best activity") are format placeholders in English — translate every label into the report language. Keep GanZhi (干支) terms in Chinese.
 
 For months in the **Shared Resonance** list, explicitly flag that both partners are affected — these are the highest-leverage months (good or bad).
 
