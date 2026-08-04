@@ -2297,6 +2297,13 @@ NEVER use generic terms like "Partner A", "Partner B", "the man", "the woman".
 - Include Chinese terms with translations
 - Do NOT use any horizontal lines
 
+## QUALITY RULES — HIGHEST PRIORITY 最高优先级质量规则
+
+1. **Use their real names 用真名**: Always refer to the partners as "{name_a}" and "{name_b}" — never use "Partner A / Partner B", "命主", "the man / the woman", or other generic labels. When addressing them as a couple, say "you two" / "你们".
+2. **Day Master strength is engine-decided 日主强弱以引擎为准**: {name_a}'s Day Master strength = **{str(bazi_a.get('dayMasterStrength', 'unknown')).upper()}**; {name_b}'s Day Master strength = **{str(bazi_b.get('dayMasterStrength', 'unknown')).upper()}**. ALL compatibility conclusions MUST be consistent with these verdicts. You may explain WHY, but you may NOT overturn them.
+3. **Structural labels follow the report language 结构标签跟报告语言走**: Any structural labels in the template (Month/Theme/Opportunity/Caution etc.) are placeholders — translate them into the report language. Keep GanZhi and BaZi terms in Chinese with translations.
+4. **Age-year conversions: LOOK UP, never calculate 年龄年份只查表不心算**: {_age_year_table(bazi_a)} | {_age_year_table(bazi_b)} Whenever you mention an age together with a calendar year, the pair MUST match these tables. Never do the arithmetic yourself.
+
 {previous_context}
 """
 
@@ -3228,6 +3235,13 @@ pre-computed date lists (and the Chapter 6 pocket card) ONLY. Never emit
 fragment-style labeled bullets for analysis. And never give a recommendation
 without first stating the BaZi reason (stem, branch interaction, Ten God, or
 element) it rests on — reason first, advice second, every time.
+
+## QUALITY RULES — HIGHEST PRIORITY 最高优先级质量规则
+
+1. **Second person only 第二人称铁律**: Address the client DIRECTLY in second person throughout ("you"/"你"), like a master explaining the chart face to face. NEVER use third person ("he", "she", "命主") or the client's name in narration — name only in the opening greeting.
+2. **Day Master strength is engine-decided 日主强弱以引擎为准**: The chart engine has determined the Day Master strength = **{str(bazi_json.get('dayMasterStrength', 'unknown')).upper()}**. ALL conclusions MUST be consistent with this verdict. You may explain WHY, but you may NOT overturn it.
+3. **Structural labels follow the report language 结构标签跟报告语言走**: Any structural labels in the template are placeholders — translate them into the report language. Keep GanZhi and BaZi terms in Chinese with translations.
+4. **Age-year conversions: LOOK UP, never calculate 年龄年份只查表不心算**: {_age_year_table(bazi_json)} Whenever you mention an age together with a calendar year, the pair MUST match this table exactly. Never do the arithmetic yourself.
 """
 
         built = build_annual_specific_prompt(
@@ -3373,6 +3387,13 @@ the task prompt. Reproduce them faithfully. Reason FROM the chart to the space.
 NEVER issue a house-fixed verdict (no "your north sector is auspicious", no
 flying-star / 八宅 the house) — you read the PERSON. And never give a placement
 without first stating the BaZi reason it rests on.
+
+## QUALITY RULES — HIGHEST PRIORITY 最高优先级质量规则
+
+1. **Second person only 第二人称铁律**: Address the client DIRECTLY in second person throughout ("you"/"你"). NEVER use third person ("he", "she", "命主") or the client's name in narration.
+2. **Day Master strength is engine-decided 日主强弱以引擎为准**: The chart engine has determined the Day Master strength = **{str(bazi_json.get('dayMasterStrength', 'unknown')).upper()}**. ALL element remedy conclusions MUST be consistent with this verdict.
+3. **Structural labels follow the report language 结构标签跟报告语言走**: Any structural labels in the template are placeholders — translate them into the report language. Keep GanZhi and BaZi terms in Chinese with translations.
+4. **Age-year conversions: LOOK UP, never calculate 年龄年份只查表不心算**: {_age_year_table(bazi_json)} Whenever you mention an age together with a calendar year, the pair MUST match this table exactly. Never do the arithmetic yourself.
 """
 
         built = build_fengshui_prompt(
@@ -3498,6 +3519,9 @@ Plain, grounded, unhurried. You are speaking to one person about one thing that 
 weighing on them. No mysticism, no cosmic language, no flattery. Short sentences carry
 more authority here than long ones. A reader who has sat with the Yi for thirty years
 does not need to perform.
+
+## TIME ANCHOR 时间锚点
+TODAY is {datetime.now():%Y-%m-%d}. Any year before {datetime.now().year} is in the PAST — never describe it as upcoming or future. Structural labels in the template are placeholders — translate them into the report language.
 """
 
         built = build_iching_prompt(
