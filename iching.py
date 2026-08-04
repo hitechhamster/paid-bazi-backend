@@ -99,11 +99,13 @@ SECTION_BRIEF = {
 
 # Roughly how long each chapter should run. The Yi rewards unhurried reading; a
 # paid reading that finishes in three paragraphs feels like a horoscope.
+_NO_CEILING = (' and no upper limit — go deeper rather than stopping short, but'
+               ' never pad, repeat, or invent content beyond the fact sheet')
 SECTION_LENGTH = {
-    'standing': '600-750 words (Chinese/Japanese: 1,100-1,400 characters)',
-    'line':     '750-900 words (Chinese/Japanese: 1,400-1,700 characters)',
-    'turn':     '550-700 words (Chinese/Japanese: 1,000-1,300 characters)',
-    'conduct':  '500-650 words (Chinese/Japanese: 900-1,200 characters)',
+    'standing': 'at least 750 words (Chinese/Japanese: 1,400 characters)' + _NO_CEILING,
+    'line':     'at least 900 words (Chinese/Japanese: 1,700 characters)' + _NO_CEILING,
+    'turn':     'at least 700 words (Chinese/Japanese: 1,300 characters)' + _NO_CEILING,
+    'conduct':  'at least 650 words (Chinese/Japanese: 1,200 characters)' + _NO_CEILING,
     'oneline':  'one or two sentences only',
 }
 

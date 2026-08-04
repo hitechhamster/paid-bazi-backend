@@ -375,8 +375,9 @@ must come from the tables provided below.
 ### COMPLETE CHART DATA:
 {context_str}
 
-### WHAT THIS CHAPTER MUST COVER (in flowing prose, ~1,800-2,500 words of
-report language; use ## subheadings to breathe, but the body is paragraphs):
+### WHAT THIS CHAPTER MUST COVER (in flowing prose, at least 2,500 words of
+report language and no upper limit — go deeper rather than stopping short, but
+never pad or repeat; use ## subheadings to breathe, but the body is paragraphs):
 
 Open the year like a master unrolling a scroll: what kind of year 丁未 is in
 itself (丁 fire riding on 未 earth — the imagery, the season, the pace), then
@@ -412,8 +413,9 @@ Tone: {tone}
 ### COMPLETE CHART DATA:
 {context_str}
 
-### WHAT THIS CHAPTER MUST COVER (flowing prose, ~1,800-2,500 words of report
-language; ## subheadings allowed, body is paragraphs):
+### WHAT THIS CHAPTER MUST COVER (flowing prose, at least 2,500 words of report
+language and no upper limit — go deeper rather than stopping short, but never
+pad or repeat; ## subheadings allowed, body is paragraphs):
 
 Begin from the mechanism: which Ten Gods govern career and wealth for THIS
 day master, and what 丁未 does to them this year — then let every judgment
@@ -448,8 +450,9 @@ Tone: {tone}
 ### COMPLETE CHART DATA:
 {context_str}
 
-### WHAT THIS CHAPTER MUST COVER (flowing prose, ~1,500-2,200 words of report
-language; ## subheadings allowed, body is paragraphs):
+### WHAT THIS CHAPTER MUST COVER (flowing prose, at least 2,200 words of report
+language and no upper limit — go deeper rather than stopping short, but never
+pad or repeat; ## subheadings allowed, body is paragraphs):
 
 Start from the spouse palace and the romance stars of THIS chart: does 丁未
 touch them — through the year stem's Ten God, through the 未 branch's
@@ -484,8 +487,9 @@ Tone: {tone}
 ### COMPLETE CHART DATA:
 {context_str}
 
-### WHAT THIS CHAPTER MUST COVER (flowing prose, ~1,500-2,000 words of report
-language; ## subheadings allowed, body is paragraphs):
+### WHAT THIS CHAPTER MUST COVER (flowing prose, at least 2,000 words of report
+language and no upper limit — go deeper rather than stopping short, but never
+pad or repeat; ## subheadings allowed, body is paragraphs):
 
 Reason from the five elements: 丁未 adds fire and dry earth to this chart —
 which of the client's elements does that parch, which organ systems (in the

@@ -1300,6 +1300,14 @@ This client has selected NON-BINARY gender. You MUST follow these rules STRICTLY
 This is NON-NEGOTIABLE. Violations will make the report inappropriate for this client.
 """
 
+        # 篇幅下限按章分配：流年章有 24 个月要逐月写，天然需要更多篇幅。
+        # 只设下限不设上限——上限会让模型（尤其 reasoning_effort=high 时它
+        # 真的会遵守）把报告压到远低于付费产品应有的分量。
+        if section_type == 'forecast':
+            _len_floor = "8000 words (Chinese: 12000 characters)"
+        else:
+            _len_floor = "3500 words (Chinese: 5500 characters)"
+
         # ================= 核心 System Prompt =================
         base_system_prompt = f"""
 You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge of classical texts like "San Ming Tong Hui" (三命通会), "Yuan Hai Zi Ping" (渊海子平), and "Di Tian Sui" (滴天髓).
@@ -1413,14 +1421,14 @@ You have access to COMPLETE chart data including:
 - END your response EXACTLY with: "{current_closing}"
 - Do NOT add greetings like "Welcome", "Hello", or "As we discussed"
 - Each chapter should read as a coherent piece. If PREVIOUS CHAPTERS context is provided below, treat their established facts as authoritative and do not contradict them. Otherwise, treat this as a standalone chapter.
-- Write 3000+ words with proper Markdown formatting (headers, bullets, bold)
+- Use proper Markdown formatting (headers, bullets, bold); see the Length rule below for how long
 - Include Chinese terms with translations for authenticity
 - Do NOT use any horizontal lines (---, ***, ===, ___) anywhere in your response
 
 ## QUALITY RULES — HIGHEST PRIORITY 最高优先级质量规则
 
 1. **Second person only 第二人称铁律**: Address the client DIRECTLY in second person throughout ("you"/"你"), like a master explaining the chart face to face. NEVER narrate the client in third person ("he", "she", "命主", or the client's name in narration). The client's name may appear ONLY in the opening greeting.
-2. **Length discipline 篇幅纪律**: Keep this chapter between 3000 and 4500 words (Chinese: 3500-5000 characters). Exceeding the ceiling is a violation. Spend the budget on the sharpest insights instead of diluting with completeness.
+2. **Length 篇幅**: Write at least {_len_floor}. There is NO upper limit — a paid reading is expected to be substantial, and running long is never a fault. But length must be EARNED with substance, never with padding: do not restate a point you have already made, do not recycle the same Ten God or the same metaphor across sections, and do not write filler transitions. Earn every extra paragraph by examining something new in THIS chart — a pillar you have not yet read, its 纳音, its 十二长生 stage, a 刑冲合害 between specific branches, 空亡, 胎元/命宫/身宫, a hidden stem and what it implies, 调候 needs, or a concrete timing window. Depth and length together, not one at the cost of the other.
 3. **Day Master strength is engine-decided 日主强弱以引擎为准**: The chart engine has determined the Day Master strength = **{str(bazi_json.get('dayMasterStrength', 'unknown')).upper()}**. ALL of your conclusions (Useful God, favorable/unfavorable elements, industries, annual luck) MUST be consistent with this verdict. You may explain WHY it holds, but you may NOT overturn it.
 4. **Structural labels follow the report language 结构标签跟报告语言走**: Any structural labels shown in the task template (e.g. Month/Theme/Opportunity/Caution/Best for/Avoid, Part/Chapter headings) are format placeholders only — translate every label into the report language. Keep GanZhi (干支), solar terms and other BaZi terms in their original Chinese form with translations.
 5. **Age-year conversions: LOOK UP, never calculate 年龄年份只查表不心算**: {_age_year_table(bazi_json)} Whenever you mention an age together with a calendar year (e.g. "after age 35, i.e. after YYYY"), the pair MUST match this table exactly. Never do the arithmetic yourself.
@@ -2296,16 +2304,17 @@ NEVER use generic terms like "Partner A", "Partner B", "the man", "the woman".
 - END your response EXACTLY with: "{current_closing}"
 - Do NOT add greetings or preambles
 - Each chapter should read as a coherent piece. If PREVIOUS CHAPTERS context is provided below, treat their established facts about this couple as authoritative and do not contradict them.
-- Write 2500+ words with proper Markdown formatting
+- Use proper Markdown formatting; see the Length rule below for how long
 - Include Chinese terms with translations
 - Do NOT use any horizontal lines
 
 ## QUALITY RULES — HIGHEST PRIORITY 最高优先级质量规则
 
-1. **Use their real names 用真名**: Always refer to the partners as "{name_a}" and "{name_b}" — never use "Partner A / Partner B", "命主", "the man / the woman", or other generic labels. When addressing them as a couple, say "you two" / "你们".
-2. **Day Master strength is engine-decided 日主强弱以引擎为准**: {name_a}'s Day Master strength = **{str(bazi_a.get('dayMasterStrength', 'unknown')).upper()}**; {name_b}'s Day Master strength = **{str(bazi_b.get('dayMasterStrength', 'unknown')).upper()}**. ALL compatibility conclusions MUST be consistent with these verdicts. You may explain WHY, but you may NOT overturn them.
-3. **Structural labels follow the report language 结构标签跟报告语言走**: Any structural labels in the template (Month/Theme/Opportunity/Caution etc.) are placeholders — translate them into the report language. Keep GanZhi and BaZi terms in Chinese with translations.
-4. **Age-year conversions: LOOK UP, never calculate 年龄年份只查表不心算**: {_age_year_table(bazi_a)} | {_age_year_table(bazi_b)} Whenever you mention an age together with a calendar year, the pair MUST match these tables. Never do the arithmetic yourself.
+1. **Length 篇幅**: Write at least 3500 words (Chinese: 5500 characters). There is NO upper limit — a paid reading is expected to be substantial, and running long is never a fault. But length must be EARNED with substance, never with padding: do not restate a point you have already made, do not recycle the same Ten God or the same metaphor across sections, and do not write filler transitions. Earn every extra paragraph by examining something new in THESE TWO charts — a pillar you have not yet read, its 纳音, its 十二长生 stage, a 刑冲合害 between their branches, 空亡, 胎元/命宫/身宫, a hidden stem and what it implies, how one partner's 用神 sits in the other's chart, or a concrete timing window. Depth and length together, not one at the cost of the other.
+2. **Use their real names 用真名**: Always refer to the partners as "{name_a}" and "{name_b}" — never use "Partner A / Partner B", "命主", "the man / the woman", or other generic labels. When addressing them as a couple, say "you two" / "你们".
+3. **Day Master strength is engine-decided 日主强弱以引擎为准**: {name_a}'s Day Master strength = **{str(bazi_a.get('dayMasterStrength', 'unknown')).upper()}**; {name_b}'s Day Master strength = **{str(bazi_b.get('dayMasterStrength', 'unknown')).upper()}**. ALL compatibility conclusions MUST be consistent with these verdicts. You may explain WHY, but you may NOT overturn them.
+4. **Structural labels follow the report language 结构标签跟报告语言走**: Any structural labels in the template (Month/Theme/Opportunity/Caution etc.) are placeholders — translate them into the report language. Keep GanZhi and BaZi terms in Chinese with translations.
+5. **Age-year conversions: LOOK UP, never calculate 年龄年份只查表不心算**: {_age_year_table(bazi_a)} | {_age_year_table(bazi_b)} Whenever you mention an age together with a calendar year, the pair MUST match these tables. Never do the arithmetic yourself.
 
 {previous_context}
 """

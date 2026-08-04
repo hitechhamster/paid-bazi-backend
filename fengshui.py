@@ -442,7 +442,7 @@ THIS birth chart, never from a house survey. No compass reading, no floor plan.
 ### COMPLETE CHART DATA:
 {context_str}
 
-Write ~1,500-2,000 words of flowing {('中文' if zh else 'English')} prose. Establish
+Write at least 2,000 words of flowing {('中文' if zh else 'English')} prose and no upper limit — go deeper rather than stopping short, but never pad or repeat. Establish
 the whole prescription's foundation: read this chart's five-element balance and
 the day master [{EL_EN.get(dm_el,'?')}]; deliver the FAVOUR VERDICT — which
 elements this person should surround themselves with and which to minimise —
@@ -470,7 +470,7 @@ Tone: {tone}
 ### COMPLETE CHART DATA:
 {context_str}
 
-Write ~1,500-2,000 words of prose. Translate the favour verdict into directions
+Write at least 2,000 words of prose and no upper limit — go deeper rather than stopping short, but never pad or repeat. Translate the favour verdict into directions
 the reader can actually use WITHOUT a compass — phone-compass-level guidance:
 which directions to face and dwell toward (the ones carrying the favoured
 elements), which to de-emphasise (the avoided elements), and the zodiac-clash
@@ -492,7 +492,7 @@ Tone: {tone}
 ### COMPLETE CHART DATA:
 {context_str}
 
-Write ~1,800-2,400 words of prose. Go room by room — Bedroom, Living room,
+Write at least 2,400 words of prose and no upper limit — go deeper rather than stopping short, but never pad or repeat. Go room by room — Bedroom, Living room,
 Workspace/Study, Entryway/Kitchen as relevant — and for EACH prescribe, from
 this chart's favoured/avoided elements: colours to use and avoid, materials
 (wood/metal/water-feature/ceramic/textile), lighting warmth, plants vs metal,
@@ -513,7 +513,7 @@ Tone: {tone}
 ### COMPLETE CHART DATA:
 {context_str}
 
-Write ~1,200-1,600 words of prose. The feng shui the reader carries on the body,
+Write at least 1,600 words of prose and no upper limit — go deeper rather than stopping short, but never pad or repeat. The feng shui the reader carries on the body,
 all from the favoured elements: clothing and accessory colours; the materials
 and gemstones/crystals that carry their favoured element (this is where a
 favoured-element bracelet or stone naturally belongs); wallet colour; favourable
@@ -535,7 +535,7 @@ Tone: {tone}
 ### COMPLETE CHART DATA:
 {context_str}
 
-Write ~1,300-1,700 words of prose covering the window of {yrs[0]}-{yrs[1]}
+Write at least 1,700 words of prose and no upper limit — go deeper rather than stopping short, but never pad or repeat. Cover the window of {yrs[0]}-{yrs[1]}
 (a rolling ~two-year horizon from today). Two threads, woven together:
 
 1. **Directions to keep calm** — layer each year's affliction directions (Tai
