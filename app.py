@@ -45,12 +45,9 @@ REPORT_LLM_PROVIDER = os.getenv("REPORT_LLM_PROVIDER", "gemini").strip().lower()
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_MODEL_ID = os.getenv("DEEPSEEK_MODEL_ID", "deepseek-v4-flash")
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
-# 推理模型的思考过程占用输出预算（实测中文章节思考可达 2.8 万 token），
-# 必须给大预算并检查 finish_reason，否则长章节会被截断。
 DEEPSEEK_MAX_TOKENS = int(os.getenv("DEEPSEEK_MAX_TOKENS", "65536"))
-# 实测 DS 偶发 10 分钟+ 长尾请求（正常一章 3-6 分钟）：超时设 600s 让慢请求
-# 尽快失败去走 Gemini 兜底，别把 worker 的 900s 预算耗在干等上。
-DEEPSEEK_TIMEOUT = int(os.getenv("DEEPSEEK_TIMEOUT", "600"))
+DEEPSEEK_REASONING_EFFORT = os.getenv("DEEPSEEK_REASONING_EFFORT", "low")
+DEEPSEEK_TIMEOUT = int(os.getenv("DEEPSEEK_TIMEOUT", "300"))
 
 # ================= 多语言配置 =================
 LANGUAGE_PROMPTS = {
@@ -841,8 +838,9 @@ def _ask_deepseek(system_prompt, user_prompt):
         "messages": [
             {"role": "user", "content": system_prompt + "\n\n" + user_prompt}
         ],
-        "temperature": 0.75,
         "max_tokens": DEEPSEEK_MAX_TOKENS,
+        "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
+        "thinking": {"type": "enabled"},
     }
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
