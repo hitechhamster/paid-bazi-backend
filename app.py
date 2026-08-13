@@ -3567,6 +3567,93 @@ TODAY is {datetime.now():%Y-%m-%d}. Any year before {datetime.now().year} is in 
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
+# ================= 紫微斗数详批 =================
+# ⚠️ 导入模块而不是 `from ziwei_prompt import generate_section` ——
+#    本文件 :1215 已经有一个叫 generate_section 的视图函数,名字会撞。
+import ziwei_prompt as zwp
+
+
+@app.route('/api/generate-ziwei-section', methods=['OPTIONS'])
+def ziwei_options_handler():
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route('/api/generate-ziwei-section', methods=['POST'])
+def generate_ziwei_section():
+    """紫微详批一段。worker 逐段调用:verdict → A → B → C → D → E。
+
+    Body: { section_type, birth: {date,time,longitude,gender,place,timezone},
+            language, custom_language, verdict }
+
+    section_type='verdict' 返回 {verdict, chart, verified};
+    其余返回 {content, residual, verified}。
+
+    **命盘每次现算,不接受 worker 传盘** —— 确定性、约 50ms,而且保证校对器
+    看到的盘和喂给模型的盘是同一张。盘结构一旦经 HTTP 往返漂移,校对就失灵。
+    """
+    try:
+        print("=== Zi Wei section request ===")
+        req_data = request.json
+        if not req_data:
+            return jsonify({"error": "No JSON received"}), 400
+
+        section_type = req_data.get('section_type', 'verdict')
+        if section_type not in zwp.ZIWEI_SECTION_TYPES:
+            return jsonify({"error": f"Unknown ziwei section type: {section_type}"}), 400
+
+        birth = req_data.get('birth') or {}
+        for k in ('date', 'time', 'longitude'):
+            if birth.get(k) in (None, ''):
+                return jsonify({"error": f"Missing birth.{k}"}), 400
+
+        # 紫微只有中/英两套事实块与章节规格。客户选了西/德/法等语言时,
+        # 用英文脚手架 + 语言指令改写 —— 和八字/风水/2027 三条线同一个做法。
+        lang_code = str(req_data.get('language') or 'en')
+        custom_lang = req_data.get('custom_language')
+        if lang_code.lower().startswith('zh'):
+            base_lang, lang_instruction = 'zh', ''
+        elif lang_code.lower() == 'en':
+            base_lang, lang_instruction = 'en', ''
+        else:
+            cfg = get_language_config(lang_code, custom_lang)
+            base_lang = 'en'
+            lang_instruction = (
+                "## LANGUAGE — OVERRIDES EVERY STYLE RULE ABOVE\n"
+                f"{cfg.get('instruction', '')}\n{cfg.get('pronoun_rule', '')}\n"
+                "The chart data above is labelled in English for precision. "
+                "Star, palace and transformation names must be rendered in the "
+                "target language on first use with the English term in brackets. "
+                "Never leave a whole sentence in English."
+            )
+
+        c = zwp.chart_for(birth, base_lang)
+        verified = zwp.verifiable(base_lang) and not lang_instruction
+        print(f"Ziwei chart: ming={c['ming']} shen={c['shen']} {c['ju_name']} "
+              f"| section={section_type} | lang={lang_code} (base={base_lang}) "
+              f"| verified={verified}")
+
+        if section_type == 'verdict':
+            v = zwp.build_verdict(c, base_lang, lang_instruction)
+            return jsonify({"verdict": v,
+                            "chart": zwp.chart_payload(c, base_lang),
+                            "verified": verified})
+
+        content, residual = zwp.generate_section(
+            section_type, c, base_lang,
+            verdict=req_data.get('verdict') or '',
+            lang_instruction=lang_instruction,
+        )
+        print(f"Ziwei section {section_type} ok: {len(content)} chars, "
+              f"{len(residual)} soft residual")
+        return jsonify({"content": content, "residual": residual,
+                        "verified": verified})
+
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL ERROR in generate_ziwei_section: {error_msg}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+
 # ================= 启动 =================
 
 if __name__ == '__main__':
