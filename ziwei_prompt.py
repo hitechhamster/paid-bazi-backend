@@ -110,7 +110,7 @@ def facts(c, lang='zh'):
         a, b = c['daxian'][i]
         L.append(f'  {nm:4}{c["gong_gan"][i]}{ZHI[i]}　主星:{"　".join(main)}'
                  + (f'　辅煞:{" ".join(oth)}' if oth else '')
-                 + (f'　★{" ".join(hua)}' if hua else '')
+                 + (f'　生年四化:{" ".join(hua)}' if hua else '')
                  + f'　十二神:{c["changsheng"][i]}　大限 {a}-{b} 岁')
     sf = san_fang(c, c['ming'])
     L += ['', f'【命宫三方四正】{ZHI[c["ming"]]}(命) · {ZHI[sf[1]]}({inv_name(inv,sf[1])},对宫) · '
@@ -139,7 +139,7 @@ def facts(c, lang='zh'):
           '  成立:' + ('、'.join(ok_terms) or '无'),
           '  其余一切格局名(君臣庆会、日月并明、阳梁昌禄等)一律不得出现。']
     if c['y_gan'] in HUA_DISPUTED:
-        L.append('  ⚠️ 该年干的化科各派有分歧,凡涉及化科的判断必须注明这一点')
+        L.append('  注意:该年干的化科各派有分歧,凡涉及化科的判断必须注明这一点')
     if c.get('_extra'):
         L += ['', c['_extra']]
     return '\n'.join(L)
@@ -172,7 +172,7 @@ def _facts_en(c, inv, P, S_, H, G):
         a, b = c['daxian'][i]
         ln.append(f'  {P(nm):18}{c["gong_gan"][i]}{ZHI[i]}　majors: {", ".join(main)}'
                   + (f'　others: {", ".join(oth)}' if oth else '')
-                  + (f'　★{"; ".join(hu)}' if hu else '')
+                  + (f'　birth-hua: {"; ".join(hu)}' if hu else '')
                   + f'　limit {a}-{b}')
     sf = san_fang(c, c['ming'])
     ln += ['', T('en', 'sanfang') + ': ' + ' · '.join(
@@ -254,16 +254,16 @@ def year_scan_facts(c, start=2026, n=15):
         if age in dx_start:
             di = dx_start[age]; dg = c['gong_gan'][di]
             dlu, _, _, dji = SI_HUA[dg]
-            tags.append(f'⚡换大限:自此十年走{c["palace"][di]}限'
+            tags.append(f'【换限】自此十年走{c["palace"][di]}限'
                         f'(宫干{dg},限禄={dlu} 限忌={dji})')
         if ji == ji0_star:
-            tags.append('⚠️双忌叠加(流年忌与生年忌同星)')
+            tags.append('【双忌】流年忌与生年忌同星')
         if '红鸾' in cell:
-            tags.append('★红鸾入流年命宫(婚恋窗口)')
+            tags.append('【婚恋窗口】红鸾入流年命宫')
         if '天喜' in cell:
-            tags.append('★天喜入流年命宫(婚恋窗口)')
+            tags.append('【婚恋窗口】天喜入流年命宫')
         if _star_palace(c, lu) == pos:
-            tags.append('☆流年禄入命')
+            tags.append('【禄入命】流年禄入命')
         if pos == c['shen']:
             tags.append('流年命宫踩身宫')
         main = '·'.join(x for x in cell if x in MAIN14) or '无主星'
@@ -287,7 +287,7 @@ def hour_sens_facts(c, y, mo, d, h, mi, lng, gender, place, tz=None):
         return ('【时辰稳定性】出生时间前后各挪一小时,命宫都不动 —— '
                 '这张盘对时辰误差不敏感,记错半小时也不影响结论。')
     det = ';'.join(f'{"早" if o < 0 else "晚"}一小时命宫变为{gz}' for o, gz in moved)
-    return (f'【时辰稳定性】⚠️ 这张盘对时辰敏感:{det}。'
+    return (f'【时辰稳定性】这张盘对时辰敏感:{det}。'
             '本报告按所报时刻(经真太阳时校正)排盘;若出生时间有出入,以上结论需重排。')
 
 
@@ -531,6 +531,8 @@ STYLE = """
 1. 只能用【事实】里给出的数据。盘上没有的星、没有的宫位关系,一个字都不许编。
 2. 禁止使用庙旺利陷(庙/旺/利/平/陷)。本引擎不提供亮度,任何依赖亮度的判断不写。
 3. **禁止出现百分比、基准率、"罕见""款型""区分度"这类统计话术。**
+3b. **全篇禁止 emoji 与装饰符号**(⚡★☆⚠️✅❌之类一个都不要)。年份的分量用
+   【换限】【婚恋窗口】【双忌】这类文字标记,与【事实】里给出的写法一致。
 4. 无主星的宫一律以【事实】里标注的"借对宫某宫:某星"为准,**禁止自行推算借哪一宫**;
    分析时用一句话说明借宫规矩。
 7. **强信号也说倾向**:禁写"一定""必然""一步到位";重大年份写"最该发力/最需收着"。
@@ -627,15 +629,15 @@ CHAPTERS = [
 ## 未来十五年,重点看这几年
 把【未来15年逐年扫描】做成一张表:年份 / 干支 / 虚岁 / 流年命宫 / 一句话提示。
 表要全 15 年,但**表后只挑 4-6 个真正值得圈出来的年份逐个展开**。
-展开顺序**严格按时间先后**,每段开头保留 ⚡/★/⚠️ 分量标记:
-- 带⚡换大限标记的年份写最重:讲清从哪一幕换到哪一幕、限禄限忌落哪、该做的准备;
+展开顺序**严格按时间先后**,每段开头保留【换限】/【婚恋窗口】/【双忌】分量标记:
+- 带【换限】标记的年份写最重:讲清从哪一幕换到哪一幕、限禄限忌落哪、该做的准备;
   **并且必须点明上一限的限忌就此卸任** —— 若十年地图里据旧限限忌给过提醒
   (如"出外碰壁"),要写一句"该提醒到换限前一年为止",与十年地图互相印证,
   不许留下一处说碰壁、一处说快去的自相矛盾;
-- 带★婚恋窗口标记的年份(红鸾/天喜入流年命宫):讲清那年感情上的形态,
+- 带【婚恋窗口】标记的年份(红鸾/天喜入流年命宫):讲清那年感情上的形态,
   **并把该年流年忌的落宫转成一条落地告诫**(如文昌文曲忌=文书合约易错),
   只写亮点不写告诫的年份展开不合格;
-- 带⚠️双忌叠加的年份:那年哪块最耗,怎么提前避;
+- 带【双忌】标记的年份:那年哪块最耗,怎么提前避;
 - 流年禄入命/踩身宫的年份:该发力做什么(说倾向,不说"一定")。
 每个重点年 100-150 字,写具体,别写"总体运势不错"。
 
@@ -673,6 +675,9 @@ table, going palace by palace — not like marketing copy, not like a textbook.
 2. NEVER use brightness grades (miao/wang/li/ping/xian). The engine does not
    provide them; skip any judgement that would depend on brightness.
 3. No percentages, base rates, or "rare/common" statistics language.
+3b. **No emoji or decorative symbols anywhere** (no ⚡★☆⚠️✅❌ or the like). Mark
+   the weight of a year with the text tags given in the FACTS —
+   [Limit Change] / [Marriage Window] / [Double Ji].
 4. Empty palaces: use exactly the borrowed palace given in [FACTS]; never work
    out the borrowing yourself. Say once, in a clause, that an empty palace
    borrows from its opposite.
@@ -804,18 +809,18 @@ stating the rule you used to pick the years unfolded below** (limit changes,
 marriage windows, double-Ji years, Lu entering the Life or Body Palace), so the
 reader can see why those years and not others. Keep all fifteen rows, then unfold **only
 the four to six years worth stopping on**, **strictly in chronological order**,
-keeping the ⚡/★/⚠️ marker at the head of each:
-- ⚡ limit-change years get the most space: which act ends and which begins,
+keeping the [Limit Change] / [Marriage Window] / [Double Ji] marker at the head of each:
+- [Limit Change] years get the most space: which act ends and which begins,
   **all four of that year's transformations (Lu, Quan, Ke, Ji) and where each
   lands** — a limit-change year written with only the Ji is incomplete —
   where the new limit's Lu and Ji land, what to prepare — **and state that the
   previous limit's Hua Ji stands down**, so any warning given in the Ten-Year
   Map from that old limit expires here. The two sections must agree.
-- ★ marriage-window years (Hong Luan / Tian Xi entering the flowing-year Life
+- [Marriage Window] years (Hong Luan / Tian Xi entering the flowing-year Life
   Palace): describe the shape the year takes — **and convert that year's Hua Ji
   into one practical caution** (e.g. Wen Chang/Wen Qu Hua Ji = paperwork and
   contracts go wrong). A year with only good news is not acceptable.
-- ⚠️ double-Ji years: what drains most, how to see it coming.
+- [Double Ji] years: what drains most, how to see it coming.
 - Years where the flowing Lu enters the Life Palace or the Body Palace: what to
   push on (write it as a leaning, never "you must").
 100–150 words each, concrete.

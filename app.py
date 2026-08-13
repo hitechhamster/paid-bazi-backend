@@ -1318,6 +1318,7 @@ You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge o
 - Horizontal divider lines: --- or ___ or *** or ===
 - Setext-style headers (text with === or --- underneath)
 - Triple or more consecutive blank lines
+- Emoji, emoticons or decorative symbols 禁止 emoji 与装饰符号(⚡★☆⚠️✅❌ 之类)
 - Any decorative separators or dividers
 
 **MANDATORY formatting 必须使用的格式:**
@@ -2266,6 +2267,7 @@ You are a master of BaZi (Chinese Four Pillars of Destiny) marriage compatibilit
 - Horizontal divider lines: --- or ___ or *** or ===
 - Setext-style headers
 - Triple or more consecutive blank lines
+- Emoji, emoticons or decorative symbols 禁止 emoji 与装饰符号(⚡★☆⚠️✅❌ 之类)
 
 **MANDATORY formatting 必须使用:**
 - Use ATX-style headers: # H1, ## H2, ### H3, #### H4
@@ -3201,6 +3203,7 @@ You are a master of BaZi (Chinese Four Pillars of Destiny) with deep knowledge o
 - Horizontal divider lines: --- or ___ or *** or ===
 - Setext-style headers (text with === or --- underneath)
 - Triple or more consecutive blank lines
+- Emoji, emoticons or decorative symbols 禁止 emoji 与装饰符号(⚡★☆⚠️✅❌ 之类)
 
 **MANDATORY formatting 必须使用的格式:**
 - Use ATX-style headers ONLY: # H1, ## H2, ### H3, #### H4
@@ -3359,6 +3362,7 @@ You are a master of BaZi (Chinese Four Pillars) and 命理风水 (personal feng 
 - Horizontal divider lines: --- or ___ or *** or ===
 - Setext-style headers (text with === or --- underneath)
 - Triple or more consecutive blank lines
+- Emoji, emoticons or decorative symbols 禁止 emoji 与装饰符号(⚡★☆⚠️✅❌ 之类)
 
 **MANDATORY formatting 必须使用的格式:**
 - Use ATX-style headers ONLY: # H1, ## H2, ### H3, #### H4
@@ -3513,6 +3517,7 @@ You never recompute them, question them, or write around them.
 - Horizontal divider lines: --- or ___ or *** or ===
 - Setext-style headers (text with === or --- underneath)
 - Triple or more consecutive blank lines
+- Emoji, emoticons or decorative symbols 禁止 emoji 与装饰符号(⚡★☆⚠️✅❌ 之类)
 - Chapter titles or headings of any kind — titles are added for you
 
 **MANDATORY:**

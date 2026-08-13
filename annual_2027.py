@@ -255,8 +255,10 @@ def personal_calendar(bazi_json: Dict[str, Any], lang_code: str = 'en',
     day_branch = ub.get('day', '')
     labels = _tag_labels(lang_code)
     zh = lang_code in ('zh', 'zh-tw')
-    star_note = ('★(与您的日支六合,格外有利)' if zh
-                 else "★(combines with the client's day branch — extra favorable)")
+    # 文字标记,不用 ★ —— 全产品禁 emoji/装饰符号(2026-08-13 判决),
+    # 事实块里的符号会被模型原样抄进正文。
+    star_note = ('【六合】(与您的日支六合,格外有利)' if zh
+                 else "[Liu He] (combines with the client's day branch — extra favorable)")
     lines = [
         "### THE CLIENT'S PERSONAL 2027 DAY CALENDAR",
         "(pre-computed from the traditional almanac AND this client's own chart: "
