@@ -274,7 +274,7 @@ def year_scan_facts(c, start=2026, n=15):
 
 def hour_sens_facts(c, y, mo, d, h, mi, lng, gender, place, tz=None):
     """时辰敏感度:钟表时间 ±1 小时各排一张,看命宫动不动。
-    紫微错时辰是命宫移位、全盘作废 —— 稳不稳本身就是值得写进报告的信息。"""
+    内部质检用:命宫是否随时辰移动。**不进交付物**(见 _extra 处说明)。"""
     import datetime as _dt
     base = _dt.datetime(y, mo, d, h, mi)
     res = []
@@ -284,11 +284,9 @@ def hour_sens_facts(c, y, mo, d, h, mi, lng, gender, place, tz=None):
         res.append((off, cc['ming'], cc['ming_gz']))
     moved = [(o, gz) for o, m, gz in res if m != c['ming']]
     if not moved:
-        return ('【时辰稳定性】出生时间前后各挪一小时,命宫都不动 —— '
-                '这张盘对时辰误差不敏感,记错半小时也不影响结论。')
+        return '[内部质检] 时辰稳定:±1 小时命宫不变。'
     det = ';'.join(f'{"早" if o < 0 else "晚"}一小时命宫变为{gz}' for o, gz in moved)
-    return (f'【时辰稳定性】这张盘对时辰敏感:{det}。'
-            '本报告按所报时刻(经真太阳时校正)排盘;若出生时间有出入,以上结论需重排。')
+    return f'[内部质检] 时辰敏感:{det}。'
 
 
 
@@ -560,7 +558,6 @@ CHAPTERS = [
 每一笔都有出处。要有劲、见血、让人会心一笑,但不贬低不吓人。
 定格之后用 200 字左右拆解这个形象:哪颗星给的"匪气",哪颗星给的"分寸",
 哪颗星决定他抢完往哪跑。结尾一句自然过渡到下一节。
-若【时辰稳定性】标了敏感,在本节末尾用一句话如实告知。
 
 ## 命格骨架
 第一句加粗核心结论:把命宫、三方四正、身宫落点串起来。然后:
@@ -868,7 +865,6 @@ def chart_for(birth, lang='zh'):
     c = build(y, mo, d, h, mi, lng, gender, place, tz)
     c['_lang'] = lang
     c['_extra'] = '\n\n'.join([
-        hour_sens_facts(c, y, mo, d, h, mi, lng, gender, place, tz),
         daxian_hua_facts(c),
         year_scan_facts(c),
     ])
