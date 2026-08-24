@@ -14,8 +14,12 @@
    报告模板拿 `chart_payload()` 的数据自己画 —— 和风水报告的罗盘同一个套路。
 
 `ds()` 是本模块自带的,不复用 app.py 的 `ask_ai`:定调预判要 `json_mode`,
-各章 `max_tokens`/`effort` 逐章不同,而 `_ask_deepseek` 用的是全局常量,
+各章 `max_tokens`/`effort` 逐章不同,而 app.py 的封装用的是全局常量,
 传进去的 max_tokens 根本不生效。
+
+**供应商跟 app.py 统一,由 `REPORT_LLM_PROVIDER` 控(默认 gemini)。**
+2026-08-23 切回 Gemini:DeepSeek 偶尔把思考链写进报告正文,付费件不能冒这个险。
+DeepSeek 分支留着,改环境变量即可切回。
 """
 import json, os, re, time
 
@@ -30,8 +34,79 @@ DS_URL = "https://api.deepseek.com/chat/completions"
 DS_MODEL = os.getenv("DEEPSEEK_MODEL_ID", "deepseek-v4-flash")
 DS_TIMEOUT = int(os.getenv("DEEPSEEK_TIMEOUT", "900"))
 
+# 与 app.py 同一个开关、同一个默认值,别让两边漂移
+REPORT_LLM_PROVIDER = os.getenv("REPORT_LLM_PROVIDER", "gemini").strip().lower()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL_ID", "gemini-3.1-pro-preview")
+GEMINI_TIMEOUT = int(os.getenv("GEMINI_TIMEOUT", "600"))
+
 
 def ds(prompt, effort='high', max_tokens=32000, retries=3, json_mode=False):
+    """一段生成。走哪家由 REPORT_LLM_PROVIDER 决定,签名对调用方不变。
+
+    `effort` 只对 DeepSeek 有意义(reasoning_effort);Gemini 分支忽略它,
+    只用来打日志 —— 保留参数是为了两边调用点不用分叉。
+    """
+    if REPORT_LLM_PROVIDER == 'deepseek' and os.getenv("DEEPSEEK_API_KEY", ""):
+        return _ds_deepseek(prompt, effort, max_tokens, retries, json_mode)
+    return _ds_gemini(prompt, effort, max_tokens, retries, json_mode)
+
+
+def _ds_gemini(prompt, effort, max_tokens, retries, json_mode):
+    """Gemini 调用。防线与 DeepSeek 分支一致:空正文、被截断都要重试。
+
+    ⚠️ 和 DeepSeek 不同,maxOutputTokens **不含**思考链,所以同样的
+       max_tokens 在这边是纯正文预算,只会更宽松,不用另调。
+    ⚠️ 命理内容偶尔会撞 Gemini 安全过滤 → candidates 缺失/finishReason=SAFETY。
+       这种情况必须抛出可读的错误,不能返回空串让残缺章节流到客户手里。
+    """
+    key = os.getenv("GOOGLE_GEMINI_API_KEY", "")
+    if not key:
+        raise RuntimeError('GOOGLE_GEMINI_API_KEY 未设置')
+    url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+           f"{GEMINI_MODEL}:generateContent?key={key}")
+    gen_cfg = {"temperature": 0.75, "maxOutputTokens": max_tokens}
+    if json_mode:
+        gen_cfg["responseMimeType"] = "application/json"
+    body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}],
+            "generationConfig": gen_cfg}
+    last = None
+    for attempt in range(1, retries + 1):
+        try:
+            r = requests.post(url, json=body, timeout=GEMINI_TIMEOUT,
+                              headers={"Content-Type": "application/json"})
+            r.raise_for_status()
+            j = r.json()
+            cands = j.get("candidates") or []
+            if not cands:
+                block = (j.get("promptFeedback") or {}).get("blockReason")
+                last = f'no candidates (blockReason={block})'
+                print(f"    Gemini attempt {attempt}: {last}")
+                time.sleep(2 * attempt)
+                continue
+            cand = cands[0]
+            fin = cand.get("finishReason", "")
+            parts = ((cand.get("content") or {}).get("parts") or [])
+            txt = "".join(p.get("text", "") for p in parts)
+            u = j.get("usageMetadata", {})
+            print(f"    GEM {GEMINI_MODEL}/{max_tokens} (effort={effort} ignored): "
+                  f"finish={fin} in={u.get('promptTokenCount')} "
+                  f"cached={u.get('cachedContentTokenCount', 0)} "
+                  f"out={u.get('candidatesTokenCount')}")
+            if not txt.strip():
+                last = f'empty content (finish={fin})'; time.sleep(2 * attempt); continue
+            if fin == 'MAX_TOKENS':
+                last = 'truncated (finishReason=MAX_TOKENS)'; time.sleep(2 * attempt); continue
+            if fin == 'SAFETY':
+                last = 'blocked by safety filter'; time.sleep(2 * attempt); continue
+            return txt.strip()
+        except Exception as e:
+            last = str(e)
+            print(f"    Gemini attempt {attempt} error: {e}")
+            time.sleep(2 * attempt)
+    raise RuntimeError(f'Gemini 失败: {last}')
+
+
+def _ds_deepseek(prompt, effort='high', max_tokens=32000, retries=3, json_mode=False):
     """DeepSeek 调用。thinking 模式下 temperature 无效,不传。
 
     ⚠️ **max_tokens 把思考链算在内**,必须为它留出预算。
