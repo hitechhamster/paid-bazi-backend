@@ -634,6 +634,21 @@ def format_bazi_context(data):
         all_dayun = data.get('allDayun', [])
         zodiac = data.get('zodiac', {})
         shen_sha = data.get('shenSha', {})
+        # Chart stars: position and basis only. We deliberately do not total
+        # them into a verdict - a single star settles nothing on its own, and
+        # the Blade is disputed between schools for yin day stems.
+        _stars = shen_sha.get('chartStars') or []
+        if _stars:
+            _lines = []
+            for s in _stars:
+                seats = ', '.join(f"{h.get('pillar','')}{h.get('char','')}" for h in (s.get('hits') or []))
+                flag = '  [schools differ on this one]' if s.get('disputed') else ''
+                _lines.append(f"- {s.get('name','')} — in the {seats} (counted from {s.get('rule','')}){flag}")
+            _lines.append("Only these stars are present. Do NOT mention any star that is not"
+                          " on this list, and do NOT add up their auspiciousness into a score.")
+            stars_str = "\n".join(_lines)
+        else:
+            stars_str = "- none computed for this chart; do not mention any symbolic star."
         
         if gender == 'male':
             gender_display = "Male (男命/乾造)"
@@ -751,9 +766,12 @@ Current Annual Luck: {current_liunian_str}
 All 10 Major Luck Cycles:
 {dayun_str}
 
-### Special Stars (Shen Sha)
-- Auspicious Stars 吉神: {shen_sha.get('jiShen', 'N/A')}
-- Challenging Stars 凶煞: {shen_sha.get('xiongSha', 'N/A')}
+### Symbolic Stars in the chart (神煞)
+{stars_str}
+
+### Almanac spirits for the birth DAY (a calendar property, NOT chart stars)
+- 吉神: {shen_sha.get('jiShen', 'N/A')}
+- 凶煞: {shen_sha.get('xiongSha', 'N/A')}
 """
         return context
 
@@ -1446,6 +1464,17 @@ You have access to COMPLETE chart data including:
 
 ### COMPLETE CHART DATA:
 {context_str}
+
+### FIXED ENGLISH TERMS - use these exact names, never invent your own
+
+Twelve Life Stages (十二长生). Translating these freehand collides with the
+names of other concepts - 帝旺 rendered as "Imperial Canopy" reads as 华盖 to
+anyone who knows the subject, which is a different thing entirely.
+长生 Growth · 沐浴 Bathing · 冠带 Capping · 临官 Office · 帝旺 Peak ·
+衰 Decline · 病 Illness · 死 Death · 墓 Storage · 绝 Extinction ·
+胎 Conception · 养 Nurture
+
+Write the English name first, with the Chinese in brackets: "Peak (帝旺)".
 
 ### REQUIRED ANALYSIS - Reference Specific Data Points:
 
