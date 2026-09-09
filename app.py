@@ -1408,15 +1408,15 @@ LOVE_READING_SECTIONS = {
     },
     'emotional_intimacy': {
         'title': 'Emotional Intimacy & Communication', 'min_words': 1800,
-        'brief': 'Explore vulnerability, reassurance, alone time, closeness, and repair after misunderstandings. Use chart evidence to distinguish healthy space from emotional withdrawal. Include detailed guidance for asking for needs, receiving support, managing over-functioning, and creating reciprocal emotional labour. Give realistic conversation examples, but do not diagnose mental health or refer to trauma.'
+        'brief': 'Explore vulnerability, reassurance, alone time, closeness, and repair after misunderstandings. Use chart evidence to distinguish healthy space from emotional withdrawal. Include detailed guidance for asking for needs, receiving support, managing over-functioning, and creating reciprocal emotional labour. Include a distinct subsection titled “Love, Stress & Emotional Energy”: explain, in non-medical relationship language, how this chart may tend to become emotionally depleted or restored within intimacy, and give relationship-specific practices for pacing, asking for a pause, reconnecting, and protecting rest. Treat Five-Element and seasonal patterns only as symbolic lenses for relational rhythm; never make a health, symptom, diagnosis, fertility, treatment, or mental-health claim. Give realistic conversation examples, but do not diagnose mental health or refer to trauma.'
     },
     'conflict_boundaries': {
         'title': 'Conflict, Boundaries & Relationship Patterns', 'min_words': 1800,
-        'brief': 'Analyze chart-supported friction patterns, especially branch combinations, clashes, harms, voids, or imbalances where present. For each pattern, explain how it feels in daily life, early warning signs, what makes it worse, and a concrete repair or boundary. Include “Patterns to interrupt early”, “How to fight fair”, and “What not to compromise on.” Do not predict divorce, infidelity, abuse, or other fixed negative events.'
+        'brief': 'Analyze chart-supported friction patterns, especially branch combinations, clashes, harms, voids, or imbalances where present. For each pattern, explain how it feels in daily life, early warning signs, what makes it worse, and a concrete repair or boundary. Include “Patterns to interrupt early”, “How to fight fair”, and “What not to compromise on.” Include a distinct subsection titled “Your Need for Space, Rest & Regulation”: translate the chart into relationship-safe guidance about overstimulation, conflict recovery, privacy, routines, and respectful ways to request space without withdrawing. It must remain about relational self-care and emotional regulation, not physical health or medical advice. Do not predict divorce, infidelity, abuse, or other fixed negative events.'
     },
     'commitment_marriage': {
         'title': 'Long-Term Partnership & Marriage Readiness', 'min_words': 1700,
-        'brief': 'Read long-term partnership through the Spouse Palace, relationship-star structure, supporting elements, life-palace context, and major luck cycles. Cover commitment pace, independence, home-life rhythm, shared responsibility, and work-life boundaries. Include “What commitment needs from you” and “What commitment should give back.” Never promise marriage, name an age of marriage, or claim a person is destined.'
+        'brief': 'Read long-term partnership through the Spouse Palace, relationship-star structure, supporting elements, life-palace context, and major luck cycles. Cover commitment pace, independence, home-life rhythm, shared responsibility, and work-life boundaries. Include “What commitment needs from you” and “What commitment should give back.” Include a distinct subsection titled “Relationship Habits That Sustain You”: identify the shared routines, rest boundaries, division of emotional labour, and pace of connection likely to make this client feel more grounded in a long partnership, plus habits that could create chronic relational depletion. Frame these as reflective relationship patterns, never as health outcomes, treatments, or medical recommendations. Never promise marriage, name an age of marriage, or claim a person is destined.'
     },
     'timing_strategy': {
         'title': 'Love Timing & Your Two-Year Strategy', 'min_words': 2400,
@@ -1517,8 +1517,9 @@ Formatting rules:
 - Never use horizontal rules, emojis, decorative symbols, or more than one consecutive blank line.
 - Address the reader directly as “you” in fluent, modern English.
 - Be emotionally intelligent, precise, and practical. Translate a BaZi term once when it improves understanding; do not teach a general BaZi course.
-- Never claim trauma, mental-health diagnoses, abuse, sexual history, health, fertility, a partner's appearance, nationality, exact career, or exact place of meeting.
+- Never claim trauma, mental-health diagnoses, abuse, sexual history, physical health, symptoms, fertility, medical conditions, treatment, a partner's appearance, nationality, exact career, or exact place of meeting.
 - Never promise a relationship, marriage, engagement, breakup, or soulmate.
+- The three assigned relationship-wellbeing subsections may discuss emotional energy, stress, rest, routines, and self-care only as they affect intimacy, conflict recovery, or sustainable partnership. They are not health assessments or medical advice, and must never use disease, symptom, organ, fertility, diagnosis, treatment, or prevention language.
 - Do not discuss non-relationship topics unless a work-life boundary directly affects intimacy.
 """
         user_prompt = f"""
