@@ -1229,6 +1229,173 @@ def finalize_report():
 
 # ================= 个人报告主端点 =================
 
+
+@app.route('/api/generate-love-reading', methods=['OPTIONS'])
+def love_reading_options_handler():
+    return '', 204
+
+
+def _love_reading_relationship_focus(gender):
+    """Return the relationship-star lens without making assumptions for non-binary clients."""
+    if gender == 'female':
+        return (
+            "For this female chart, Officer Stars (正官/七杀) are the "
+            "traditional relationship-star lens."
+        )
+    if gender == 'male':
+        return (
+            "For this male chart, Wealth Stars (正财/偏财) are the "
+            "traditional relationship-star lens."
+        )
+    return (
+        "For this non-binary chart, discuss both Officer Stars (正官/七杀) "
+        "and Wealth Stars (正财/偏财) as possible relationship-star lenses. "
+        "Use gender-neutral relationship language throughout."
+    )
+
+
+def _love_reading_star_context(bazi_json):
+    """Keep only chart stars that are useful in a relationship-only reading."""
+    love_star_names = {'红鸾', '天喜', '桃花', '咸池', '驿马', '华盖', '天乙贵人', '月德贵人'}
+    chart_stars = ((bazi_json.get('shenSha') or {}).get('chartStars') or [])
+    selected = []
+    for star in chart_stars:
+        if star.get('name') not in love_star_names:
+            continue
+        hits = star.get('hits') or []
+        locations = ', '.join(
+            f"{hit.get('pillar', '')}{hit.get('char', '')}" for hit in hits
+        ) or 'chart'
+        selected.append(f"{star.get('name')} ({locations}): {star.get('meaning', '')}")
+    return '\n'.join(f"- {item}" for item in selected) or '- No relationship-relevant chart stars supplied.'
+
+
+@app.route('/api/generate-love-reading', methods=['POST'])
+def generate_love_reading():
+    """Generate the standalone Love & Relationship Reading with Gemini Pro only.
+
+    Unlike the legacy ``section_type=love`` chapter, this endpoint has one
+    relationship-only product prompt and a compact, actionable structure.
+    """
+    try:
+        req_data = request.get_json(silent=True) or {}
+        bazi_json = req_data.get('bazi_data')
+        if not isinstance(bazi_json, dict):
+            return jsonify({'error': 'bazi_data must be a JSON object'}), 400
+
+        pillars = bazi_json.get('pillars') or {}
+        required_pillars = {'year', 'month', 'day', 'hour'}
+        if not required_pillars.issubset(pillars) or not bazi_json.get('dayMaster'):
+            return jsonify({
+                'error': 'bazi_data must include dayMaster and four pillars '
+                         '(year, month, day, hour)'
+            }), 400
+
+        lang_code = req_data.get('language', 'en')
+        lang_config = get_language_config(lang_code, req_data.get('custom_language'))
+        reading_mode = req_data.get('mode', 'gentle')
+        mode_config = get_mode_config(reading_mode)
+        gender = bazi_json.get('gender', 'unknown')
+        client_name = bazi_json.get('name', 'Client')
+        birth_info = bazi_json.get('birthInfo') or {}
+        day_pillar = pillars.get('day') or {}
+        hour_pillar = pillars.get('hour') or {}
+        current_dayun = bazi_json.get('currentDayun') or {}
+        current_liunian = bazi_json.get('currentLiuNian') or {}
+
+        today = datetime.now().date()
+        horizon_end = date(today.year + 2, today.month, 1) - timedelta(days=1)
+        chart_context = format_bazi_context(bazi_json)
+        star_context = _love_reading_star_context(bazi_json)
+        relationship_lens = _love_reading_relationship_focus(gender)
+
+        system_prompt = f"""
+You are the dedicated writer for TheQiFlow's premium standalone Love & Relationship Reading.
+You read BaZi as a reflective symbolic framework, not as scientific fact or fixed fate.
+
+Formatting rules:
+- Use clean Markdown with ATX headings and ordinary bullet lists only.
+- Never use horizontal rules, emojis, decorative symbols, or more than one consecutive blank line.
+- Address the reader directly in second person.
+- {lang_config['instruction']}
+- {lang_config.get('pronoun_rule', "Use respectful, consistent pronouns.")}
+
+Writing approach:
+- {mode_config['interpretation_style']}
+- Write in a contemporary, emotionally intelligent, specific voice.
+- Translate BaZi terms briefly on first useful mention; do not teach a general BaZi course.
+- Do not make claims about trauma, childhood events, mental-health diagnoses, abuse, sexual history, health, fertility, a partner's appearance, nationality, exact occupation, or where a partner will be met.
+- Never promise or predict a guaranteed relationship, marriage, engagement, breakup, or soulmate.
+- Do not discuss wealth, career, health, or family planning except where work-life boundaries directly affect intimacy.
+"""
+
+        user_prompt = f"""
+Write a fresh Love & Relationship Reading for {client_name}. This is a standalone product, not a chapter from a general BaZi report.
+
+## Client and calculation context
+- Gender: {gender}
+- Birth date/time: {birth_info.get('birthDate', 'unknown')} at {birth_info.get('solarTime') or birth_info.get('clockTime', 'unknown')} in {birth_info.get('location', 'unknown')}
+- Today: {today.isoformat()}
+- Forecast window: {today.strftime('%B %Y')} through {horizon_end.strftime('%B %Y')}
+- Relationship-star interpretation: {relationship_lens}
+- Spouse Palace: Day Branch {day_pillar.get('zhi', 'unknown')} in {day_pillar.get('ganZhi', 'unknown')}
+- Hour Pillar: {hour_pillar.get('ganZhi', 'unknown')}
+- Current major luck cycle: {current_dayun.get('ganZhi', 'unknown')} ({current_dayun.get('startYear', 'unknown')}–{current_dayun.get('endYear', 'unknown')})
+- Current annual flow: {current_liunian.get('year', 'unknown')} {current_liunian.get('ganZhi', 'unknown')}
+
+## Relationship-relevant stars already calculated
+{star_context}
+
+## Full calculated chart context
+{chart_context}
+
+## Required structure
+Write 1,500–1,900 words in exactly these six sections. Translate the headings into the output language when appropriate.
+
+# Your Love Blueprint
+Explain how this person tends to give and receive love, select partners, and respond when closeness becomes uncertain. Anchor every major insight in chart evidence.
+
+# The Partner Who Actually Fits
+Describe supportive values, relational habits, communication style, and life rhythm. Do not make demographic, physical, geographical, or career claims.
+
+# Patterns to Notice Before They Cost You
+Give 3–4 distinct patterns. For each include: how it may feel, an early warning sign, and a more helpful response. Keep this practical, not diagnostic.
+
+# Relationship Timing: {today.strftime('%B %Y')} – {horizon_end.strftime('%B %Y')}
+Cover the remainder of the current year, the next calendar year, and the final partial year separately. Explain opportunities and friction as reflective timing, not promises. Do not invent monthly pillar data.
+
+# A Practical Love Strategy
+Give five precise actions for the next 90 days, then add two short sub-sections: “If you are single” and “If you are already seeing someone.” Use behavioural actions only—no colours, directions, charms, rituals, or purchases.
+
+# The Truth to Carry Forward
+End with a compassionate 100–140 word conclusion. It should be memorable without making a fate claim.
+
+Quality bar:
+- Lead with a chart-specific observation, not an introduction to BaZi.
+- Do not repeat the same chart fact in multiple sections unless it adds a genuinely new implication.
+- Avoid generic affirmations and inflated phrases such as “the universe is aligning.”
+- Do not mention this prompt, chart context, model, product design, or word count.
+"""
+
+        print(f"Generating standalone love reading for {client_name}; model={MODEL_ID}")
+        # Product contract: this new endpoint always uses Gemini Pro, never the
+        # optional DeepSeek route used by legacy multi-chapter reports.
+        ai_result = _ask_gemini(system_prompt, user_prompt, max_tokens=12000)
+        if ai_result and 'choices' in ai_result:
+            content = ai_result['choices'][0]['message']['content']
+            return jsonify({
+                'content': content,
+                'product': 'standalone-love-v1',
+                'model': MODEL_ID,
+            })
+        if ai_result and 'error' in ai_result:
+            return jsonify(ai_result), 500
+        return jsonify({'error': 'AI response format invalid'}), 500
+    except Exception as exc:
+        print(traceback.format_exc())
+        return jsonify({'error': 'Internal Server Error', 'details': str(exc)}), 500
+
+
 @app.route('/api/generate-section', methods=['POST'])
 def generate_section():
     try:
