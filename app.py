@@ -1440,8 +1440,17 @@ def _standalone_word_count(text, language):
 def _standalone_language_prompts(system_prompt, user_prompt, language):
     if language == 'en':
         return system_prompt, user_prompt
+    if language == 'de':
+        system_prompt = system_prompt.replace('fluent, modern English', 'fluent, natural German')
+        user_prompt = user_prompt.replace('English words', 'German words')
+        system_prompt += ('\nWrite the entire chapter in idiomatic German, including all headings, '
+                          'tables, examples and conclusions. Address the reader consistently as Sie. '
+                          'Translate the assignment headings naturally; retain supplied Chinese chart '
+                          'symbols where needed. Do not summarize or shorten the report because of '
+                          'the output language. Preserve all supplied chart facts and safety limits.')
+        return system_prompt, user_prompt
     if language != 'fr':
-        raise ValueError('Supported standalone languages: en, fr')
+        raise ValueError('Supported standalone languages: en, fr, de')
     system_prompt = system_prompt.replace('fluent, modern English', 'fluent, natural French')
     user_prompt = user_prompt.replace('English words', 'French words')
     system_prompt += ('\nWrite the entire chapter in French, including all headings, examples, '
@@ -1508,8 +1517,8 @@ def generate_love_reading_section():
         if section_type not in LOVE_READING_SECTIONS:
             return jsonify({'error': 'Unknown love reading section', 'available_sections': list(LOVE_READING_SECTIONS)}), 400
         language = req_data.get('language', 'en')
-        if language not in ('en', 'fr'):
-            return jsonify({'error': 'standalone-love-v2 supports language=en or fr'}), 400
+        if language not in ('en', 'fr', 'de'):
+            return jsonify({'error': 'standalone-love-v2 supports language=en, fr or de'}), 400
 
         pillars = bazi_json.get('pillars') or {}
         if not {'year', 'month', 'day', 'hour'}.issubset(pillars) or not bazi_json.get('dayMaster'):
@@ -1581,7 +1590,7 @@ Do not mention this assignment, the word requirement, model, product, or chart c
 """
 
         system_prompt, user_prompt = _standalone_language_prompts(system_prompt, user_prompt, language)
-        output_language = 'French' if language == 'fr' else 'English'
+        output_language = {'en': 'English', 'fr': 'French', 'de': 'German'}[language]
         print(f"Generating love section {section_type} for {client_name}; model={MODEL_ID}")
         for attempt in range(1, 3):
             prompt = user_prompt
@@ -1687,8 +1696,8 @@ def generate_career_wealth_section():
         if section_type not in CAREER_WEALTH_SECTIONS:
             return jsonify({'error': 'Unknown career wealth section', 'available_sections': list(CAREER_WEALTH_SECTIONS)}), 400
         language = req_data.get('language', 'en')
-        if language not in ('en', 'fr'):
-            return jsonify({'error': 'standalone-career-wealth supports language=en or fr'}), 400
+        if language not in ('en', 'fr', 'de'):
+            return jsonify({'error': 'standalone-career-wealth supports language=en, fr or de'}), 400
         pillars = bazi_json.get('pillars') or {}
         if not {'year', 'month', 'day', 'hour'}.issubset(pillars) or not bazi_json.get('dayMaster'):
             return jsonify({'error': 'bazi_data must include dayMaster and four pillars (year, month, day, hour)'}), 400
@@ -1750,7 +1759,7 @@ The previous chapters are authoritative client-facing reference material. Do not
 Do not mention this assignment, the word requirement, model, product, or chart context in the client-facing chapter.
 """
         system_prompt, user_prompt = _standalone_language_prompts(system_prompt, user_prompt, language)
-        output_language = 'French' if language == 'fr' else 'English'
+        output_language = {'en': 'English', 'fr': 'French', 'de': 'German'}[language]
         print(f"Generating career wealth section {section_type} for {bazi_json.get('name', 'Client')}; model={MODEL_ID}")
         for attempt in range(1, 3):
             prompt = user_prompt
